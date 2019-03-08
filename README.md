@@ -13,4 +13,7 @@ af Emil &amp; Patrick
 * BPF comes to firewalls
   - https://lwn.net/Articles/747551/
 * b
+  - http://www.wotug.org/papers/CPA-2013/Rehr13/Rehr13.pdf
+  - http://wotug.org/cpa2014/preprints/12-preprint.pdf
+  - file:///C:/Users/patri/Downloads/03-preprint.pdf
 * c
