@@ -9,3 +9,7 @@ af Emil &amp; Patrick
 ## Rapport (under construction)
 * https://www.overleaf.com/project/5c824e22fc173f46b9573a56
 
+## litteratur og læsemateriale
+* a
+* b
+* c
