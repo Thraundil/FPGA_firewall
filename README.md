@@ -15,5 +15,5 @@ af Emil &amp; Patrick
 * b
   - http://www.wotug.org/papers/CPA-2013/Rehr13/Rehr13.pdf
   - http://wotug.org/cpa2014/preprints/12-preprint.pdf
-  - file:///C:/Users/patri/Downloads/03-preprint.pdf
+  - https://www.researchgate.net/publication/281278995_Bus_Centric_Synchronous_Message_Exchange_for_Hardware_Designs
 * c
