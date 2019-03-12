@@ -15,3 +15,5 @@ af Emil &amp; Patrick
 * [Synchronous Message Exchange for Hardware Designs](http://wotug.org/cpa2014/preprints/12-preprint.pdf)
 * [Bus Centric Synchronous Message Exchange for Hardware Designs](https://www.researchgate.net/publication/281278995_Bus_Centric_Synchronous_Message_Exchange_for_Hardware_Designs)
 * [ResearchGate SME papers](https://www.researchgate.net/project/Synchronous-Message-Exchange)
+* [Stateless vs Statefull Firewalls](https://www.cybrary.it/0p3n/stateful-vs-stateless-firewalls/)
+* [Artikel om Hardware-based Package Filtering with FPGA](http://www.cs.ru.ac.za/research/g07w1974/documents/thesis.pdf)
