@@ -1,8 +1,22 @@
 
 
-TCP/IPV4 Example:
-45 00 00 3c ab 62 40 00 40 06 3c c3 0a 44 47 14 c6 4a 3a f4
+*************************
+IPV4 PROTOCOL EXAMPLE
+*************************
 
+ [diff]     [ID]       [protocol]
+   |         | |  [flags]  |       [Source IP]
+   |         | |   | |     |        |  |  |  |
+   |         | |   | |     |        |  |  |  |
+45 00 00 3c ab 62 40 00 40 06 3c c3 0a 44 47 14 c6 4a 3a f4
+ |     | |              |      | |               |  |  |  |
+ |     | |              |      | |               |  |  |  |
+ |  [total len]         |  [header checksum]   [Destination IP]
+ |               [time to live]
+[header]
+
+
+*************************************************
 
 # Version + Header Length (45)
     0100 .... = Version 4
@@ -24,7 +38,7 @@ TCP/IPV4 Example:
     ..0. .... .... .... = More fragments: Not set
     ...0 0000 0000 0000 = Fragment offset: 0
 
-# Time to live: (64)
+# Time to live: (40)
     0110 0100 = Time to live(64)
 
 # Protocol: (06)
