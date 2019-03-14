@@ -1,0 +1,40 @@
+
+
+TCP/IPV4 Example:
+45 00 00 3c ab 62 40 00 40 06 3c c3 0a 44 47 14 c6 4a 3a f4
+
+
+# Version + Header Length (45)
+    0100 .... = Version 4
+    .... 0101 = Header length 20 bytes (5)
+
+# Diff Services (00)
+    0000 00.. = Differentiated Services Codepoint: Default (0)
+    .... ..00 = Explicit Congestion Notification: Not ECN-Capable Transport (0)
+
+# Total Length: (00 3c)
+    00000000 00111101 = Total Length: 60
+
+# Identification: (ab 62)
+    10101011 01100010 = Identification: 0xab62 (43874)
+
+# Flags: (40 00)
+    0... .... .... .... = Reserved bit: Not set
+    .1.. .... .... .... = Don't fragment: Set
+    ..0. .... .... .... = More fragments: Not set
+    ...0 0000 0000 0000 = Fragment offset: 0
+
+# Time to live: (64)
+    0110 0100 = Time to live(64)
+
+# Protocol: (06)
+    0000 0110 = Protocol TCP(6)
+
+# Header checksum: (3cc3)
+    00111100 11000011 = [validation disabled]
+
+# Source (0a 44 47 14)
+    Source = 10.68.71.20
+
+# Destination (c6 4a 3a f4)
+    Destination = 198.74.58.244
