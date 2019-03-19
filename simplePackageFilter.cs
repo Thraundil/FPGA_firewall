@@ -15,17 +15,17 @@ namespace simplePackageFilter
 
         byte Diff { get; set; }
 
-        byte[] length { get; set; }
+        byte[] Length { get; set; }
 
-        byte[] id { get; set; }
+        byte[] Id { get; set; }
 
-        byte[] flags { get; set; }
+        byte[] Flags { get; set; }
 
-        byte ttl { get; set; }
+        byte Ttl { get; set; }
 
-        byte protocol { get; set; }
+        byte Protocol { get; set; }
 
-        byte[] checksum { get; set; }
+        byte[] Checksum { get; set; }
 
         byte[] SourceIP { get; set; }
 
@@ -36,14 +36,14 @@ namespace simplePackageFilter
     public class inputSimulator : SimulationProcess
     {
 
-        [InputBus]
+        [OutputBus]
         public IPv4_Simple ipv4;
 
         byte[] sample;
 
         public async override System.Threading.Tasks.Task Run()
         {
-            sample = File.ReadAllBytes("C:/Users/patri/OneDrive/Dokumenter/GitHub/FPGA_firewall/ipv4_bytes.txt");
+            sample = File.ReadAllBytes("../../ipv4_bytes.txt");
                 
             //foreach (var item in sample)
             //{
@@ -58,20 +58,37 @@ namespace simplePackageFilter
             for (int i = 0; i < (sample.Length) / 20; i++)
             {
                 // UPDATE IPv4_Simple INPUTBUS HERE
-                Console.WriteLine("Version and header length {0}", reader.ReadByte());
-                Console.WriteLine("Diff services {0}", reader.ReadByte());
+//                Console.WriteLine("Version and header length {0}", reader.ReadByte());
+                ipv4.Header = reader.ReadByte();
 
-                Console.WriteLine("Total length {0}", IPAddress.NetworkToHostOrder(reader.ReadInt16()));
-                Console.WriteLine("ID {0}", IPAddress.NetworkToHostOrder(reader.ReadInt16()));
-                Console.WriteLine("Flags and offset {0}", IPAddress.NetworkToHostOrder(reader.ReadInt16()));
+//                Console.WriteLine("Diff services {0}", reader.ReadByte());
+                ipv4.Diff = reader.ReadByte();
 
-                Console.WriteLine("TTL {0}", reader.ReadByte());
-                Console.WriteLine("Protocol {0}", reader.ReadByte());
-                Console.WriteLine("Checksum {0}", reader.ReadInt16());
+//                Console.WriteLine("Total length {0}", IPAddress.NetworkToHostOrder(reader.ReadInt16()));
+                ipv4.Length = reader.ReadBytes(2);
 
-                Console.WriteLine("Source IP {0}", new IPAddress(reader.ReadUInt32()));
-                Console.WriteLine("Destination IP {0}", new IPAddress(reader.ReadUInt32()));
+//                Console.WriteLine("ID {0}", IPAddress.NetworkToHostOrder(reader.ReadInt16()));
+                ipv4.Id = reader.ReadBytes(2);
 
+//                Console.WriteLine("Flags and offset {0}", IPAddress.NetworkToHostOrder(reader.ReadInt16()));
+                ipv4.Flags = reader.ReadBytes(2);
+
+//                Console.WriteLine("Ttl {0}", reader.ReadByte());
+                ipv4.Ttl = reader.ReadByte();
+
+//                Console.WriteLine("Protocol {0}", reader.ReadByte());
+                ipv4.Protocol = reader.ReadByte();
+
+//                Console.WriteLine("Checksum {0}", reader.ReadInt16());
+                ipv4.Checksum = reader.ReadBytes(2);
+
+//                Console.WriteLine("Source IP {0}", new IPAddress(reader.ReadUInt32()));
+                ipv4.SourceIP = reader.ReadBytes(4);
+
+//                Console.WriteLine("Destination IP {0}", new IPAddress(reader.ReadUInt32()));
+                ipv4.DestinationIP = reader.ReadBytes(4);
+
+                await ClockAsync();
             }
         }
     }
