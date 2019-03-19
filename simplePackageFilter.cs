@@ -45,18 +45,17 @@ namespace simplePackageFilter
         {
             sample = File.ReadAllBytes("C:/Users/patri/OneDrive/Dokumenter/GitHub/FPGA_firewall/ipv4_bytes.txt");
                 
-            Console.WriteLine("hmm");
-            foreach (var item in sample)
-            {
-                Console.WriteLine(item);
-            }
+            //foreach (var item in sample)
+            //{
+            //    Console.WriteLine(item);
+            //}
 
-            byte[] arr = { 0x45, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x82, 0xe2, 0xed, 0xad, 0x5b, 0xe0, 0xd3, 0x47 };
+           // byte[] arr = { 0x45, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x82, 0xe2, 0xed, 0xad, 0x5b, 0xe0, 0xd3, 0x47 };
             var stream = new MemoryStream(sample, 0, sample.Length);
             var reader = new BinaryReader(stream);
+            //Console.WriteLine(sample.Length);
 
-
-            for (int i = 0; i < (sample.Length) / 80; i++)
+            for (int i = 0; i < (sample.Length) / 20; i++)
             {
                 // UPDATE IPv4_Simple INPUTBUS HERE
                 Console.WriteLine("Version and header length {0}", reader.ReadByte());
@@ -77,9 +76,6 @@ namespace simplePackageFilter
         }
     }
 
-
-
-
     // Main
     public class Program
     {
@@ -90,10 +86,7 @@ namespace simplePackageFilter
                 sim
                     .BuildCSVFile()
                     .BuildVHDL();
-                //                var programSimulator = new programPinSim();
-                //                var keypadSimulator  = new inputSimulator(programSimulator.keyControl);
-                //
-                //                var control = new controlProcess(keypadSimulator.keyPressed, keypadSimulator.keyControl);
+
                 var some = new inputSimulator();
 
                 sim.Run();
