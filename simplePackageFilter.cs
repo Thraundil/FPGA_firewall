@@ -44,20 +44,15 @@ namespace simplePackageFilter
     // Input class, which reads simple IPv4 bytes
     public class inputSimulator : SimulationProcess
     {
-
         [OutputBus]
         public IPv4_Simple ipv4 = Scope.CreateBus<IPv4_Simple>();
 
+        // Used to read input from a .txt file
         byte[] sample;
 
         public async override System.Threading.Tasks.Task Run()
         {
             sample = File.ReadAllBytes("../../ipv4_bytes.txt");
-
-            //foreach (var item in sample)
-            //{
-            //    Console.WriteLine(item);
-            //}
 
             var stream = new MemoryStream(sample, 0, sample.Length);
             var reader = new BinaryReader(stream);
