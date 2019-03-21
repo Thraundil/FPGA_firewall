@@ -106,10 +106,11 @@ namespace simplePackageFilter
         }
 
 
-        private void localFunction() {
+        // int x is needed, as VHDL does not allow function calls without an argument...?
+        private void localFunction(int x) {
 
-            if (ipv4.SourceIP[0] == 0x82){
-                Console.WriteLine("YAY");
+            if (ipv4.SourceIP[0] == 133){
+            Console.WriteLine(5);
             }
 
             // Console.WriteLine("{0} {1} {2} {3}", ipv4.SourceIP[0], ipv4.SourceIP[1], ipv4.SourceIP[2], ipv4.SourceIP[3]);
@@ -120,26 +121,24 @@ namespace simplePackageFilter
         protected override void OnTick()
         {
             if (ipv4.clockCheck) {
-                localFunction();
+                localFunction(5);
             }
         }
     }
 
 
     public class IP_Rules {
-        public void read_rules(){
-            string[] strInput;
+        public int[] read_rules(){
 
-            strInput = File.ReadAllLines("../../IP_rules.txt");
-            Console.WriteLine(strInput.Length);
+            string[] strInput = File.ReadAllLines("../../IP_rules.txt");
+
             for (int i = 0; i < strInput.Length; i++) {
                 Console.WriteLine(strInput[i]);
             }
 
-            int[] numbers = strInput[0].Split(',').Select(Int32.Parse).ToArray();
+            int[] ip_rules_array = strInput[0].Split('.').Select(Int32.Parse).ToArray();
 
-            Console.WriteLine(numbers);
-
+            return ip_rules_array;
         }
     }
 
@@ -156,7 +155,7 @@ namespace simplePackageFilter
                     .BuildVHDL();
 
                 var rules = new IP_Rules();
-                rules.read_rules();
+                int[] ip_rules_array = rules.read_rules();
 
                 var some     = new inputSimulator();
                 var ipv4Read = new ipv4Reader(some.ipv4);
