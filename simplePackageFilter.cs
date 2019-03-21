@@ -105,16 +105,41 @@ namespace simplePackageFilter
            ipv4 = busIn;
         }
 
+
         private void localFunction() {
-            Console.WriteLine("Davs");
-            Console.WriteLine("{0} {1} {2} {3}", ipv4.SourceIP[0], ipv4.SourceIP[1], ipv4.SourceIP[2], ipv4.SourceIP[3]);
+
+            if (ipv4.SourceIP[0] == 0x82){
+                Console.WriteLine("YAY");
+            }
+
+            // Console.WriteLine("{0} {1} {2} {3}", ipv4.SourceIP[0], ipv4.SourceIP[1], ipv4.SourceIP[2], ipv4.SourceIP[3]);
+
         }
 
+        // On Tick (ipv4Readers 'main')
         protected override void OnTick()
         {
             if (ipv4.clockCheck) {
-                localFunction()
+                localFunction();
             }
+        }
+    }
+
+
+    public class IP_Rules {
+        public void read_rules(){
+            string[] strInput;
+
+            strInput = File.ReadAllLines("../../IP_rules.txt");
+            Console.WriteLine(strInput.Length);
+            for (int i = 0; i < strInput.Length; i++) {
+                Console.WriteLine(strInput[i]);
+            }
+
+            int[] numbers = strInput[0].Split(',').Select(Int32.Parse).ToArray();
+
+            Console.WriteLine(numbers);
+
         }
     }
 
@@ -129,6 +154,9 @@ namespace simplePackageFilter
                 sim
                     .BuildCSVFile()
                     .BuildVHDL();
+
+                var rules = new IP_Rules();
+                rules.read_rules();
 
                 var some     = new inputSimulator();
                 var ipv4Read = new ipv4Reader(some.ipv4);
