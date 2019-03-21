@@ -15,21 +15,30 @@ namespace simplePackageFilter
 
         byte Diff { get; set; }
 
-        byte[] Length { get; set; }
+        [FixedArrayLength(2)]
+        IFixedArray<byte> Length { get; set; }
 
-        byte[] Id { get; set; }
+        [FixedArrayLength(2)]
+        IFixedArray<byte> Id { get; set; }
 
-        byte[] Flags { get; set; }
+        [FixedArrayLength(2)]
+        IFixedArray<byte> Flags { get; set; }
 
         byte Ttl { get; set; }
 
         byte Protocol { get; set; }
 
-        byte[] Checksum { get; set; }
+        [FixedArrayLength(2)]
+        IFixedArray<byte> Checksum { get; set; }
 
-        byte[] SourceIP { get; set; }
+        [FixedArrayLength(4)]
+        IFixedArray<byte> SourceIP { get; set; }
 
-        byte[] DestinationIP { get; set; }
+        [FixedArrayLength(4)]
+        IFixedArray<byte> DestinationIP { get; set; }
+
+        [InitialValue(false)]
+        bool clockCheck {get; set; }
     }
 
     // Input class, which reads simple IPv4 bytes
@@ -37,61 +46,83 @@ namespace simplePackageFilter
     {
 
         [OutputBus]
-        public IPv4_Simple ipv4;
+        public IPv4_Simple ipv4 = Scope.CreateBus<IPv4_Simple>();
 
         byte[] sample;
 
         public async override System.Threading.Tasks.Task Run()
         {
             sample = File.ReadAllBytes("../../ipv4_bytes.txt");
-                
+
             //foreach (var item in sample)
             //{
             //    Console.WriteLine(item);
             //}
 
-           // byte[] arr = { 0x45, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x82, 0xe2, 0xed, 0xad, 0x5b, 0xe0, 0xd3, 0x47 };
             var stream = new MemoryStream(sample, 0, sample.Length);
             var reader = new BinaryReader(stream);
-            //Console.WriteLine(sample.Length);
 
-            for (int i = 0; i < (sample.Length) / 20; i++)
-            {
-                // UPDATE IPv4_Simple INPUTBUS HERE
-//                Console.WriteLine("Version and header length {0}", reader.ReadByte());
-                ipv4.Header = reader.ReadByte();
-
-//                Console.WriteLine("Diff services {0}", reader.ReadByte());
-                ipv4.Diff = reader.ReadByte();
-
-//                Console.WriteLine("Total length {0}", IPAddress.NetworkToHostOrder(reader.ReadInt16()));
-                ipv4.Length = reader.ReadBytes(2);
-
-//                Console.WriteLine("ID {0}", IPAddress.NetworkToHostOrder(reader.ReadInt16()));
-                ipv4.Id = reader.ReadBytes(2);
-
-//                Console.WriteLine("Flags and offset {0}", IPAddress.NetworkToHostOrder(reader.ReadInt16()));
-                ipv4.Flags = reader.ReadBytes(2);
-
-//                Console.WriteLine("Ttl {0}", reader.ReadByte());
-                ipv4.Ttl = reader.ReadByte();
-
-//                Console.WriteLine("Protocol {0}", reader.ReadByte());
-                ipv4.Protocol = reader.ReadByte();
-
-//                Console.WriteLine("Checksum {0}", reader.ReadInt16());
-                ipv4.Checksum = reader.ReadBytes(2);
-
-//                Console.WriteLine("Source IP {0}", new IPAddress(reader.ReadUInt32()));
-                ipv4.SourceIP = reader.ReadBytes(4);
-
-//                Console.WriteLine("Destination IP {0}", new IPAddress(reader.ReadUInt32()));
-                ipv4.DestinationIP = reader.ReadBytes(4);
-
+            // Reads a single byte each clockcykle, and
+            // updates the Toplevel Inputbus IPv4_Simple
+            ipv4.Header = reader.ReadByte();
+            await ClockAsync();
+            ipv4.Diff = reader.ReadByte();
+            await ClockAsync();
+            for (int i = 0; i < 2; i++) {
+                ipv4.Length[i] = reader.ReadByte();
                 await ClockAsync();
+            }
+            for (int i = 0; i < 2; i++) {
+                ipv4.Id[i] = reader.ReadByte();
+                await ClockAsync();
+            }
+            for (int i = 0; i < 2; i++) {
+                ipv4.Flags[i] = reader.ReadByte();
+                await ClockAsync();
+            }
+            ipv4.Ttl = reader.ReadByte();
+            await ClockAsync();
+            ipv4.Protocol = reader.ReadByte();
+            await ClockAsync();
+            for (int i = 0; i < 2; i++) {
+                ipv4.Checksum[i] = reader.ReadByte();
+                await ClockAsync();
+            }
+            for (int i = 0; i < 4; i++) {
+                ipv4.SourceIP[i] = reader.ReadByte();
+                await ClockAsync();
+            }
+            for (int i = 0; i < 4; i++) {
+                ipv4.DestinationIP[i] = reader.ReadByte();
+                await ClockAsync();
+            }
+            ipv4.clockCheck = true;
+        }
+    }
+
+    public class ipv4Reader : SimpleProcess{
+
+        [InputBus]
+        public IPv4_Simple ipv4;
+
+        public ipv4Reader(IPv4_Simple busIn)
+        {
+           ipv4 = busIn;
+        }
+
+        private void localFunction() {
+            Console.WriteLine("Davs");
+            Console.WriteLine("{0} {1} {2} {3}", ipv4.SourceIP[0], ipv4.SourceIP[1], ipv4.SourceIP[2], ipv4.SourceIP[3]);
+        }
+
+        protected override void OnTick()
+        {
+            if (ipv4.clockCheck) {
+                localFunction()
             }
         }
     }
+
 
     // Main
     public class Program
@@ -104,7 +135,9 @@ namespace simplePackageFilter
                     .BuildCSVFile()
                     .BuildVHDL();
 
-                var some = new inputSimulator();
+                var some     = new inputSimulator();
+                var ipv4Read = new ipv4Reader(some.ipv4);
+
 
                 sim.Run();
             }
