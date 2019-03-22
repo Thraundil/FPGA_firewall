@@ -109,27 +109,27 @@ namespace simplePackageFilter
 //        private readonly int[] allowed_SourceIP; = new int[4];
 //        IFixedArray<int> allowed_SourceIP;
 
-        private int ip0 = 0;
-        private int ip1 = 0;
-        private int ip2 = 0;
-        private int ip3 = 0;
-        int TEST = 130;
+        private int ip0;
+        private int ip1;
+        private int ip2;
+        private int ip3;
+        public int TEST;
 
         // ipv4Reader_Constructor
         public ipv4Reader(IPv4_Simple busIn, int[] SourceIP)
         {
-           ipv4 = busIn;
-           ip0 = SourceIP[0];
-           ip1 = SourceIP[1];
-           ip2 = SourceIP[2];
-           ip3 = SourceIP[3];
+            ipv4 = busIn;
+            ip0 = SourceIP[0];
+            ip1 = SourceIP[1];
+            ip2 = SourceIP[2];
+            ip3 = SourceIP[3];
 //           allowed_SourceIP = SourceIP;
         }
 
         // int x is needed, as VHDL does not allow function calls without an argument...?
         private void localFunction(int x) {
-
-            if (ipv4.SourceIP[0] == TEST){
+            int test0 = ip0;
+            if (ipv4.SourceIP[0] == test0){
             Console.WriteLine("PARTY TIME");
             }
         }
