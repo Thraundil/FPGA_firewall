@@ -109,7 +109,7 @@ namespace simplePackageFilter
         // int x is needed, as VHDL does not allow function calls without an argument...?
         private void localFunction(int x) {
 
-            if (ipv4.SourceIP[0] == 133){
+            if (ipv4.SourceIP[0] == 130){
             Console.WriteLine(5);
             }
 
@@ -120,6 +120,7 @@ namespace simplePackageFilter
         // On Tick (ipv4Readers 'main')
         protected override void OnTick()
         {
+
             if (ipv4.clockCheck) {
                 localFunction(5);
             }
@@ -128,17 +129,19 @@ namespace simplePackageFilter
 
 
     public class IP_Rules {
-        public int[] read_rules(){
+        public int[] convert_to_int_list(string ip){
+            int[] ip_array  = new int[4];
+            ip_array        = ip.Split('.').Select(Int32.Parse).ToArray();
+            return ip_array;
+        }
+    }
 
-            string[] strInput = File.ReadAllLines("../../IP_rules.txt");
-
-            for (int i = 0; i < strInput.Length; i++) {
-                Console.WriteLine(strInput[i]);
+    public class Print {
+        public void print_int_array(int[] int_array){
+            for (int i=0; i < int_array.Length; i++) {
+                Console.Write(int_array[i] + " ");
             }
-
-            int[] ip_rules_array = strInput[0].Split('.').Select(Int32.Parse).ToArray();
-
-            return ip_rules_array;
+            Console.WriteLine("");
         }
     }
 
@@ -154,8 +157,14 @@ namespace simplePackageFilter
                     .BuildCSVFile()
                     .BuildVHDL();
 
+                // Reads which IP sources are allowed
+                string[] strInput = File.ReadAllLines("../../IP_rules.txt");
                 var rules = new IP_Rules();
-                int[] ip_rules_array = rules.read_rules();
+                var print = new Print();
+
+                for (int i=0; i < strInput.Length; i++) {
+                    print.print_int_array(rules.convert_to_int_list(strInput[i]));
+                }
 
                 var some     = new inputSimulator();
                 var ipv4Read = new ipv4Reader(some.ipv4);
