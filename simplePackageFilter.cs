@@ -41,6 +41,8 @@ namespace simplePackageFilter
         bool clockCheck {get; set; }
     }
 
+// ****************************************************************************
+
     // Input class, which reads simple IPv4 bytes
     public class inputSimulator : SimulationProcess
     {
@@ -95,38 +97,53 @@ namespace simplePackageFilter
         }
     }
 
+// ****************************************************************************
+
     public class ipv4Reader : SimpleProcess{
 
         [InputBus]
         public IPv4_Simple ipv4;
 
-        public ipv4Reader(IPv4_Simple busIn)
+// TODO: Find a way to get the IP inputs into a LIST/Array, instead of
+// some stupid int variables.
+//        private readonly int[] allowed_SourceIP; = new int[4];
+//        IFixedArray<int> allowed_SourceIP;
+
+        private int ip0 = 0;
+        private int ip1 = 0;
+        private int ip2 = 0;
+        private int ip3 = 0;
+        int TEST = 130;
+
+        // ipv4Reader_Constructor
+        public ipv4Reader(IPv4_Simple busIn, int[] SourceIP)
         {
            ipv4 = busIn;
+           ip0 = SourceIP[0];
+           ip1 = SourceIP[1];
+           ip2 = SourceIP[2];
+           ip3 = SourceIP[3];
+//           allowed_SourceIP = SourceIP;
         }
-
 
         // int x is needed, as VHDL does not allow function calls without an argument...?
         private void localFunction(int x) {
 
-            if (ipv4.SourceIP[0] == 130){
-            Console.WriteLine(5);
+            if (ipv4.SourceIP[0] == TEST){
+            Console.WriteLine("PARTY TIME");
             }
-
-            // Console.WriteLine("{0} {1} {2} {3}", ipv4.SourceIP[0], ipv4.SourceIP[1], ipv4.SourceIP[2], ipv4.SourceIP[3]);
-
         }
 
         // On Tick (ipv4Readers 'main')
         protected override void OnTick()
         {
-
             if (ipv4.clockCheck) {
                 localFunction(5);
             }
         }
     }
 
+// ****************************************************************************
 
     public class IP_Rules {
         public int[] convert_to_int_list(string ip){
@@ -135,6 +152,8 @@ namespace simplePackageFilter
             return ip_array;
         }
     }
+
+// ****************************************************************************
 
     public class Print {
         public void print_int_array(int[] int_array){
@@ -145,6 +164,7 @@ namespace simplePackageFilter
         }
     }
 
+// ****************************************************************************
 
     // Main
     public class Program
@@ -161,14 +181,13 @@ namespace simplePackageFilter
                 string[] strInput = File.ReadAllLines("../../IP_rules.txt");
                 var rules = new IP_Rules();
                 var print = new Print();
+                var byte_input_stream  = new inputSimulator();
 
                 for (int i=0; i < strInput.Length; i++) {
                     print.print_int_array(rules.convert_to_int_list(strInput[i]));
                 }
 
-                var some     = new inputSimulator();
-                var ipv4Read = new ipv4Reader(some.ipv4);
-
+                var ipv4Read = new ipv4Reader(byte_input_stream.ipv4,rules.convert_to_int_list(strInput[0]));
 
                 sim.Run();
             }
