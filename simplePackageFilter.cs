@@ -128,8 +128,7 @@ namespace simplePackageFilter
 
         // int x is needed, as VHDL does not allow function calls without an argument...?
         private void localFunction(int x) {
-            int test0 = ip0;
-            if (ipv4.SourceIP[0] == test0){
+            if (ipv4.SourceIP[0] == x){
             Console.WriteLine("PARTY TIME");
             }
         }
@@ -138,7 +137,7 @@ namespace simplePackageFilter
         protected override void OnTick()
         {
             if (ipv4.clockCheck) {
-                localFunction(5);
+                localFunction(ip0);
             }
         }
     }
