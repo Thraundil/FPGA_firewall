@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Net;
-using sme_example;
 
 namespace simplePackageFilter
 {
@@ -76,7 +75,6 @@ namespace simplePackageFilter
 
     public class ipv4Reader : SimpleProcess
     {
-
         [InputBus]
         public IPv4_Simple ipv4;
 
@@ -130,22 +128,6 @@ namespace simplePackageFilter
         }
     }
 
-
-    // ****************************************************************************
-
-    public class IP_Rules
-    {
-        public int[] convert_to_int_list(string ip)
-        {
-            int[] ip_array = new int[4];
-            ip_array = ip.Split('.').Select(Int32.Parse).ToArray();
-            return ip_array;
-        }
-    }
-
-    // ****************************************************************************
-
-
     // ****************************************************************************
 
     // Main
@@ -160,19 +142,18 @@ namespace simplePackageFilter
                     .BuildVHDL();
 
                 // Reads which IP sources are allowed
-                string[] strInput = File.ReadAllLines("../../IP_rules.txt");
-                //string[] portInput = File.ReadAllLines("");
-                //string[] destInput = File.ReadAllLines("");
-                var rules = new IP_Rules();
+                var rules = new Rules();
+                // Print class
                 var print = new Print();
+
                 var byte_input_stream = new inputSimulator();
 
-                for (int i = 0; i < strInput.Length; i++)
+                for (int i = 0; i < rules.accepted_sources.Length; i++)
                 {
-                    print.print_int_array(rules.convert_to_int_list(strInput[i]));
+                    print.print_int_array(rules.ip_str_to_int_array(rules.accepted_sources[i]));
                 }
 
-                var ipv4Read = new ipv4Reader(byte_input_stream.ipv4, byte_input_stream.TCP, rules.convert_to_int_list(strInput[0]));
+                var ipv4Read = new ipv4Reader(byte_input_stream.ipv4, byte_input_stream.TCP, rules.ip_str_to_int_array(rules.accepted_sources[0]));
 
                 sim.Run();
             }

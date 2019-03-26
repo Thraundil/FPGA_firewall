@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using simplePackageFilter;
 using SME;
 
-namespace sme_example
+namespace simplePackageFilter
 {
     public class inputSimulator : SimulationProcess
     {
@@ -23,9 +23,9 @@ namespace sme_example
 
         public async override System.Threading.Tasks.Task Run()
         {
-            sample = File.ReadAllBytes("../../ipv4_bytes.txt");
+            sample = File.ReadAllBytes("../../input_data/ipv4_bytes.txt");
 
-            TCP_package = File.ReadAllBytes("../../tcp_bytes.txt");
+            TCP_package = File.ReadAllBytes("../../input_data/tcp_bytes.txt");
 
 
             var stream = new MemoryStream(sample, 0, sample.Length);

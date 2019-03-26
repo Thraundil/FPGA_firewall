@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace sme_example
+namespace simplePackageFilter
 {
     public class Print
     {
