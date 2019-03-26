@@ -141,20 +141,18 @@ namespace simplePackageFilter
                     .BuildCSVFile()
                     .BuildVHDL();
 
-                // Reads which IP sources are allowed
-                var rules = new Rules();
-                // Print class
-                var print = new Print();
+                // Creates 3 classes, each with their own uses
+                var rules      = new Rules();
+                var print      = new Print();
+                var byte_input = new inputSimulator();
 
-                var byte_input_stream = new inputSimulator();
+                // Prints a file, for testing purposes
+                // print.print_file(rules.accepted_sources);
 
-                for (int i = 0; i < rules.accepted_sources.Length; i++)
-                {
-                    print.print_int_array(rules.ip_str_to_int_array(rules.accepted_sources[i]));
-                }
 
-                var ipv4Read = new ipv4Reader(byte_input_stream.ipv4, byte_input_stream.TCP, rules.ip_str_to_int_array(rules.accepted_sources[0]));
-
+                var ipv4Read = new ipv4Reader(byte_input.ipv4,
+                                              byte_input.TCP,
+                                              rules.ip_str_to_int_array(rules.accepted_sources[0]));
                 sim.Run();
             }
         }

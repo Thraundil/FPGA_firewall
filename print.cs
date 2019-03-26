@@ -16,5 +16,14 @@ namespace simplePackageFilter
             }
             Console.WriteLine("");
         }
+
+        public void print_file(string[] str_array)
+        {
+            for (int i = 0; i < str_array.Length; i++)
+            {
+                Console.WriteLine(str_array[i]);
+            }
+        }
+
     }
 }
