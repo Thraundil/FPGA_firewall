@@ -8,7 +8,6 @@ using sme_example;
 
 namespace simplePackageFilter
 {
-
     [TopLevelInputBus]
     public interface IPv4_Simple : IBus
     {
@@ -41,6 +40,7 @@ namespace simplePackageFilter
         [InitialValue(false)]
         bool clockCheck { get; set; }
     }
+
     [TopLevelInputBus]
     public interface ITCP : IBus
     {
@@ -72,137 +72,6 @@ namespace simplePackageFilter
         IFixedArray<byte> Optional_data { get; set; }
     }
 
-
-    // ****************************************************************************
-
-    // Input class, which reads simple IPv4 bytes
-    public class inputSimulator : SimulationProcess
-    {
-        [OutputBus]
-        public IPv4_Simple ipv4 = Scope.CreateBus<IPv4_Simple>();
-
-        [OutputBus]
-        public ITCP TCP  = Scope.CreateBus<ITCP>();
-
-        // Used to read input from a .txt file
-        byte[] sample;
-        byte[] TCP_package;
-
-        public async override System.Threading.Tasks.Task Run()
-        {
-            sample = File.ReadAllBytes("../../ipv4_bytes.txt");
-
-            TCP_package = File.ReadAllBytes("../../tcp_bytes.txt");
-
-
-            var stream = new MemoryStream(sample, 0, sample.Length);
-            var reader = new BinaryReader(stream);
-
-            var stream1 = new MemoryStream(TCP_package, 0, TCP_package.Length);
-            var reader1 = new BinaryReader(stream1);
-
-            // Reads a single byte each clockcykle, and
-            // updates the Toplevel Inputbus IPv4_Simple
-            ipv4.Header = reader.ReadByte();
-            await ClockAsync();
-            ipv4.Diff = reader.ReadByte();
-            await ClockAsync();
-            for (int i = 0; i < 2; i++)
-            {
-                ipv4.Length[i] = reader.ReadByte();
-                await ClockAsync();
-            }
-            for (int i = 0; i < 2; i++)
-            {
-                ipv4.Id[i] = reader.ReadByte();
-                await ClockAsync();
-            }
-            for (int i = 0; i < 2; i++)
-            {
-                ipv4.Flags[i] = reader.ReadByte();
-                await ClockAsync();
-            }
-            ipv4.Ttl = reader.ReadByte();
-            await ClockAsync();
-            ipv4.Protocol = reader.ReadByte();
-            await ClockAsync();
-            for (int i = 0; i < 2; i++)
-            {
-                ipv4.Checksum[i] = reader.ReadByte();
-                await ClockAsync();
-            }
-            for (int i = 0; i < 4; i++)
-            {
-                ipv4.SourceIP[i] = reader.ReadByte();
-                await ClockAsync();
-            }
-            for (int i = 0; i < 4; i++)
-            {
-                ipv4.DestinationIP[i] = reader.ReadByte();
-                await ClockAsync();
-            }
-            // TCP Packet begins //
-            for (int i = 0; i < 2; i++)
-            {
-                TCP.Source_Port[i] = reader1.ReadByte();
-                await ClockAsync();
-            }
-            for (int i = 0; i < 2; i++)
-            {
-                TCP.Dest_Port[i] = reader1.ReadByte();
-                await ClockAsync();
-
-            }
-            for (int i = 0; i < 4; i++)
-            {
-                TCP.Sequence_number[i] = reader1.ReadByte();
-                await ClockAsync();
-
-            }
-            for (int i = 0; i < 4; i++)
-            {
-                TCP.Ack_number[i] = reader1.ReadByte();
-                await ClockAsync();
-
-            }
-            for (int i = 0; i < 2; i++)
-            {
-                TCP.junk[i] = reader1.ReadByte();
-                await ClockAsync();
-
-            }
-            for (int i = 0; i < 2; i++)
-            {
-                TCP.Window_size[i] = reader1.ReadByte();
-                await ClockAsync();
-
-            }
-            for (int i = 0; i < 2; i++)
-            {
-                TCP.Checksum[i] = reader1.ReadByte();
-                await ClockAsync();
-
-            }
-            for (int i = 0; i < 2; i++)
-            {
-                TCP.Urgent_pointer[i] = reader1.ReadByte();
-                await ClockAsync();
-
-            }
-            for (int i = 0; i < 20; i++)
-            {
-                TCP.Optional_data[i] = reader1.ReadByte();
-                await ClockAsync();
-
-            }
-
-            ipv4.clockCheck = true;
-            await ClockAsync();
-
-            ipv4.clockCheck = false;            
-        }
-    }
-
     // ****************************************************************************
 
     public class ipv4Reader : SimpleProcess
@@ -212,7 +81,7 @@ namespace simplePackageFilter
         public IPv4_Simple ipv4;
 
         [InputBus]
-        public ITCP TCP;
+        public ITCP tcp;
         //[InputBus, OutputBus]
         //public ITCP TCP;
 
@@ -222,9 +91,10 @@ namespace simplePackageFilter
         //        private int[] allowed_DestinationIP = new int[4];
 
         // ipv4Reader_Constructor
-        public ipv4Reader(IPv4_Simple busIn, int[] SourceIP)
+        public ipv4Reader(IPv4_Simple busIn, ITCP busTcp, int[] SourceIP)
         {
             ipv4 = busIn;
+            tcp  = busTcp;
             allowed_SourceIP = SourceIP;
             //allowed_ports = ports;
         }
@@ -238,8 +108,7 @@ namespace simplePackageFilter
                 Console.WriteLine("Ipv4 TIME");
             }
         }
-        // int x is needed, as VHDL does not allow function calls without an argument...?
-       // private void sourceComparePort(int[] x)
+       // private void sourceComparePort(int x)
         //{
         //    if (TCP.Dest_Port[0] == x[0])
         //
@@ -255,7 +124,6 @@ namespace simplePackageFilter
 
             if (ipv4.clockCheck)
             {
-
                 sourceCompareIpv4(allowed_SourceIP);
                 //sourceComparePort(allowed_ports);
             }
@@ -304,7 +172,7 @@ namespace simplePackageFilter
                     print.print_int_array(rules.convert_to_int_list(strInput[i]));
                 }
 
-                var ipv4Read = new ipv4Reader(byte_input_stream.ipv4, rules.convert_to_int_list(strInput[0]));
+                var ipv4Read = new ipv4Reader(byte_input_stream.ipv4, byte_input_stream.TCP, rules.convert_to_int_list(strInput[0]));
 
                 sim.Run();
             }
