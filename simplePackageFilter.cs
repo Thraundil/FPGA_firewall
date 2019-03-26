@@ -104,31 +104,20 @@ namespace simplePackageFilter
         [InputBus]
         public IPv4_Simple ipv4;
 
-// TODO: Find a way to get the IP inputs into a LIST/Array, instead of
-// some stupid int variables.
-//        private readonly int[] allowed_SourceIP; = new int[4];
-//        IFixedArray<int> allowed_SourceIP;
-
-        private int ip0;
-        private int ip1;
-        private int ip2;
-        private int ip3;
-        public int TEST;
+        // Int list[4] to compare IP Source/Destination
+        private int[] allowed_SourceIP      = new int[4];
+//        private int[] allowed_DestinationIP = new int[4];
 
         // ipv4Reader_Constructor
         public ipv4Reader(IPv4_Simple busIn, int[] SourceIP)
         {
             ipv4 = busIn;
-            ip0 = SourceIP[0];
-            ip1 = SourceIP[1];
-            ip2 = SourceIP[2];
-            ip3 = SourceIP[3];
-//           allowed_SourceIP = SourceIP;
+            allowed_SourceIP = SourceIP;
         }
 
         // int x is needed, as VHDL does not allow function calls without an argument...?
-        private void localFunction(int x) {
-            if (ipv4.SourceIP[0] == x){
+        private void sourceCompare(int[] x) {
+            if (ipv4.SourceIP[0] == x[0]){
             Console.WriteLine("PARTY TIME");
             }
         }
@@ -137,7 +126,7 @@ namespace simplePackageFilter
         protected override void OnTick()
         {
             if (ipv4.clockCheck) {
-                localFunction(ip0);
+                sourceCompare(allowed_SourceIP);
             }
         }
     }
