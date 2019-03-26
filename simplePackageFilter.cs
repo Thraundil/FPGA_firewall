@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using System.Net;
+using sme_example;
 
 namespace simplePackageFilter
 {
@@ -140,7 +141,7 @@ namespace simplePackageFilter
                 ipv4.DestinationIP[i] = reader.ReadByte();
                 await ClockAsync();
             }
-            // TCP Packet begins
+            // TCP Packet begins //
             for (int i = 0; i < 2; i++)
             {
                 TCP.Source_Port[i] = reader1.ReadByte();
@@ -210,8 +211,14 @@ namespace simplePackageFilter
         [InputBus]
         public IPv4_Simple ipv4;
 
+        [InputBus]
+        public ITCP TCP;
+        //[InputBus, OutputBus]
+        //public ITCP TCP;
+
         // Int list[4] to compare IP Source/Destination
         private int[] allowed_SourceIP = new int[4];
+        //private int[] allowed_ports = new int[2];
         //        private int[] allowed_DestinationIP = new int[4];
 
         // ipv4Reader_Constructor
@@ -219,29 +226,42 @@ namespace simplePackageFilter
         {
             ipv4 = busIn;
             allowed_SourceIP = SourceIP;
+            //allowed_ports = ports;
         }
 
         // int x is needed, as VHDL does not allow function calls without an argument...?
-        private void sourceCompare(int[] x)
+        private void sourceCompareIpv4(int[] x)
         {
-            Console.WriteLine(ipv4.SourceIP[0]);
-            Console.WriteLine(x[0]);
             if (ipv4.SourceIP[0] == x[0])
               
             {
-                Console.WriteLine("PARTY TIME");
+                Console.WriteLine("Ipv4 TIME");
             }
         }
+        // int x is needed, as VHDL does not allow function calls without an argument...?
+       // private void sourceComparePort(int[] x)
+        //{
+        //    if (TCP.Dest_Port[0] == x[0])
+        //
+        //    {
+        //        Console.WriteLine("Port TIME");
+        //    }
+        //}
+
 
         // On Tick (ipv4Readers 'main')
         protected override void OnTick()
         {
+
             if (ipv4.clockCheck)
             {
-                sourceCompare(allowed_SourceIP);
+
+                sourceCompareIpv4(allowed_SourceIP);
+                //sourceComparePort(allowed_ports);
             }
         }
     }
+
 
     // ****************************************************************************
 
@@ -257,17 +277,6 @@ namespace simplePackageFilter
 
     // ****************************************************************************
 
-    public class Print
-    {
-        public void print_int_array(int[] int_array)
-        {
-            for (int i = 0; i < int_array.Length; i++)
-            {
-                Console.Write(int_array[i] + " ");
-            }
-            Console.WriteLine("");
-        }
-    }
 
     // ****************************************************************************
 
@@ -284,6 +293,8 @@ namespace simplePackageFilter
 
                 // Reads which IP sources are allowed
                 string[] strInput = File.ReadAllLines("../../IP_rules.txt");
+                //string[] portInput = File.ReadAllLines("");
+                //string[] destInput = File.ReadAllLines("");
                 var rules = new IP_Rules();
                 var print = new Print();
                 var byte_input_stream = new inputSimulator();
