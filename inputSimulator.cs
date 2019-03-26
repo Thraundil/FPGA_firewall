@@ -1,16 +1,21 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using simplePackageFilter;
 using SME;
 
 namespace sme_example
 {
-    // Input class, which reads simple IPv4 bytes
     public class inputSimulator : SimulationProcess
     {
         [OutputBus]
         public IPv4_Simple ipv4 = Scope.CreateBus<IPv4_Simple>();
 
         [OutputBus]
-        public ITCP TCP  = Scope.CreateBus<ITCP>();
+        public ITCP TCP = Scope.CreateBus<ITCP>();
 
         // Used to read input from a .txt file
         byte[] sample;
@@ -128,7 +133,7 @@ namespace sme_example
 
             ipv4.clockCheck = true;
             await ClockAsync();
-            ipv4.clockCheck = false;            
+            ipv4.clockCheck = false;
         }
     }
 }

@@ -94,7 +94,7 @@ namespace simplePackageFilter
         public ipv4Reader(IPv4_Simple busIn, ITCP busTcp, int[] SourceIP)
         {
             ipv4 = busIn;
-            tcp  = busTcp;
+            tcp = busTcp;
             allowed_SourceIP = SourceIP;
             //allowed_ports = ports;
         }
@@ -103,12 +103,12 @@ namespace simplePackageFilter
         private void sourceCompareIpv4(int[] x)
         {
             if (ipv4.SourceIP[0] == x[0])
-              
+
             {
                 Console.WriteLine("Ipv4 TIME");
             }
         }
-       // private void sourceComparePort(int x)
+        // private void sourceComparePort(int x)
         //{
         //    if (TCP.Dest_Port[0] == x[0])
         //
