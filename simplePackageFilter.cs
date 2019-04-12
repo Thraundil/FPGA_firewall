@@ -10,25 +10,6 @@ namespace simplePackageFilter
     [TopLevelInputBus]
     public interface IPv4_Simple : IBus
     {
-        byte Header { get; set; }
-
-        byte Diff { get; set; }
-
-        [FixedArrayLength(2)]
-        IFixedArray<byte> Length { get; set; }
-
-        [FixedArrayLength(2)]
-        IFixedArray<byte> Id { get; set; }
-
-        [FixedArrayLength(2)]
-        IFixedArray<byte> Flags { get; set; }
-
-        byte Ttl { get; set; }
-
-        byte Protocol { get; set; }
-
-        [FixedArrayLength(2)]
-        IFixedArray<byte> Checksum { get; set; }
 
         [FixedArrayLength(4)]
         IFixedArray<byte> SourceIP { get; set; }
@@ -39,61 +20,72 @@ namespace simplePackageFilter
         [InitialValue(false)]
         bool clockCheck { get; set; }
     }
-
     [TopLevelInputBus]
-    public interface ITCP : IBus
+    public interface Itemp_name : IBus
     {
         [FixedArrayLength(2)]
-        IFixedArray<byte> Source_Port { get; set; }
+        IFixedArray<bool> good_or_bad { get; set; }
+    }
 
-        [FixedArrayLength(2)]
-        IFixedArray<byte> Dest_Port { get; set; }
+    [TopLevelOutputBus]
+    public interface Iprocess_bools : IBus
+    {
+        bool accept_or_deny { get; set; }
+    }
 
-        [FixedArrayLength(4)]
-        IFixedArray<byte> Sequence_number { get; set; }
+    public class final_check : SimpleProcess
+    {
+        [InputBus]
+        public Itemp_name yes_or_no;
 
-        [FixedArrayLength(4)]
-        IFixedArray<byte> Ack_number { get; set; }
-        // data_offset + reserved + control flags
-        [FixedArrayLength(2)]
-        IFixedArray<byte> junk { get; set; }
+        [OutputBus]
+        public Iprocess_bools final_say;
 
-        [FixedArrayLength(2)]
-        IFixedArray<byte> Window_size { get; set; }
+        public final_check(Itemp_name busIn)
+        {
+            yes_or_no = busIn;
+        }
 
-        [FixedArrayLength(2)]
-        IFixedArray<byte> Checksum { get; set; }
-
-        [FixedArrayLength(2)]
-        IFixedArray<byte> Urgent_pointer { get; set; }
-
-        [FixedArrayLength(40)]
-        IFixedArray<byte> Optional_data { get; set; }
+        // Deicdes to throw away or keep the package
+        private bool keep_track = false;
+        protected override void OnTick()
+        {
+            keep_track = false;
+            for(int i = 0; i < yes_or_no.good_or_bad.Length; i++)
+            {
+                Console.WriteLine(yes_or_no.good_or_bad[i]);
+                if(yes_or_no.good_or_bad[i])
+                {
+                    keep_track = true;
+                    Console.WriteLine("TRUE DAT");
+                    break;
+                }
+            }
+        }
     }
 
     // ****************************************************************************
-
     public class ipv4Reader : SimpleProcess
     {
         [InputBus]
         public IPv4_Simple ipv4;
 
-        [InputBus]
-        public ITCP tcp;
-        //[InputBus, OutputBus]
-        //public ITCP TCP;
+        [OutputBus]
+        public Itemp_name TCP = Scope.CreateBus<Itemp_name>();
 
         // Int list[4] to compare IP Source/Destination
-        private int[] allowed_SourceIP = new int[4];
+        private readonly int[] allowed_SourceIP = new int[4];
         //private int[] allowed_ports = new int[2];
         //        private int[] allowed_DestinationIP = new int[4];
 
+        private readonly int my_id = new int();
+
         // ipv4Reader_Constructor
-        public ipv4Reader(IPv4_Simple busIn, ITCP busTcp, int[] SourceIP)
+        public ipv4Reader(IPv4_Simple busIn, int[] SourceIP, int id)
         {
             ipv4 = busIn;
-            tcp = busTcp;
             allowed_SourceIP = SourceIP;
+            my_id = id;
             //allowed_ports = ports;
         }
 
@@ -101,25 +93,22 @@ namespace simplePackageFilter
         private void sourceCompareIpv4(int[] x)
         {
             if (ipv4.SourceIP[0] == x[0])
-
             {
-                Console.WriteLine("Ipv4 TIME");
+                TCP.good_or_bad[my_id] = true;
+                Console.WriteLine("The packet was accepted");
+            }
+            else
+            {
+                TCP.good_or_bad[my_id] = false;
+                Console.WriteLine("The packet was denied");
             }
         }
-        // private void sourceComparePort(int x)
-        //{
-        //    if (TCP.Dest_Port[0] == x[0])
-        //
-        //    {
-        //        Console.WriteLine("Port TIME");
-        //    }
-        //}
 
 
         // On Tick (ipv4Readers 'main')
         protected override void OnTick()
         {
-
+            TCP.good_or_bad[my_id] = false;
             if (ipv4.clockCheck)
             {
                 sourceCompareIpv4(allowed_SourceIP);
@@ -142,17 +131,22 @@ namespace simplePackageFilter
                     .BuildVHDL();
 
                 // Creates 3 classes, each with their own uses
-                var rules      = new Rules();
-                var print      = new Print();
+                var rules = new Rules();
+                var print = new Print();
                 var byte_input = new inputSimulator();
 
                 // Prints a file, for testing purposes
                 // print.print_file(rules.accepted_sources);
 
-
-                var ipv4Read = new ipv4Reader(byte_input.ipv4,
-                                              byte_input.TCP,
-                                              rules.ip_str_to_int_array(rules.accepted_sources[0]));
+                // start one process for each rule
+                for (int i = 0; i < (rules.accepted_sources).Length; i++)
+                {
+                    Console.WriteLine(i);
+                    var ipv4Read = new ipv4Reader(byte_input.ipv4,
+                                                  rules.ip_str_to_int_array(rules.accepted_sources[i]),
+                                                  i);
+                    var final_say = new final_check(ipv4Read.TCP);
+                }
                 sim.Run();
             }
         }
