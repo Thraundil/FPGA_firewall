@@ -10,7 +10,6 @@ namespace simplePackageFilter
     [TopLevelInputBus]
     public interface IPv4_Simple : IBus
     {
-
         [FixedArrayLength(4)]
         IFixedArray<byte> SourceIP { get; set; }
 
@@ -20,11 +19,14 @@ namespace simplePackageFilter
         [InitialValue(false)]
         bool clockCheck { get; set; }
     }
+
     [TopLevelInputBus]
     public interface ITemp_name : IBus
     {
+        [InitialValue(false)]
         bool good_or_bad { get; set; }
 
+        [InitialValue(false)]
         bool ready_or_not { get; set; }
     }
 
@@ -42,30 +44,38 @@ namespace simplePackageFilter
         bool testest { get; set; }
     }
 
+// ****************************************************************************
+
     public class testing : SimpleProcess
-    {
+        {
         [InputBus]
-        public ITemp_name[] yesyesyes;
+        public ITemp_name[] busList;
 
         [OutputBus]
         public IProcess_bools final_say = Scope.CreateBus<IProcess_bools>();
          
-    public testing(ITemp_name[] stuff)
+    public testing(ITemp_name[] busList_in)
     {
-            yesyesyes = stuff;
+            busList = busList_in;
     }
 
-        protected override void OnTick()
+    public bool resultTest(){
+        return busList[0].good_or_bad;
+    }
+
+    protected override void OnTick()
+    {
+        final_say.Valid = false;
+        final_say.accept_or_deny = false;
+        bool my_bool = busList[1].good_or_bad;
+        Console.WriteLine(my_bool);
+    }
+}
+
+// ****************************************************************************
+
+    public class Final_check : SimpleProcess
         {
-            final_say.Valid = false;
-            final_say.accept_or_deny = false;
-            Console.WriteLine(yesyesyes[0].good_or_bad);
-            bool my_bool = yesyesyes[0].good_or_bad;
-        }
-    }
-
-public class Final_check : SimpleProcess
-    {
         [InputBus]
         public ITemp_name yes_or_no0;
 
@@ -118,7 +128,7 @@ public class Final_check : SimpleProcess
         }
     }
 
-    // ****************************************************************************
+// ****************************************************************************
     public class ipv4Reader : SimpleProcess
     {
         [InputBus]
@@ -144,13 +154,17 @@ public class Final_check : SimpleProcess
         }
 
         // int x is needed, as VHDL does not allow function calls without an argument...?
-        private void sourceCompareIpv4(int[] x)
+        private void sourceCompareIpv4(int[] allowed_SourceIP)
         {
-            if (ipv4.SourceIP[0] == x[0])
+            if (ipv4.SourceIP[0] == allowed_SourceIP[0])
             {
                 procArray.good_or_bad = true;
                 procArray.ready_or_not = true;
-                //Console.WriteLine("The packet was accepted");
+                Console.WriteLine("The packet was accepted");
+            }
+            else
+            {
+                Console.WriteLine("The packet was NOT accepted");
             }
         }
 
@@ -172,21 +186,22 @@ public class Final_check : SimpleProcess
         }
     }
 
-    // ****************************************************************************
+// ****************************************************************************
 
-    public class Make_arrays
-    {
-        public string[] len_array;
-        public string[] int_to_array(int len)
-        {
-            for (int i = 0; i < len; i++)
-            {
-                len_array[i] = "rules" + i.ToString();
-            }
-            return len_array;
-        }
-    }
+//    public class Make_arrays
+//    {
+//        public string[] len_array;
+//        public string[] int_to_array(int len)
+//        {
+//            for (int i = 0; i < len; i++)
+//            {
+//                len_array[i] = "rules" + i.ToString();
+//            }
+//            return len_array;
+//        }
+//    }
 
+// ****************************************************************************
 
     // Main
     public class Program
@@ -204,17 +219,20 @@ public class Final_check : SimpleProcess
                 var print = new Print();
                 var byte_input = new inputSimulator();
 
+                // Number of 'sources' rules
                 int len_rules = rules.accepted_sources.Length;
 
-                var process_array = new Make_arrays();
-
+                // Bus array for each rule to write a bus to
                 ITemp_name[] newnew_array = new ITemp_name[len_rules];
 
+                // The bus loop, in which the above array is filled
                 for (int i = 0; i < len_rules; i++)
                 {
-                    var temptemp = new ipv4Reader(byte_input.ipv4, rules.ip_str_to_int_array(rules.accepted_sources[0]), 0);
+                    var temptemp = new ipv4Reader(byte_input.ipv4, rules.ip_str_to_int_array(rules.accepted_sources[i]), 0);
                     newnew_array[i] = temptemp.procArray;
                 }
+
+                // TEST
                 var teststuff = new testing(newnew_array);
 
 
