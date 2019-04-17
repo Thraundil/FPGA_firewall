@@ -6,7 +6,7 @@ namespace simplePackageFilter
     public class inputSimulator : SimulationProcess
     {
         [OutputBus]
-        public IPv4_Simple ipv4 = Scope.CreateBus<IPv4_Simple>();
+        public Bus_IPv4 ipv4 = Scope.CreateBus<Bus_IPv4>();
 
         // Used to read input from a .txt file
         byte[] sample;
@@ -19,7 +19,7 @@ namespace simplePackageFilter
             var reader = new BinaryReader(stream);
 
             // Reads a single byte each clockcykle, and
-            // updates the Toplevel Inputbus IPv4_Simple
+            // updates the Toplevel Inputbus Bus_IPv4
 
             // reads every byte up until the source and destination IP's
             for (int i = 0; i < 12; i++)

@@ -8,7 +8,7 @@ using System.Net;
 namespace simplePackageFilter
 {
     [TopLevelInputBus]
-    public interface IPv4_Simple : IBus
+    public interface Bus_IPv4 : IBus
     {
         [FixedArrayLength(4)]
         IFixedArray<byte> SourceIP { get; set; }
@@ -21,53 +21,48 @@ namespace simplePackageFilter
     }
 
     [TopLevelInputBus]
-    public interface ITemp_name : IBus
+    public interface Bus_ruleVerdict : IBus
     {
         [InitialValue(false)]
-        bool good_or_bad { get; set; }
+        bool accepted { get; set; }
 
         [InitialValue(false)]
-        bool ready_or_not { get; set; }
+        bool isSet { get; set; }
     }
 
     [TopLevelOutputBus]
-    public interface IProcess_bools : IBus
+    public interface Bus_finalVerdict : IBus
     {
         bool accept_or_deny { get; set; }
 
         bool Valid { get; set; }
     }
 
-    [InputBus]
-    public interface ITesting_bus : IBus
-    {
-        bool testest { get; set; }
-    }
 
 // ****************************************************************************
 
     public class testing : SimpleProcess
         {
         [InputBus]
-        public ITemp_name[] busList;
+        public Bus_ruleVerdict[] busList;
 
         [OutputBus]
-        public IProcess_bools final_say = Scope.CreateBus<IProcess_bools>();
+        public Bus_finalVerdict final_say = Scope.CreateBus<Bus_finalVerdict>();
          
-    public testing(ITemp_name[] busList_in)
+    public testing(Bus_ruleVerdict[] busList_in)
     {
             busList = busList_in;
     }
 
     public bool resultTest(){
-        return busList[0].good_or_bad;
+        return busList[0].accepted;
     }
 
     protected override void OnTick()
     {
         final_say.Valid = false;
         final_say.accept_or_deny = false;
-        bool my_bool = busList[1].good_or_bad;
+        bool my_bool = busList[1].accepted;
         Console.WriteLine(my_bool);
     }
 }
@@ -77,18 +72,18 @@ namespace simplePackageFilter
     public class Final_check : SimpleProcess
         {
         [InputBus]
-        public ITemp_name yes_or_no0;
+        public Bus_ruleVerdict yes_or_no0;
 
         [InputBus]
-        public ITemp_name yes_or_no1;
+        public Bus_ruleVerdict yes_or_no1;
 
         [InputBus]
-        public ITemp_name yes_or_no2;
+        public Bus_ruleVerdict yes_or_no2;
 
         [OutputBus]
-        public IProcess_bools final_say = Scope.CreateBus<IProcess_bools>();
+        public Bus_finalVerdict final_say = Scope.CreateBus<Bus_finalVerdict>();
 
-        public Final_check(ITemp_name busIn0, ITemp_name busIn1, ITemp_name busIn2)
+        public Final_check(Bus_ruleVerdict busIn0, Bus_ruleVerdict busIn1, Bus_ruleVerdict busIn2)
         {
             yes_or_no0 = busIn0;
             yes_or_no1 = busIn1;
@@ -100,20 +95,20 @@ namespace simplePackageFilter
         {
             final_say.Valid = false;
             final_say.accept_or_deny = false;
-            if (yes_or_no0.ready_or_not)
+            if (yes_or_no0.isSet)
             {
                 final_say.Valid = true;
-                if (yes_or_no0.good_or_bad)
+                if (yes_or_no0.accepted)
                 {
                     final_say.accept_or_deny = true;
                     Console.WriteLine("Accept");
                 }
-                else if (yes_or_no1.good_or_bad)
+                else if (yes_or_no1.accepted)
                 {
                     Console.WriteLine("Accept");
                     final_say.accept_or_deny = true;
                 }
-                else if (yes_or_no2.good_or_bad)
+                else if (yes_or_no2.accepted)
                 {
                     final_say.accept_or_deny = true;
                     Console.WriteLine("Accept");
@@ -132,10 +127,10 @@ namespace simplePackageFilter
     public class ipv4Reader : SimpleProcess
     {
         [InputBus]
-        public IPv4_Simple ipv4;
+        public Bus_IPv4 ipv4;
 
         [OutputBus]
-        public ITemp_name procArray = Scope.CreateBus<ITemp_name>();
+        public Bus_ruleVerdict procArray = Scope.CreateBus<Bus_ruleVerdict>();
 
         // Int list[4] to compare IP Source/Destination
         private readonly int[] allowed_SourceIP = new int[4];
@@ -145,7 +140,7 @@ namespace simplePackageFilter
         private readonly int my_id = new int();
 
         // ipv4Reader_Constructor
-        public ipv4Reader(IPv4_Simple busIn1, int[] SourceIP, int id)
+        public ipv4Reader(Bus_IPv4 busIn1, int[] SourceIP, int id)
         {
             ipv4 = busIn1;
             allowed_SourceIP = SourceIP;
@@ -158,8 +153,8 @@ namespace simplePackageFilter
         {
             if (ipv4.SourceIP[0] == allowed_SourceIP[0])
             {
-                procArray.good_or_bad = true;
-                procArray.ready_or_not = true;
+                procArray.accepted = true;
+                procArray.isSet = true;
                 Console.WriteLine("The packet was accepted");
             }
             else
@@ -172,8 +167,8 @@ namespace simplePackageFilter
         // On Tick (ipv4Readers 'main')
         protected override void OnTick()
         {
-            procArray.good_or_bad = false;
-            procArray.ready_or_not = false;
+            procArray.accepted = false;
+            procArray.isSet = false;
             if (ipv4.clockCheck)
             {
                 sourceCompareIpv4(allowed_SourceIP);
@@ -181,7 +176,7 @@ namespace simplePackageFilter
             }
             else
             {
-                procArray.ready_or_not = false;
+                procArray.isSet = false;
             }
         }
     }
@@ -223,7 +218,7 @@ namespace simplePackageFilter
                 int len_rules = rules.accepted_sources.Length;
 
                 // Bus array for each rule to write a bus to
-                ITemp_name[] newnew_array = new ITemp_name[len_rules];
+                Bus_ruleVerdict[] newnew_array = new Bus_ruleVerdict[len_rules];
 
                 // The bus loop, in which the above array is filled
                 for (int i = 0; i < len_rules; i++)
