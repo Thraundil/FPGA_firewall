@@ -55,11 +55,6 @@ namespace simplePackageFilter
                 busList = busList_in;
         }
 
-        // Test
-        public bool resultTest(){
-            return busList[0].accepted;
-        }
-
         // OnTick()
         protected override void OnTick()
         {
@@ -127,6 +122,7 @@ namespace simplePackageFilter
 //    }
 
 // ****************************************************************************
+
     public class ipv4Reader : SimpleProcess
     {
         [InputBus]
@@ -157,11 +153,11 @@ namespace simplePackageFilter
             {
                 ruleVerdict.accepted = true;
                 ruleVerdict.isSet    = true;
-                Console.WriteLine("The packet was accepted");
+                // Console.WriteLine("The packet was accepted");
             }
             else
             {
-                Console.WriteLine("The packet was NOT accepted");
+                // Console.WriteLine("The packet was NOT accepted");
             }
         }
 
