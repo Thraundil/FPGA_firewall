@@ -21,66 +21,74 @@ namespace simplePackageFilter
         bool clockCheck { get; set; }
     }
     [TopLevelInputBus]
-    public interface Itemp_name : IBus
+    public interface ITemp_name : IBus
     {
-        [FixedArrayLength(2)]
-        IFixedArray<bool> good_or_bad { get; set; }
+        bool good_or_bad { get; set; }
 
-        [InitialValue(false)]
-        bool clockCheck { get; set; }
+        bool ready_or_not { get; set; }
     }
 
     [TopLevelOutputBus]
-    public interface Iprocess_bools : IBus
+    public interface IProcess_bools : IBus
     {
         bool accept_or_deny { get; set; }
+
+        bool Valid { get; set; }
     }
 
 
-    // ****************************************************************************
-    public class final_check : SimpleProcess
+    public class Final_check : SimpleProcess
     {
         [InputBus]
-        public Itemp_name procArray;
+        public ITemp_name yes_or_no0;
+
+        [InputBus]
+        public ITemp_name yes_or_no1;
+
+        [InputBus]
+        public ITemp_name yes_or_no2;
 
         [OutputBus]
-        public Iprocess_bools final_say;
+        public IProcess_bools final_say = Scope.CreateBus<IProcess_bools>();
 
-        public final_check(Itemp_name busIn)
+        public Final_check(ITemp_name busIn0, ITemp_name busIn1, ITemp_name busIn2)
         {
-            procArray = busIn;
+            yes_or_no0 = busIn0;
+            yes_or_no1 = busIn1;
+            yes_or_no2 = busIn2;
         }
 
-        // Decides to throw away or keep the package
-        private bool keep_track = false;
+        // Deicdes to throw away or keep the package
         protected override void OnTick()
         {
-            keep_track = false;
-            if (procArray.clockCheck) {
-                for(int i = 0; i < procArray.good_or_bad.Length; i++)
+            final_say.Valid = false;
+            final_say.accept_or_deny = false;
+            if (yes_or_no0.ready_or_not)
+            {
+                final_say.Valid = true;
+                if (yes_or_no0.good_or_bad)
                 {
-    //                Console.WriteLine(procArray.good_or_bad[i]);
-                    if(procArray.good_or_bad[i])
-                    {
-                        Console.WriteLine(i);
-                        keep_track = true;
-                        Console.WriteLine("TRUE DAT");
-                    }
+                    final_say.accept_or_deny = true;
+                    Console.WriteLine("Accept");
                 }
-//                procArray.clockCheck = false;
-
+                else if (yes_or_no1.good_or_bad)
+                {
+                    Console.WriteLine("Accept");
+                    final_say.accept_or_deny = true;
+                }
+                else if (yes_or_no2.good_or_bad)
+                {
+                    final_say.accept_or_deny = true;
+                    Console.WriteLine("Accept");
+                }
+                else
+                {
+                    Console.WriteLine("Denied");
+                    final_say.accept_or_deny = false;
+                }
             }
+
         }
-    }
-
-
-    // ****************************************************************************
-    public class busExtra
-    {
-
-        [OutputBus]
-        public Itemp_name procArray = Scope.CreateBus<Itemp_name>();
-
     }
 
     // ****************************************************************************
@@ -90,7 +98,7 @@ namespace simplePackageFilter
         public IPv4_Simple ipv4;
 
         [OutputBus]
-        public Itemp_name procArray;
+        public ITemp_name procArray = Scope.CreateBus<ITemp_name>();
 
         // Int list[4] to compare IP Source/Destination
         private readonly int[] allowed_SourceIP = new int[4];
@@ -100,10 +108,9 @@ namespace simplePackageFilter
         private readonly int my_id = new int();
 
         // ipv4Reader_Constructor
-        public ipv4Reader(IPv4_Simple busIn1, Itemp_name busIn2, int[] SourceIP, int id)
+        public ipv4Reader(IPv4_Simple busIn1, int[] SourceIP, int id)
         {
             ipv4 = busIn1;
-            procArray = busIn2;
             allowed_SourceIP = SourceIP;
             my_id = id;
             //allowed_ports = ports;
@@ -114,32 +121,45 @@ namespace simplePackageFilter
         {
             if (ipv4.SourceIP[0] == x[0])
             {
-                procArray.good_or_bad[this.my_id] = true;
-                Console.WriteLine("The packet was accepted");
-            }
-            else
-            {
-                procArray.good_or_bad[this.my_id] = false;
-                Console.WriteLine("The packet was denied");
-            }
-            if (my_id == 0) {
-                procArray.clockCheck = true;
+                procArray.good_or_bad = true;
+                procArray.ready_or_not = true;
+                //Console.WriteLine("The packet was accepted");
             }
         }
+
 
         // On Tick (ipv4Readers 'main')
         protected override void OnTick()
         {
-            procArray.good_or_bad[this.my_id] = false;
+            procArray.good_or_bad = false;
+            procArray.ready_or_not = false;
             if (ipv4.clockCheck)
             {
                 sourceCompareIpv4(allowed_SourceIP);
                 //sourceComparePort(allowed_ports);
             }
+            else
+            {
+                procArray.ready_or_not = false;
+            }
         }
     }
 
     // ****************************************************************************
+
+    public class Make_arrays
+    {
+        public string[] len_array;
+        public string[] int_to_array(int len)
+        {
+            for (int i = 0; i < len; i++)
+            {
+                len_array[i] = "rules" + i.ToString();
+            }
+            return len_array;
+        }
+    }
+
 
     // Main
     public class Program
@@ -156,20 +176,36 @@ namespace simplePackageFilter
                 var rules = new Rules();
                 var print = new Print();
                 var byte_input = new inputSimulator();
-                var busArrayProc = new busExtra();
+
+                int len_rules = rules.accepted_sources.Length;
+
+                var process_array = new Make_arrays();
+
+                foreach (string my_array in process_array.int_to_array(len_rules))
+                {
+
+                    new ipv4Reader(byte_input.ipv4,rules.ip_str_to_int_array(rules.accepted_sources[0]),0);
+                }
+
+                
 
                 // Prints a file, for testing purposes
                 // print.print_file(rules.accepted_sources);
+
                 // start one process for each rule
-                for (int i = 0; i < 2; i++)
-                {
-//                    Console.WriteLine(i);
-                    var ipv4Read = new ipv4Reader(byte_input.ipv4,
-                                                  busArrayProc.procArray,
-                                                  rules.ip_str_to_int_array(rules.accepted_sources[i]),
-                                                  i);
-                    var final_say = new final_check(ipv4Read.procArray);
-                }
+                // Make an array of the rule names and then use a for each over the array creating 
+                // a process from each name in the array
+                var ipv4Read0 = new ipv4Reader(byte_input.ipv4,
+                                                  rules.ip_str_to_int_array(rules.accepted_sources[0]),
+                                                  0);
+                var ipv4Read1 = new ipv4Reader(byte_input.ipv4,
+                                  rules.ip_str_to_int_array(rules.accepted_sources[1]),
+                                  1);
+                var ipv4Read2 = new ipv4Reader(byte_input.ipv4,
+                                  rules.ip_str_to_int_array(rules.accepted_sources[1]),
+                                  2);
+
+                var final_say = new Final_check(ipv4Read0.procArray, ipv4Read1.procArray, ipv4Read2.procArray);
                 sim.Run();
             }
         }
