@@ -36,8 +36,35 @@ namespace simplePackageFilter
         bool Valid { get; set; }
     }
 
+    [InputBus]
+    public interface ITesting_bus : IBus
+    {
+        bool testest { get; set; }
+    }
 
-    public class Final_check : SimpleProcess
+    public class testing : SimpleProcess
+    {
+        [InputBus]
+        public ITemp_name[] yesyesyes;
+
+        [OutputBus]
+        public IProcess_bools final_say = Scope.CreateBus<IProcess_bools>();
+         
+    public testing(ITemp_name[] stuff)
+    {
+            yesyesyes = stuff;
+    }
+
+        protected override void OnTick()
+        {
+            final_say.Valid = false;
+            final_say.accept_or_deny = false;
+            Console.WriteLine(yesyesyes[0].good_or_bad);
+            bool my_bool = yesyesyes[0].good_or_bad;
+        }
+    }
+
+public class Final_check : SimpleProcess
     {
         [InputBus]
         public ITemp_name yes_or_no0;
@@ -181,13 +208,15 @@ namespace simplePackageFilter
 
                 var process_array = new Make_arrays();
 
-                foreach (string my_array in process_array.int_to_array(len_rules))
+                ITemp_name[] newnew_array = new ITemp_name[len_rules];
+
+                for (int i = 0; i < len_rules; i++)
                 {
-
-                    new ipv4Reader(byte_input.ipv4,rules.ip_str_to_int_array(rules.accepted_sources[0]),0);
+                    var temptemp = new ipv4Reader(byte_input.ipv4, rules.ip_str_to_int_array(rules.accepted_sources[0]), 0);
+                    newnew_array[i] = temptemp.procArray;
                 }
+                var teststuff = new testing(newnew_array);
 
-                
 
                 // Prints a file, for testing purposes
                 // print.print_file(rules.accepted_sources);
@@ -195,17 +224,17 @@ namespace simplePackageFilter
                 // start one process for each rule
                 // Make an array of the rule names and then use a for each over the array creating 
                 // a process from each name in the array
-                var ipv4Read0 = new ipv4Reader(byte_input.ipv4,
-                                                  rules.ip_str_to_int_array(rules.accepted_sources[0]),
-                                                  0);
-                var ipv4Read1 = new ipv4Reader(byte_input.ipv4,
-                                  rules.ip_str_to_int_array(rules.accepted_sources[1]),
-                                  1);
-                var ipv4Read2 = new ipv4Reader(byte_input.ipv4,
-                                  rules.ip_str_to_int_array(rules.accepted_sources[1]),
-                                  2);
+//                var ipv4Read0 = new ipv4Reader(byte_input.ipv4,
+//                                                  rules.ip_str_to_int_array(rules.accepted_sources[0]),
+//                                                  0);
+//                var ipv4Read1 = new ipv4Reader(byte_input.ipv4,
+//                                  rules.ip_str_to_int_array(rules.accepted_sources[1]),
+//                                  1);
+//                var ipv4Read2 = new ipv4Reader(byte_input.ipv4,
+//                                 rules.ip_str_to_int_array(rules.accepted_sources[1]),
+//                                  2);
 
-                var final_say = new Final_check(ipv4Read0.procArray, ipv4Read1.procArray, ipv4Read2.procArray);
+                //var final_say = new Final_check(newnew_array);
                 sim.Run();
             }
         }
