@@ -17,23 +17,23 @@ namespace simplePackageFilter
         IFixedArray<byte> DestinationIP { get; set; }
 
         [InitialValue(false)]
-        bool clockCheck { get; set; }
+        bool ClockCheck { get; set; }
     }
 
     [TopLevelInputBus]
     public interface IBus_ruleVerdict : IBus
     {
         [InitialValue(false)]
-        bool accepted { get; set; }
+        bool Accepted { get; set; }
 
         [InitialValue(false)]
-        bool isSet { get; set; }
+        bool IsSet { get; set; }
     }
 
     [TopLevelOutputBus]
     public interface IBus_finalVerdict : IBus
     {
-        bool accept_or_deny { get; set; }
+        bool Accept_or_deny { get; set; }
 
         bool Valid { get; set; }
     }
@@ -62,26 +62,25 @@ namespace simplePackageFilter
         protected override void OnTick()
         {
             final_say.Valid = false;
-            final_say.accept_or_deny = false;
-            if (busList[0].isSet)
+            final_say.Accept_or_deny = false;
+            if (busList[0].IsSet)
             {
-                Console.WriteLine("is set");
                 for (int i = 0; i < busList.Length; i++)
                 {
-                    if (busList[i].accepted)
+                    if (busList[i].Accepted)
                         my_bool = true;
                 }
 
                 final_say.Valid = true;
                 if (my_bool)
                 {
-                    final_say.accept_or_deny = true;
-                    Console.WriteLine("Accept");
+                    final_say.Accept_or_deny = true;
+                    Console.WriteLine("The package was Accepted");
                 }
                 else
                 {
-                    Console.WriteLine("Denied");
-                    final_say.accept_or_deny = false;
+                    Console.WriteLine("Access Denied");
+                    final_say.Accept_or_deny = false;
                 }
                 my_bool = false;
             }
@@ -90,7 +89,7 @@ namespace simplePackageFilter
 
     // ****************************************************************************
 
-    public class ipv4Reader : SimpleProcess
+    public class Ipv4Reader : SimpleProcess
     {
         [InputBus]
         public IBus_IPv4 ipv4;
@@ -102,19 +101,16 @@ namespace simplePackageFilter
         private readonly byte[] ip_low = new byte[4];
         private readonly byte[] ip_high = new byte[4];
 
-        private readonly int my_id = new int();
-
         // ipv4Reader_Constructor
-        public ipv4Reader(IBus_IPv4 busIn, byte[] ip_low_in, byte[] ip_high_in, int id)
+        public Ipv4Reader(IBus_IPv4 busIn, byte[] ip_low_in, byte[] ip_high_in)
         {
             ipv4 = busIn;
             ip_low = ip_low_in;
             ip_high = ip_high_in;
-            my_id = id;
         }
 
         // An argument is needed, as VHDL does not allow function calls without an argument...?!
-        private void sourceCompareIpv4(byte[] low, byte[] high)
+        private void SourceCompareIpv4(byte[] low, byte[] high)
         {
 
             // Potential iFixedArray-to-byteArray
@@ -130,7 +126,7 @@ namespace simplePackageFilter
                (low[2] <= ipv4.SourceIP[2] && ipv4.SourceIP[2] <= high[2]) &&
                (low[3] <= ipv4.SourceIP[3] && ipv4.SourceIP[3] <= high[3]))
             {
-                ruleVerdict.accepted = true;
+                ruleVerdict.Accepted = true;
                 // Console.WriteLine("The packet was accepted");
             }
             else
@@ -143,12 +139,12 @@ namespace simplePackageFilter
         // On Tick (ipv4Readers 'main')
         protected override void OnTick()
         {
-            ruleVerdict.accepted = false;
-            ruleVerdict.isSet = false;
-            if (ipv4.clockCheck)
+            ruleVerdict.Accepted = false;
+            ruleVerdict.IsSet = false;
+            if (ipv4.ClockCheck)
             {
-                sourceCompareIpv4(ip_low, ip_high);
-                ruleVerdict.isSet = true;
+                SourceCompareIpv4(ip_low, ip_high);
+                ruleVerdict.IsSet = true;
                 //sourceComparePort(allowed_ports);
             }
         }
@@ -156,34 +152,20 @@ namespace simplePackageFilter
 
     // ****************************************************************************
 
-    //    public class Make_arrays
-    //    {
-    //        public string[] len_array;
-    //        public string[] int_to_array(int len)
-    //        {
-    //            for (int i = 0; i < len; i++)
-    //            {
-    //                len_array[i] = "rules" + i.ToString();
-    //            }
-    //            return len_array;
-    //        }
-    //    }
-
-    // ****************************************************************************
 
     // Main
     public class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
 
             // General classes, compiled before simulation
             var rules = new Rules();
-            var print = new Print();
+            _ = new Print();
 
             // Number of rules, 
             int len_sources = rules.accepted_sources.Length;
-            int len_destination = rules.accepted_destinations.Length;
+            _ = rules.accepted_destinations.Length;
 
             using (var sim = new Simulation())
             {
@@ -202,7 +184,7 @@ namespace simplePackageFilter
                 for (int i = 0; i < len_sources; i++)
                 {
                     var (low, high) = rules.get_sources(i);
-                    var temptemp = new ipv4Reader(byte_input.ipv4, low, high, 0);
+                    var temptemp = new Ipv4Reader(byte_input.ipv4, low, high);
                     newnew_array[i] = temptemp.ruleVerdict;
                 }
 
@@ -212,21 +194,6 @@ namespace simplePackageFilter
 
                 // Prints a file, for testing purposes
                 // print.print_file(rules.accepted_sources);
-
-                // start one process for each rule
-                // Make an array of the rule names and then use a for each over the array creating 
-                // a process from each name in the array
-                //                var ipv4Read0 = new ipv4Reader(byte_input.ipv4,
-                //                                                  rules.ip_str_to_int_array(rules.accepted_sources[0]),
-                //                                                  0);
-                //                var ipv4Read1 = new ipv4Reader(byte_input.ipv4,
-                //                                  rules.ip_str_to_int_array(rules.accepted_sources[1]),
-                //                                  1);
-                //                var ipv4Read2 = new ipv4Reader(byte_input.ipv4,
-                //                                 rules.ip_str_to_int_array(rules.accepted_sources[1]),
-                //                                  2);
-
-                //var final_say = new Final_check(newnew_array);
                 sim.Run();
             }
         }
