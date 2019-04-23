@@ -79,7 +79,7 @@ namespace simplePackageFilter
                 }
                 else
                 {
-                    Console.WriteLine("Access Denied");
+                    Console.WriteLine("The package was Denied");
                     final_say.Accept_or_deny = false;
                 }
                 my_bool = false;
@@ -98,11 +98,11 @@ namespace simplePackageFilter
         public IBus_ruleVerdict ruleVerdict = Scope.CreateBus<IBus_ruleVerdict>();
 
         // Int list[4] to compare IP Source/Destination
-        private readonly byte[] ip_low = new byte[4];
-        private readonly byte[] ip_high = new byte[4];
+        private readonly int[] ip_low = new int[4];
+        private readonly int[] ip_high = new int[4];
 
         // ipv4Reader_Constructor
-        public Ipv4Reader(IBus_IPv4 busIn, byte[] ip_low_in, byte[] ip_high_in)
+        public Ipv4Reader(IBus_IPv4 busIn, int[] ip_low_in, int[] ip_high_in)
         {
             ipv4 = busIn;
             ip_low = ip_low_in;
@@ -110,7 +110,7 @@ namespace simplePackageFilter
         }
 
         // An argument is needed, as VHDL does not allow function calls without an argument...?!
-        private void SourceCompareIpv4(byte[] low, byte[] high)
+        private void SourceCompareIpv4(int[] low, int[] high)
         {
 
             // Potential iFixedArray-to-byteArray
@@ -120,18 +120,18 @@ namespace simplePackageFilter
             //                 fromIfixedArray[i] = ipv4.SourceIP[i];
             //             }
 
+            long triple = (256*256*256);
+            long low_int  = low[3] + (low[2] * 256) + (low[1] * 256*256) + (low[0] * triple);
+            long high_int = high[3] + (high[2] * 256) + (high[1] * 256*256) + (high[0] * triple);
+            long ipv4_int = ipv4.SourceIP[3] + (ipv4.SourceIP[2] * 256) + (ipv4.SourceIP[1] * 256*256) + (ipv4.SourceIP[0] * triple);
+            Console.WriteLine(low_int);
+            Console.WriteLine(high_int);
+            Console.WriteLine(ipv4_int);
 
-            if ((low[0] <= ipv4.SourceIP[0] && ipv4.SourceIP[0] <= high[0]) &&
-               (low[1] <= ipv4.SourceIP[1] && ipv4.SourceIP[1] <= high[1]) &&
-               (low[2] <= ipv4.SourceIP[2] && ipv4.SourceIP[2] <= high[2]) &&
-               (low[3] <= ipv4.SourceIP[3] && ipv4.SourceIP[3] <= high[3]))
+            if (low_int <= ipv4_int && ipv4_int <= high_int)
             {
                 ruleVerdict.Accepted = true;
                 // Console.WriteLine("The packet was accepted");
-            }
-            else
-            {
-                // Console.WriteLine("The packet was NOT accepted");
             }
         }
 

@@ -21,7 +21,7 @@ namespace simplePackageFilter
             return ip_array;
         }
 
-        public (byte[], byte[]) Ip_str_to_byte_array(string ip)
+        public (int[], int[]) Ip_str_to_byte_array(string ip)
         {
             string[] ip_array = new string[2];
             int[] low = new int[4];
@@ -38,10 +38,10 @@ namespace simplePackageFilter
             byte_low = low.Select(i => (byte)i).ToArray();
             byte_high = high.Select(i => (byte)i).ToArray();
 
-            return (byte_low, byte_high);
+            return (low, high);
         }
 
-        public (byte[], byte[]) Get_sources(int x)
+        public (int[], int[]) Get_sources(int x)
         {
             return (Ip_str_to_byte_array(this.accepted_sources[x]));
         }
