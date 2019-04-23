@@ -49,6 +49,9 @@ namespace simplePackageFilter
         [OutputBus]
         public Bus_finalVerdict final_say = Scope.CreateBus<Bus_finalVerdict>();
 
+        // Class Variables
+        bool my_bool = false;
+
         // Constructor         
         public testing(Bus_ruleVerdict[] busList_in)
         {
@@ -57,10 +60,10 @@ namespace simplePackageFilter
 
         // OnTick()
         protected override void OnTick()
-        {
+        {   
             final_say.Valid = false;
             final_say.accept_or_deny = false;
-            bool my_bool = busList[0].accepted;
+            my_bool = busList[0].accepted;
             Console.WriteLine(my_bool);
         }
     }
@@ -132,25 +135,38 @@ namespace simplePackageFilter
         public Bus_ruleVerdict ruleVerdict = Scope.CreateBus<Bus_ruleVerdict>();
 
         // Int list[4] to compare IP Source/Destination
-        private readonly int[] allowed_SourceIP = new int[4];
-        //private int[] allowed_ports = new int[2];
-        //        private int[] allowed_DestinationIP = new int[4];
+        private readonly byte[] ip_low  = new byte[4];
+        private readonly byte[] ip_high = new byte[4];
 
         private readonly int my_id = new int();
 
         // ipv4Reader_Constructor
-        public ipv4Reader(Bus_IPv4 busIn, int[] SourceIP, int id)
+        public ipv4Reader(Bus_IPv4 busIn, byte[] ip_low_in, byte[] ip_high_in, int id)
         {
-            ipv4             = busIn;
-            allowed_SourceIP = SourceIP;
-            my_id            = id;
+            ipv4    = busIn;
+            ip_low  = ip_low_in;
+            ip_high = ip_high_in;
+            my_id   = id;
         }
 
         // An argument is needed, as VHDL does not allow function calls without an argument...?!
-        private void sourceCompareIpv4(int[] allowed_SourceIP)
+        private void sourceCompareIpv4(byte[] low, byte[] high)
         {
-            if (ipv4.SourceIP[0] == allowed_SourceIP[0])
+
+            // Potential iFixedArray-to-byteArray
+//             byte[] fromIfixedArray = new byte[4];
+// 
+//             for(int i = 0; i < 4; i++) {
+//                 fromIfixedArray[i] = ipv4.SourceIP[i];
+//             }
+
+
+            if ((low[0] <= ipv4.SourceIP[0] && ipv4.SourceIP[0] <= high[0]) &&
+               (low[1] <= ipv4.SourceIP[1] && ipv4.SourceIP[1] <= high[1]) &&
+               (low[2] <= ipv4.SourceIP[2] && ipv4.SourceIP[2] <= high[2]) &&
+               (low[3] <= ipv4.SourceIP[3] && ipv4.SourceIP[3] <= high[3]))
             {
+                Console.WriteLine("IT WORKS");
                 ruleVerdict.accepted = true;
                 ruleVerdict.isSet    = true;
                 // Console.WriteLine("The packet was accepted");
@@ -169,7 +185,7 @@ namespace simplePackageFilter
             ruleVerdict.isSet    = false;
             if (ipv4.clockCheck)
             {
-                sourceCompareIpv4(allowed_SourceIP);
+                sourceCompareIpv4(ip_low, ip_high);
                 //sourceComparePort(allowed_ports);
             }
             else
@@ -201,27 +217,33 @@ namespace simplePackageFilter
     {
         static void Main(string[] args)
         {
+
+            // General classes, compiled before simulation
+            var rules = new Rules();
+            var print = new Print();
+
+            // Number of rules, 
+            int len_sources     = rules.accepted_sources.Length;
+            int len_destination = rules.accepted_destinations.Length;
+
             using (var sim = new Simulation())
             {
                 sim
-                    .BuildCSVFile()
-                    .BuildVHDL();
+                    .BuildCSVFile();
+//                    .BuildVHDL();
 
                 // Creates 3 classes, each with their own uses
-                var rules = new Rules();
-                var print = new Print();
                 var byte_input = new inputSimulator();
 
-                // Number of 'sources' rules
-                int len_rules = rules.accepted_sources.Length;
 
                 // Bus array for each rule to write a bus to
-                Bus_ruleVerdict[] newnew_array = new Bus_ruleVerdict[len_rules];
+                Bus_ruleVerdict[] newnew_array = new Bus_ruleVerdict[len_sources];
 
                 // The bus loop, in which the above array is filled
-                for (int i = 0; i < len_rules; i++)
+                for (int i = 0; i < len_sources; i++)
                 {
-                    var temptemp = new ipv4Reader(byte_input.ipv4, rules.ip_str_to_int_array(rules.accepted_sources[i]), 0);
+                    var (low,high) = rules.get_sources(i);
+                    var temptemp = new ipv4Reader(byte_input.ipv4, low, high, 0);
                     newnew_array[i] = temptemp.ruleVerdict;
                 }
 

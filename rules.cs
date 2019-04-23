@@ -20,5 +20,32 @@ namespace simplePackageFilter
             ip_array = ip.Split('.').Select(Int32.Parse).ToArray();
             return ip_array;
         }
+
+
+        public (byte[],byte[]) ip_str_to_byte_array(string ip)
+        {
+            string[] ip_array = new string[2];
+            int[] low  = new int[4];
+            int[] high = new int[4];
+            byte[] byte_low  = new byte[4];
+            byte[] byte_high = new byte[4];
+
+            // Splits 'x.x.x.x-y.y.y.y' in two
+            ip_array = ip.Split('-');
+            // Splits both strings by '.' into lists, converts to int
+            low  = ip_array[0].Split('.').Select(Int32.Parse).ToArray();
+            high = ip_array[1].Split('.').Select(Int32.Parse).ToArray();
+            // Converts int lists to byte lists
+            byte_low  = low.Select(i  => (byte) i).ToArray();
+            byte_high = high.Select(i => (byte) i).ToArray();
+
+            return (byte_low,byte_high);
+        }
+
+        public (byte[],byte[]) get_sources(int x)
+        {
+            return (ip_str_to_byte_array(this.accepted_sources[x]));
+        }
+
     }
 }
