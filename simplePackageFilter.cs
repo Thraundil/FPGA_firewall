@@ -113,20 +113,10 @@ namespace simplePackageFilter
         private void SourceCompareIpv4(int[] low, int[] high)
         {
 
-            // Potential iFixedArray-to-byteArray
-            //             byte[] fromIfixedArray = new byte[4];
-            // 
-            //             for(int i = 0; i < 4; i++) {
-            //                 fromIfixedArray[i] = ipv4.SourceIP[i];
-            //             }
-
             long triple = (256*256*256);
             long low_int  = low[3] + (low[2] * 256) + (low[1] * 256*256) + (low[0] * triple);
             long high_int = high[3] + (high[2] * 256) + (high[1] * 256*256) + (high[0] * triple);
             long ipv4_int = ipv4.SourceIP[3] + (ipv4.SourceIP[2] * 256) + (ipv4.SourceIP[1] * 256*256) + (ipv4.SourceIP[0] * triple);
-            Console.WriteLine(low_int);
-            Console.WriteLine(high_int);
-            Console.WriteLine(ipv4_int);
 
             if (low_int <= ipv4_int && ipv4_int <= high_int)
             {
