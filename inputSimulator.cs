@@ -3,9 +3,9 @@ using SME;
 
 namespace simplePackageFilter
 {
-    public class inputSimulator : SimulationProcess
+    public class InputSimulator : SimulationProcess
     {
-        [OutputBus]
+        [OutputBus, InputBus]
         public IBus_IPv4 ipv4 = Scope.CreateBus<IBus_IPv4>();
 
         // Used to read input from a .txt file
@@ -22,26 +22,28 @@ namespace simplePackageFilter
             // updates the Toplevel Inputbus Bus_IPv4
 
             // reads every byte up until the source and destination IP's
-            for (int i = 0; i < 12; i++)
+            int length = (int)reader.BaseStream.Length;
+            for (int j = 0; j < length/20; j++)
             {
-                reader.ReadByte();
+                for (int i = 0; i < 12; i++)
+                {
+                    reader.ReadByte();
+                    await ClockAsync();
+                }
+                for (int i = 0; i < 4; i++)
+                {
+                    ipv4.SourceIP[i] = reader.ReadByte();
+                    await ClockAsync();
+                }
+                for (int i = 0; i < 4; i++)
+                {
+                    ipv4.DestinationIP[i] = reader.ReadByte();
+                    await ClockAsync();
+                }
+                ipv4.ClockCheck = true;
                 await ClockAsync();
+                ipv4.ClockCheck = false;
             }
-            for (int i = 0; i < 4; i++)
-            {
-                ipv4.SourceIP[i] = reader.ReadByte();
-                await ClockAsync();
-            }
-            for (int i = 0; i < 4; i++)
-            {
-                ipv4.DestinationIP[i] = reader.ReadByte();
-                await ClockAsync();
-            }
-
-
-            ipv4.clockCheck = true;
-            await ClockAsync();
-            ipv4.clockCheck = false;
         }
     }
 }

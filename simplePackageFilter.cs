@@ -174,7 +174,7 @@ namespace simplePackageFilter
                 //                    .BuildVHDL();
 
                 // Creates 3 classes, each with their own uses
-                var byte_input = new inputSimulator();
+                var byte_input = new InputSimulator();
 
 
                 // Bus array for each rule to write a bus to
@@ -183,7 +183,7 @@ namespace simplePackageFilter
                 // The bus loop, in which the above array is filled
                 for (int i = 0; i < len_sources; i++)
                 {
-                    var (low, high) = rules.get_sources(i);
+                    var (low, high) = rules.Get_sources(i);
                     var temptemp = new Ipv4Reader(byte_input.ipv4, low, high);
                     newnew_array[i] = temptemp.ruleVerdict;
                 }
