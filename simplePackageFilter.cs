@@ -63,8 +63,9 @@ namespace simplePackageFilter
         {
             final_say.Valid = false;
             final_say.accept_or_deny = false;
-            if (busList[1].isSet)
+            if (busList[0].isSet)
             {
+                Console.WriteLine("is set");
                 for (int i = 0; i < busList.Length; i++)
                 {
                     if (busList[i].accepted)
@@ -82,6 +83,7 @@ namespace simplePackageFilter
                     Console.WriteLine("Denied");
                     final_say.accept_or_deny = false;
                 }
+                my_bool = false;
             }
         }
     }
