@@ -8,7 +8,7 @@ using System.Net;
 namespace simplePackageFilter
 {
     [TopLevelInputBus]
-    public interface Bus_IPv4 : IBus
+    public interface IBus_IPv4 : IBus
     {
         [FixedArrayLength(4)]
         IFixedArray<byte> SourceIP { get; set; }
@@ -21,7 +21,7 @@ namespace simplePackageFilter
     }
 
     [TopLevelInputBus]
-    public interface Bus_ruleVerdict : IBus
+    public interface IBus_ruleVerdict : IBus
     {
         [InitialValue(false)]
         bool accepted { get; set; }
@@ -31,7 +31,7 @@ namespace simplePackageFilter
     }
 
     [TopLevelOutputBus]
-    public interface Bus_finalVerdict : IBus
+    public interface IBus_finalVerdict : IBus
     {
         bool accept_or_deny { get; set; }
 
@@ -45,16 +45,16 @@ namespace simplePackageFilter
     public class Final_check : SimpleProcess
     {
         [InputBus]
-        public Bus_ruleVerdict[] busList;
+        public IBus_ruleVerdict[] busList;
 
         [OutputBus]
-        public Bus_finalVerdict final_say = Scope.CreateBus<Bus_finalVerdict>();
+        public IBus_finalVerdict final_say = Scope.CreateBus<IBus_finalVerdict>();
 
         // Class Variables
         bool my_bool = false;
 
         // Constructor         
-        public Final_check(Bus_ruleVerdict[] busList_in)
+        public Final_check(IBus_ruleVerdict[] busList_in)
         {
             busList = busList_in;
         }
@@ -63,9 +63,9 @@ namespace simplePackageFilter
         {
             final_say.Valid = false;
             final_say.accept_or_deny = false;
-            if (busList[0].isSet)
+            if (busList[1].isSet)
             {
-                for(int i = 0;i < busList.Length; i++)
+                for (int i = 0; i < busList.Length; i++)
                 {
                     if (busList[i].accepted)
                         my_bool = true;
@@ -91,10 +91,10 @@ namespace simplePackageFilter
     public class ipv4Reader : SimpleProcess
     {
         [InputBus]
-        public Bus_IPv4 ipv4;
+        public IBus_IPv4 ipv4;
 
         [OutputBus]
-        public Bus_ruleVerdict ruleVerdict = Scope.CreateBus<Bus_ruleVerdict>();
+        public IBus_ruleVerdict ruleVerdict = Scope.CreateBus<IBus_ruleVerdict>();
 
         // Int list[4] to compare IP Source/Destination
         private readonly byte[] ip_low = new byte[4];
@@ -103,7 +103,7 @@ namespace simplePackageFilter
         private readonly int my_id = new int();
 
         // ipv4Reader_Constructor
-        public ipv4Reader(Bus_IPv4 busIn, byte[] ip_low_in, byte[] ip_high_in, int id)
+        public ipv4Reader(IBus_IPv4 busIn, byte[] ip_low_in, byte[] ip_high_in, int id)
         {
             ipv4 = busIn;
             ip_low = ip_low_in;
@@ -128,9 +128,7 @@ namespace simplePackageFilter
                (low[2] <= ipv4.SourceIP[2] && ipv4.SourceIP[2] <= high[2]) &&
                (low[3] <= ipv4.SourceIP[3] && ipv4.SourceIP[3] <= high[3]))
             {
-                Console.WriteLine("IT WORKS");
                 ruleVerdict.accepted = true;
-                ruleVerdict.isSet = true;
                 // Console.WriteLine("The packet was accepted");
             }
             else
@@ -148,11 +146,8 @@ namespace simplePackageFilter
             if (ipv4.clockCheck)
             {
                 sourceCompareIpv4(ip_low, ip_high);
+                ruleVerdict.isSet = true;
                 //sourceComparePort(allowed_ports);
-            }
-            else
-            {
-                ruleVerdict.isSet = false;
             }
         }
     }
@@ -199,7 +194,7 @@ namespace simplePackageFilter
 
 
                 // Bus array for each rule to write a bus to
-                Bus_ruleVerdict[] newnew_array = new Bus_ruleVerdict[len_sources];
+                IBus_ruleVerdict[] newnew_array = new IBus_ruleVerdict[len_sources];
 
                 // The bus loop, in which the above array is filled
                 for (int i = 0; i < len_sources; i++)
@@ -235,4 +230,3 @@ namespace simplePackageFilter
         }
     }
 }
-
