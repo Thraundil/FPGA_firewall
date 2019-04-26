@@ -97,11 +97,11 @@ namespace simplePackageFilter
         public IBus_ruleVerdict ruleVerdict = Scope.CreateBus<IBus_ruleVerdict>();
 
         // Int list[4] to compare IP Source/Destination
-        private readonly int[] ip_low = new int[4];
-        private readonly int[] ip_high = new int[4];
+        private readonly long ip_low = new long();
+        private readonly long ip_high = new long();
 
         // ipv4Reader_Constructor
-        public Ipv4Reader(IBus_IPv4 busIn, int[] ip_low_in, int[] ip_high_in)
+        public Ipv4Reader(IBus_IPv4 busIn, long ip_low_in, long ip_high_in)
         {
             ipv4 = busIn;
             ip_low = ip_low_in;
@@ -109,19 +109,19 @@ namespace simplePackageFilter
         }
 
         // An argument is needed, as VHDL does not allow function calls without an argument...?!
-        private void SourceCompareIpv4(int[] low, int[] high)
+        private void SourceCompareIpv4(long low, long high)
         {
-
-            long doubl    = (256*256);
-            long triple   = (256*doubl);
-            long low_int  = low[3] + (low[2] * 256) + (low[1] * doubl) + (low[0] * triple);
-            long high_int = high[3] + (high[2] * 256) + (high[1] * doubl) + (high[0] * triple);
+            // Converts the received SOURCE IP into a long for comparison
+            long doubl    = (65536);    // 256*256
+            long triple   = (16777216); // 256*256*256
             long ipv4_int = ipv4.SourceIP[3] + (ipv4.SourceIP[2] * 256) + (ipv4.SourceIP[1] * doubl) + (ipv4.SourceIP[0] * triple);
 
-            if (low_int <= ipv4_int && ipv4_int <= high_int)
+            // Compares a given IP range with the received Source IP
+            if (low <= ipv4_int && ipv4_int <= high)
             {
+                // The received packet's Source IP was accepted, as it was
+                // inside the accepted IP ranges of a specific rule.
                 ruleVerdict.Accepted = true;
-                // Console.WriteLine("The packet was accepted");
             }
         }
 
@@ -161,11 +161,11 @@ namespace simplePackageFilter
             {
                 sim
                     .BuildCSVFile();
+                // CARL/KENNETH FIX PLZ
                 //                    .BuildVHDL();
 
                 // Creates 3 classes, each with their own uses
                 var byte_input = new InputSimulator();
-
 
                 // Bus array for each rule to write a bus to
                 IBus_ruleVerdict[] newnew_array = new IBus_ruleVerdict[len_sources];

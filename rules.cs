@@ -21,7 +21,7 @@ namespace simplePackageFilter
             return ip_array;
         }
 
-        public (int[], int[]) Ip_str_to_byte_array(string ip)
+        public (long, long) Ip_str_to_long_tuple(string ip)
         {
             string[] ip_array = new string[2];
             int[] low = new int[4];
@@ -34,16 +34,19 @@ namespace simplePackageFilter
             // Splits both strings by '.' into lists, converts to int
             low = ip_array[0].Split('.').Select(Int32.Parse).ToArray();
             high = ip_array[1].Split('.').Select(Int32.Parse).ToArray();
-            // Converts int lists to byte lists
-            byte_low = low.Select(i => (byte)i).ToArray();
-            byte_high = high.Select(i => (byte)i).ToArray();
 
-            return (low, high);
+            // Converts the IP address into a Long, for easier comparisons used later on
+            long doubl     = (65536);    // 256*256
+            long triple    = (16777216); // 256*256*256
+            long low_long  = low[3] + (low[2] * 256) + (low[1] * doubl) + (low[0] * triple);
+            long high_long = high[3] + (high[2] * 256) + (high[1] * doubl) + (high[0] * triple);
+
+            return (low_long, high_long);
         }
 
-        public (int[], int[]) Get_sources(int x)
+        public (long, long) Get_sources(int x)
         {
-            return (Ip_str_to_byte_array(this.accepted_sources[x]));
+            return (Ip_str_to_long_tuple(this.accepted_sources[x]));
         }
 
     }
