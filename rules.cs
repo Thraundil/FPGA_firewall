@@ -49,5 +49,10 @@ namespace simplePackageFilter
             return (Ip_str_to_long_tuple(this.accepted_sources[x]));
         }
 
+        public (long, long) Get_destination(int x)
+        {
+            return (Ip_str_to_long_tuple(this.accepted_destinations[x]));
+        }
+
     }
 }

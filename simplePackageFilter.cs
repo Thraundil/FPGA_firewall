@@ -14,7 +14,7 @@ namespace simplePackageFilter
         IFixedArray<byte> SourceIP { get; set; }
 
         [FixedArrayLength(4)]
-        IFixedArray<byte> DestinationIP { get; set; }
+        IFixedArray<byte> DestIP { get; set; }
 
         [InitialValue(false)]
         bool ClockCheck { get; set; }
@@ -96,32 +96,42 @@ namespace simplePackageFilter
         [OutputBus]
         public IBus_ruleVerdict ruleVerdict = Scope.CreateBus<IBus_ruleVerdict>();
 
-        // Int list[4] to compare IP Source/Destination
-        private readonly long ip_low = new long();
-        private readonly long ip_high = new long();
+        // IP source range low/high as a LONG
+        private readonly long ip_low_source = new long();
+        private readonly long ip_high_source = new long();
+
+        // IP destination range low/high as a LONG
+        private readonly long ip_low_dest = new long();
+        private readonly long ip_high_dest = new long();
 
         // ipv4Reader_Constructor
-        public Rule_Process(IBus_IPv4 busIn, long ip_low_in, long ip_high_in)
+        public Rule_Process(IBus_IPv4 busIn, long ip_low_source_in, long ip_high_source_in, long ip_low_dest_in, long ip_high_dest_in)
         {
             ipv4 = busIn;
-            ip_low = ip_low_in;
-            ip_high = ip_high_in;
+            ip_low_source  = ip_low_source_in;
+            ip_high_source = ip_high_source_in;
+            ip_low_dest    = ip_low_dest_in;
+            ip_high_dest   = ip_high_dest_in;
+
         }
 
         // An argument is needed, as VHDL does not allow function calls without an argument...?!
-        private void SourceCompareIpv4(long low, long high)
+        private void isIPinRange(long low_source, long high_source, long low_dest, long high_dest)
         {
             // Converts the received SOURCE IP into a long for comparison
             long doubl = (65536);    // 256*256
             long triple = (16777216); // 256*256*256
-            long ipv4_int = ipv4.SourceIP[3] + (ipv4.SourceIP[2] * 256) + (ipv4.SourceIP[1] * doubl) + (ipv4.SourceIP[0] * triple);
+            long ipv4_source = ipv4.SourceIP[3] + (ipv4.SourceIP[2] * 256) + (ipv4.SourceIP[1] * doubl) + (ipv4.SourceIP[0] * triple);
+            long ipv4_dest = ipv4.DestIP[3] + (ipv4.DestIP[2] * 256) + (ipv4.DestIP[1] * doubl) + (ipv4.DestIP[0] * triple);
 
             // Compares a given IP range with the received Source IP
-            if (low <= ipv4_int && ipv4_int <= high)
+            if (low_source <= ipv4_source && ipv4_source <= high_source)
             {
-                // The received packet's Source IP was accepted, as it was
-                // inside the accepted IP ranges of a specific rule.
-                ruleVerdict.Accepted = true;
+                if (low_dest <= ipv4_dest && ipv4_dest <= high_dest){
+                    // The received packet's Source IP was accepted, as it was
+                    // inside the accepted IP ranges of a specific rule.
+                    ruleVerdict.Accepted = true;
+                }
             }
         }
 
@@ -133,7 +143,7 @@ namespace simplePackageFilter
             ruleVerdict.IsSet = false;
             if (ipv4.ClockCheck)
             {
-                SourceCompareIpv4(ip_low, ip_high);
+                isIPinRange(ip_low_source, ip_high_source, ip_low_dest, ip_high_dest);
                 ruleVerdict.IsSet = true;
                 //sourceComparePort(allowed_ports);
             }
@@ -141,7 +151,6 @@ namespace simplePackageFilter
     }
 
     // ****************************************************************************
-
 
     // Main
     public class Program
@@ -174,12 +183,12 @@ namespace simplePackageFilter
                 // The bus loop, in which the above array is filled
                 for (int i = 0; i < len_sources; i++)
                 {
-                    var (low, high) = rules.Get_sources(i);
-                    var temptemp = new Rule_Process(byte_input.ipv4, low, high);
+                    var (low_src, high_src) = rules.Get_sources(i);
+                    var (low_dest, high_dest) = rules.Get_destination(i);
+                    var temptemp = new Rule_Process(byte_input.ipv4, low_src, high_src, low_dest, high_dest);
                     Bus_array_sources[i] = temptemp.ruleVerdict;
                 }
 
-                // TEST
                 var Final_verdict = new Final_check(Bus_array_sources);
 
 

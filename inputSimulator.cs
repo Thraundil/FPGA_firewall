@@ -37,7 +37,7 @@ namespace simplePackageFilter
                 }
                 for (int i = 0; i < 4; i++)
                 {
-                    ipv4.DestinationIP[i] = reader.ReadByte();
+                    ipv4.DestIP[i] = reader.ReadByte();
                     await ClockAsync();
                 }
                 ipv4.ClockCheck = true;
