@@ -65,18 +65,17 @@ namespace simplePackageFilter
             final_say.Accept_or_deny = false;
             if (busList[0].IsSet)
             {
-                for (int i = 0; i < busList.Length; i++)
-                {
-                    if (busList[i].Accepted)
-                        my_bool = true;
-                }
-
+                // Checks if any rule process returns TRUE.
+                my_bool = busList.Any(val => val.Accepted);
                 final_say.Valid = true;
+
+                // Accept the incoming package
                 if (my_bool)
                 {
                     final_say.Accept_or_deny = true;
                     Console.WriteLine("The package was Accepted");
                 }
+                // Deny the incoming package, as the IP was not on the whitelist.
                 else
                 {
                     Console.WriteLine("The package was Denied");
@@ -113,10 +112,11 @@ namespace simplePackageFilter
         private void SourceCompareIpv4(int[] low, int[] high)
         {
 
-            long triple = (256*256*256);
-            long low_int  = low[3] + (low[2] * 256) + (low[1] * 256*256) + (low[0] * triple);
-            long high_int = high[3] + (high[2] * 256) + (high[1] * 256*256) + (high[0] * triple);
-            long ipv4_int = ipv4.SourceIP[3] + (ipv4.SourceIP[2] * 256) + (ipv4.SourceIP[1] * 256*256) + (ipv4.SourceIP[0] * triple);
+            long doubl    = (256*256);
+            long triple   = (256*doubl);
+            long low_int  = low[3] + (low[2] * 256) + (low[1] * doubl) + (low[0] * triple);
+            long high_int = high[3] + (high[2] * 256) + (high[1] * doubl) + (high[0] * triple);
+            long ipv4_int = ipv4.SourceIP[3] + (ipv4.SourceIP[2] * 256) + (ipv4.SourceIP[1] * doubl) + (ipv4.SourceIP[0] * triple);
 
             if (low_int <= ipv4_int && ipv4_int <= high_int)
             {
