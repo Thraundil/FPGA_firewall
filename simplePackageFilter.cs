@@ -88,7 +88,7 @@ namespace simplePackageFilter
 
     // ****************************************************************************
 
-    public class Ipv4Reader : SimpleProcess
+    public class Rule_Process : SimpleProcess
     {
         [InputBus]
         public IBus_IPv4 ipv4;
@@ -101,7 +101,7 @@ namespace simplePackageFilter
         private readonly long ip_high = new long();
 
         // ipv4Reader_Constructor
-        public Ipv4Reader(IBus_IPv4 busIn, long ip_low_in, long ip_high_in)
+        public Rule_Process(IBus_IPv4 busIn, long ip_low_in, long ip_high_in)
         {
             ipv4 = busIn;
             ip_low = ip_low_in;
@@ -112,8 +112,8 @@ namespace simplePackageFilter
         private void SourceCompareIpv4(long low, long high)
         {
             // Converts the received SOURCE IP into a long for comparison
-            long doubl    = (65536);    // 256*256
-            long triple   = (16777216); // 256*256*256
+            long doubl = (65536);    // 256*256
+            long triple = (16777216); // 256*256*256
             long ipv4_int = ipv4.SourceIP[3] + (ipv4.SourceIP[2] * 256) + (ipv4.SourceIP[1] * doubl) + (ipv4.SourceIP[0] * triple);
 
             // Compares a given IP range with the received Source IP
@@ -168,18 +168,19 @@ namespace simplePackageFilter
                 var byte_input = new InputSimulator();
 
                 // Bus array for each rule to write a bus to
-                IBus_ruleVerdict[] newnew_array = new IBus_ruleVerdict[len_sources];
+                
+                IBus_ruleVerdict[] Bus_array_sources = new IBus_ruleVerdict[len_sources];
 
                 // The bus loop, in which the above array is filled
                 for (int i = 0; i < len_sources; i++)
                 {
                     var (low, high) = rules.Get_sources(i);
-                    var temptemp = new Ipv4Reader(byte_input.ipv4, low, high);
-                    newnew_array[i] = temptemp.ruleVerdict;
+                    var temptemp = new Rule_Process(byte_input.ipv4, low, high);
+                    Bus_array_sources[i] = temptemp.ruleVerdict;
                 }
 
                 // TEST
-                var teststuff = new Final_check(newnew_array);
+                var Final_verdict = new Final_check(Bus_array_sources);
 
 
                 // Prints a file, for testing purposes
@@ -189,3 +190,4 @@ namespace simplePackageFilter
         }
     }
 }
+
