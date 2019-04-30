@@ -10,9 +10,9 @@ namespace simplePackageFilter
     public class Rules
     {
 
-        public string[] accepted_ports = File.ReadAllLines("../../input_data/accepted_ports.txt");
-        public string[] accepted_sources = File.ReadAllLines("../../input_data/accepted_sourceIP.txt");
-        public string[] accepted_destinations = File.ReadAllLines("../../input_data/accepted_destinationIP.txt");
+        public string[] accepted_ports = File.ReadAllLines("../../input_data/whitelist_ports_src.txt");
+        public string[] accepted_sources = File.ReadAllLines("../../input_data/whitelist_ip_src.txt");
+        public string[] accepted_destinations = File.ReadAllLines("../../input_data/whitelist_ip_dest.txt");
 
         public int[] Ip_str_to_int_array(string ip)
         {
