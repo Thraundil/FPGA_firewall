@@ -2,9 +2,9 @@ using SME;
 
 namespace simplePackageFilter
 {
-    // Main
     public class Program
     {
+        // Main
         static void Main()
         {
             // General classes, compiled before simulation
@@ -37,11 +37,10 @@ namespace simplePackageFilter
                     Bus_array_sources[i] = temptemp.ruleVerdict;
                 }
 
+                // The final verdict, checking if any rule process accepted the IPV4 source.
                 var Final_verdict = new Final_check(Bus_array_sources);
 
 
-                // Prints a file, for testing purposes
-                // print.print_file(rules.accepted_sources);
                 sim.Run();
             }
         }
