@@ -16,10 +16,9 @@ namespace simplePackageFilter
         [FixedArrayLength(4)]
         IFixedArray<byte> DestIP { get; set; }
 
-        int Port { get; set; }
+        byte Port { get; set; }
 
-        [FixedArrayLength(9)]
-        IFixedArray<byte> Flags { get; set; }
+        byte Flags { get; set; }
 
         [InitialValue(false)]
         bool ThatOneVariableThatSaysIfWeAreDone { get; set; }
