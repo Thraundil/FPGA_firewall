@@ -1,4 +1,4 @@
-using SME;
+﻿using SME;
 using System;
 using System.IO;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Net;
 namespace simplePackageFilter
 {
     [TopLevelInputBus]
-    public interface IBus_IPv4 : IBus
+    public interface IBus_IPv4_In : IBus
     {
         [FixedArrayLength(4)]
         IFixedArray<byte> SourceIP { get; set; }
@@ -21,7 +21,7 @@ namespace simplePackageFilter
     }
 
     [TopLevelInputBus]
-    public interface IBus_ruleVerdict : IBus
+    public interface IBus_ruleVerdict_In : IBus
     {
         [InitialValue(false)]
         bool Accepted { get; set; }
@@ -31,7 +31,7 @@ namespace simplePackageFilter
     }
 
     [TopLevelOutputBus]
-    public interface IBus_finalVerdict : IBus
+    public interface IBus_finalVerdict_In : IBus
     {
         bool Accept_or_deny { get; set; }
 
@@ -45,16 +45,16 @@ namespace simplePackageFilter
     public class Final_check : SimpleProcess
     {
         [InputBus]
-        public IBus_ruleVerdict[] busList;
+        public IBus_ruleVerdict_In[] busList;
 
         [OutputBus]
-        public IBus_finalVerdict final_say = Scope.CreateBus<IBus_finalVerdict>();
+        public IBus_finalVerdict_In final_say = Scope.CreateBus<IBus_finalVerdict_In>();
 
         // Class Variables
         bool my_bool = false;
 
         // Constructor         
-        public Final_check(IBus_ruleVerdict[] busList_in)
+        public Final_check(IBus_ruleVerdict_In[] busList_in)
         {
             busList = busList_in;
         }
@@ -66,7 +66,8 @@ namespace simplePackageFilter
             if (busList[0].IsSet)
             {
                 // Checks if any rule process returns TRUE.
-                my_bool = busList.Any(val => val.Accepted);
+                //my_bool = busList.Any(val => val.Accepted);
+                my_bool = busList.AsParallel().Any(val => val.Accepted);
                 final_say.Valid = true;
 
                 // Accept the incoming package
@@ -91,10 +92,10 @@ namespace simplePackageFilter
     public class Rule_Process : SimpleProcess
     {
         [InputBus]
-        public IBus_IPv4 ipv4;
+        public IBus_IPv4_In ipv4;
 
         [OutputBus]
-        public IBus_ruleVerdict ruleVerdict = Scope.CreateBus<IBus_ruleVerdict>();
+        public IBus_ruleVerdict_In ruleVerdict = Scope.CreateBus<IBus_ruleVerdict_In>();
 
         // IP source range low/high as a LONG
         private readonly long ip_low_source = new long();
@@ -105,18 +106,18 @@ namespace simplePackageFilter
         private readonly long ip_high_dest = new long();
 
         // ipv4Reader_Constructor
-        public Rule_Process(IBus_IPv4 busIn, long ip_low_source_in, long ip_high_source_in, long ip_low_dest_in, long ip_high_dest_in)
+        public Rule_Process(IBus_IPv4_In busIn, long ip_low_source_in, long ip_high_source_in, long ip_low_dest_in, long ip_high_dest_in)
         {
             ipv4 = busIn;
-            ip_low_source  = ip_low_source_in;
+            ip_low_source = ip_low_source_in;
             ip_high_source = ip_high_source_in;
-            ip_low_dest    = ip_low_dest_in;
-            ip_high_dest   = ip_high_dest_in;
+            ip_low_dest = ip_low_dest_in;
+            ip_high_dest = ip_high_dest_in;
 
         }
 
         // An argument is needed, as VHDL does not allow function calls without an argument...?!
-        private void isIPinRange(long low_source, long high_source, long low_dest, long high_dest)
+        private void IsIPinRange(long low_source, long high_source, long low_dest, long high_dest)
         {
             // Converts the received SOURCE IP into a long for comparison
             long doubl = (65536);    // 256*256
@@ -127,7 +128,8 @@ namespace simplePackageFilter
             // Compares a given IP range with the received Source IP
             if (low_source <= ipv4_source && ipv4_source <= high_source)
             {
-                if (low_dest <= ipv4_dest && ipv4_dest <= high_dest){
+                if (low_dest <= ipv4_dest && ipv4_dest <= high_dest)
+                {
                     // The received packet's Source IP was accepted, as it was
                     // inside the accepted IP ranges of a specific rule.
                     ruleVerdict.Accepted = true;
@@ -143,12 +145,16 @@ namespace simplePackageFilter
             ruleVerdict.IsSet = false;
             if (ipv4.ClockCheck)
             {
-                isIPinRange(ip_low_source, ip_high_source, ip_low_dest, ip_high_dest);
+                IsIPinRange(ip_low_source, ip_high_source, ip_low_dest, ip_high_dest);
                 ruleVerdict.IsSet = true;
                 //sourceComparePort(allowed_ports);
             }
         }
     }
+
     // ****************************************************************************
+
+    // Main
 }
+
 

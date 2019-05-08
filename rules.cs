@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +10,9 @@ namespace simplePackageFilter
     public class Rules
     {
 
-        public string[] accepted_ports = File.ReadAllLines("../../input_data/whitelist_ports_src.txt");
-        public string[] accepted_sources = File.ReadAllLines("../../input_data/whitelist_ip_src.txt");
-        public string[] accepted_destinations = File.ReadAllLines("../../input_data/whitelist_ip_dest.txt");
+        public string[] accepted_ports = File.ReadAllLines("../../input_data/accepted_ports.txt");
+        public string[] accepted_sources = File.ReadAllLines("../../input_data/accepted_sourceIP.txt");
+        public string[] accepted_destinations = File.ReadAllLines("../../input_data/accepted_destinationIP.txt");
 
         public int[] Ip_str_to_int_array(string ip)
         {
@@ -36,9 +36,9 @@ namespace simplePackageFilter
             high = ip_array[1].Split('.').Select(Int32.Parse).ToArray();
 
             // Converts the IP address into a Long, for easier comparisons used later on
-            long doubl     = (65536);    // 256*256
-            long triple    = (16777216); // 256*256*256
-            long low_long  = low[3] + (low[2] * 256) + (low[1] * doubl) + (low[0] * triple);
+            long doubl = (65536);    // 256*256
+            long triple = (16777216); // 256*256*256
+            long low_long = low[3] + (low[2] * 256) + (low[1] * doubl) + (low[0] * triple);
             long high_long = high[3] + (high[2] * 256) + (high[1] * doubl) + (high[0] * triple);
 
             return (low_long, high_long);
@@ -56,3 +56,4 @@ namespace simplePackageFilter
 
     }
 }
+
