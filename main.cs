@@ -19,6 +19,7 @@ namespace simplePackageFilter
 
             // Number of rules, 
             int len_sources = rules.accepted_sources.Length;
+            int max_number_connections = 1000;
             _ = rules.accepted_destinations.Length;
 
             using (var sim = new Simulation())
@@ -29,7 +30,9 @@ namespace simplePackageFilter
                 //                    .BuildVHDL();
 
                 // Creates 3 classes, each with their own uses
-                var byte_input = new InputSimulator();
+                var ipv4_in = new InputSimulator();
+                var tcp_input = new tcp_in_simulator();
+                //var output = new output_simulator();
 
                 // Bus array for each rule to write a bus to
 
@@ -40,9 +43,20 @@ namespace simplePackageFilter
                 {
                     var (low_src, high_src) = rules.Get_sources(i);
                     var (low_dest, high_dest) = rules.Get_destination(i);
-                    var temptemp = new Rule_Process(byte_input.ipv4, low_src, high_src, low_dest, high_dest);
+                    var temptemp = new Rule_Process(ipv4_in.ipv4, low_src, high_src, low_dest, high_dest);
                     Bus_array_sources[i] = temptemp.ruleVerdict;
                 }
+
+                // Bus array for the exsisting connections
+
+                IBus_ITCP_RuleVerdict[] Bus_array_connections = new IBus_ITCP_RuleVerdict[max_number_connections];
+                for (int i = 0; i < max_number_connections; i++)
+                {
+                    // Inizialise every process to some default value that can never be matched
+                    var temp = new Connection_process(tcp_input.tcp, 0, 0, 0, 0,0,0);
+                    Bus_array_connections[i] = temp.ruleVerdict;
+                }
+
 
                 var Final_verdict = new Final_check(Bus_array_sources);
 

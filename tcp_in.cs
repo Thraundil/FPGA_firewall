@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using SME;
 
-namespace sme_example
+namespace simplePackageFilter
 {
     [TopLevelInputBus]
-    public interface ITCP_In : IBus
+    public interface IBus_ITCP_In : IBus
     {
         [FixedArrayLength(4)]
         IFixedArray<byte> SourceIP { get; set; }
@@ -27,7 +27,7 @@ namespace sme_example
 
     }
     [TopLevelInputBus]
-    public interface ITCP_RuleVerdict : IBus
+    public interface IBus_ITCP_RuleVerdict : IBus
     {
         [InitialValue(false)]
         bool Accepted { get; set; }
@@ -38,10 +38,10 @@ namespace sme_example
     public class Connection_process : SimpleProcess
     {
         [InputBus]
-        public ITCP_In TCP;
+        public IBus_ITCP_In TCP;
 
         [OutputBus]
-        public ITCP_RuleVerdict ruleVerdict = Scope.CreateBus<ITCP_RuleVerdict>();
+        public IBus_ITCP_RuleVerdict ruleVerdict = Scope.CreateBus<IBus_ITCP_RuleVerdict>();
 
         private readonly long ip_low_source = new long();
         private readonly long ip_high_source = new long();
@@ -54,7 +54,7 @@ namespace sme_example
         private readonly int port_high_in = new int();
         readonly long doubl = (65536);    // 256*256
         readonly long triple = (16777216); // 256*256*256
-        public Connection_process(ITCP_In busIn, long ip_low_source_in, long ip_high_source_in, long ip_low_dest_in, long ip_high_dest_in, int port_low, int port_high)
+        public Connection_process(IBus_ITCP_In busIn, long ip_low_source_in, long ip_high_source_in, long ip_low_dest_in, long ip_high_dest_in, int port_low, int port_high)
         {
             TCP = busIn;
             port_high_in = port_high;
@@ -88,7 +88,7 @@ namespace sme_example
         {
             ruleVerdict.IsSet = false;
             ruleVerdict.Accepted = false;
-            if (true) // FIX SHOULD NOT BE TRUE :)
+            if (TCP.ThatOneVariableThatSaysIfWeAreDone)
             {
                 long tcp_source = TCP.SourceIP[3] + (TCP.SourceIP[2] * 256) + (TCP.SourceIP[1] * doubl) + (TCP.SourceIP[0] * triple);
                 long tcp_dest = TCP.DestIP[3] + (TCP.DestIP[2] * 256) + (TCP.DestIP[1] * doubl) + (TCP.DestIP[0] * triple);
