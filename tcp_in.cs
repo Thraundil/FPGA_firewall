@@ -34,6 +34,13 @@ namespace simplePackageFilter
         [InitialValue(false)]
         bool IsSet { get; set; }
     }
+    [TopLevelOutputBus]
+    public interface IBus_finalVerdict_tcp_In : IBus
+    {
+        bool Accept_or_deny { get; set; }
+
+        bool Valid { get; set; }
+    }
     public class Connection_process : SimpleProcess
     {
         [InputBus]
@@ -42,15 +49,16 @@ namespace simplePackageFilter
         [OutputBus]
         public IBus_ITCP_RuleVerdict ruleVerdict = Scope.CreateBus<IBus_ITCP_RuleVerdict>();
 
-        private readonly long ip_low_source = new long();
-        private readonly long ip_high_source = new long();
+        private long ip_low_source { get; set; }
+        private long ip_high_source { get; set; }
 
         // IP destination range low/high as a LONG
-        private readonly long ip_low_dest = new long();
-        private readonly long ip_high_dest = new long();
+        private long ip_low_dest { get; set; }
+        private long ip_high_dest { get; set; }
 
-        private readonly int port_low_in = new int();
-        private readonly int port_high_in = new int();
+        private int port_low_in { get; set; }
+        private int port_high_in { get; set; }
+
         readonly long doubl = (65536);    // 256*256
         readonly long triple = (16777216); // 256*256*256
         public Connection_process(IBus_ITCP_In busIn, long ip_low_source_in, long ip_high_source_in, long ip_low_dest_in, long ip_high_dest_in, int port_low, int port_high)
@@ -97,6 +105,51 @@ namespace simplePackageFilter
                     ruleVerdict.Accepted = true;
                 }
                 ruleVerdict.IsSet = true;
+            }
+        }
+    }
+
+    public class Final_check_Tcp : SimpleProcess
+    {
+        [InputBus]
+        public IBus_ITCP_RuleVerdict[] busList;
+
+        [OutputBus]
+        public IBus_finalVerdict_tcp_In final_say = Scope.CreateBus<IBus_finalVerdict_tcp_In>();
+
+        // Class Variables
+        bool my_bool = false;
+
+        // Constructor         
+        public Final_check_Tcp(IBus_ITCP_RuleVerdict[] busList_in)
+        {
+            busList = busList_in;
+        }
+
+        protected override void OnTick()
+        {
+            final_say.Valid = false;
+            final_say.Accept_or_deny = false;
+            if (busList[0].IsSet)
+            {
+                // Checks if any rule process returns TRUE.
+                //my_bool = busList.Any(val => val.Accepted);
+                my_bool = busList.AsParallel().Any(val => val.Accepted);
+                final_say.Valid = true;
+
+                // Accept the incoming package
+                if (my_bool)
+                {
+                    final_say.Accept_or_deny = true;
+                    Console.WriteLine("The package was Accepted");
+                }
+                // Deny the incoming package, as the IP was not on the whitelist.
+                else
+                {
+                    Console.WriteLine("The package was Denied");
+                    final_say.Accept_or_deny = false;
+                }
+                my_bool = false;
             }
         }
     }

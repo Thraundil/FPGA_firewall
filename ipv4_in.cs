@@ -98,21 +98,24 @@ namespace simplePackageFilter
         public IBus_ruleVerdict_In ruleVerdict = Scope.CreateBus<IBus_ruleVerdict_In>();
 
         // IP source range low/high as a LONG
-        private readonly long ip_low_source = new long();
-        private readonly long ip_high_source = new long();
+        private  long ip_low_source { get; set; }
+        private  long ip_high_source { get; set; }
 
         // IP destination range low/high as a LONG
-        private readonly long ip_low_dest = new long();
-        private readonly long ip_high_dest = new long();
+        private  long ip_low_dest { get;  set; }
+        private  long ip_high_dest { get; set; }
+
+        private readonly int my_id = new int();
 
         // ipv4Reader_Constructor
-        public Rule_Process(IBus_IPv4_In busIn, long ip_low_source_in, long ip_high_source_in, long ip_low_dest_in, long ip_high_dest_in)
+        public Rule_Process(IBus_IPv4_In busIn, long ip_low_source_in, long ip_high_source_in, long ip_low_dest_in, long ip_high_dest_in, int the_id)
         {
             ipv4 = busIn;
             ip_low_source = ip_low_source_in;
             ip_high_source = ip_high_source_in;
             ip_low_dest = ip_low_dest_in;
             ip_high_dest = ip_high_dest_in;
+            my_id = the_id;
 
         }
 

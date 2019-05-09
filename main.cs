@@ -41,7 +41,7 @@ namespace simplePackageFilter
                 {
                     var (low_src, high_src) = rules.Get_sources(i);
                     var (low_dest, high_dest) = rules.Get_destination(i);
-                    var temptemp = new Rule_Process(ipv4_in.ipv4, low_src, high_src, low_dest, high_dest);
+                    var temptemp = new Rule_Process(ipv4_in.ipv4, low_src, high_src, low_dest, high_dest,i);
                     Bus_array_IP_whitelist[i] = temptemp.ruleVerdict;
                 }
 
