@@ -62,7 +62,7 @@ namespace simplePackageFilter
                         Bus_array_connections[i] = temp.ruleVerdict;
                     }
                 }
-                var final_verdict_tcP = new Final_check_Tcp(Bus_array_connections);
+                var final_verdict_tcP = new Final_check_Tcp(Bus_array_connections, Bus_array_IP_whitelist);
 
                 var Final_verdict = new Final_check(Bus_array_IP_whitelist);
 

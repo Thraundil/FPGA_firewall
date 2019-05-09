@@ -104,44 +104,61 @@ namespace simplePackageFilter
     public class Final_check_Tcp : SimpleProcess
     {
         [InputBus]
-        public IBus_ITCP_RuleVerdict[] busList;
+        public IBus_ITCP_RuleVerdict[] connection_list;
+
+        [InputBus]
+        public IBus_ruleVerdict_In[] rule_list;
 
         [OutputBus]
         public IBus_finalVerdict_tcp_In final_say = Scope.CreateBus<IBus_finalVerdict_tcp_In>();
 
         // Class Variables
-        bool my_bool = false;
+        bool connection_bool = false;
+
+        bool rule_bool = false;
 
         // Constructor         
-        public Final_check_Tcp(IBus_ITCP_RuleVerdict[] busList_in)
+        public Final_check_Tcp(IBus_ITCP_RuleVerdict[] busList_in, IBus_ruleVerdict_In[] rule_list_in )
         {
-            busList = busList_in;
+            connection_list = busList_in;
+            rule_list = rule_list_in;
+
         }
 
         protected override void OnTick()
         {
             final_say.Valid = false;
             final_say.Accept_or_deny = false;
-            if (busList[0].IsSet)
+            if (connection_list[0].IsSet)
             {
                 // Checks if any rule process returns TRUE.
                 //my_bool = busList.Any(val => val.Accepted);
-                my_bool = busList.AsParallel().Any(val => val.Accepted);
+                connection_bool = connection_list.AsParallel().Any(val => val.Accepted);
                 final_say.Valid = true;
 
                 // Accept the incoming package
-                if (my_bool)
+                if (connection_bool)
                 {
                     final_say.Accept_or_deny = true;
                     Console.WriteLine("The connection already exists");
                 }
-                // Deny the incoming package, as the IP was not on the whitelist.
+
                 else
                 {
-                    Console.WriteLine("The connection does not exist");
-                    final_say.Accept_or_deny = false;
+                    rule_bool = rule_list.AsParallel().Any(val => val.Accepted);
+                    if (rule_bool) // And some flags are correct - in parituclar the syn flag
+                    {
+                        Console.WriteLine("The connection does not exist but matches a whitelisted rule");
+                        final_say.Accept_or_deny = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("The connection does neither match a connection or a rule");
+                        final_say.Accept_or_deny = false;
+                    }
                 }
-                my_bool = false;
+                connection_bool = false;
+                rule_bool = false;
             }
         }
     }
