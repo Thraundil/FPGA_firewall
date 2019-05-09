@@ -1,19 +1,20 @@
+using System;
 using System.IO;
 using SME;
 
 namespace simplePackageFilter
 {
-    public class InputSimulator : SimulationProcess
+    public class TcpSimulator : SimulationProcess
     {
         [OutputBus, InputBus]
-        public IBus_ITCP_In tcpBus = Scope.CreateBus<ITCP_In>();
+        public IBus_ITCP_In tcpBus = Scope.CreateBus<IBus_ITCP_In>();
 
         // Used to read input from a .txt file
         byte[] sample;
 
         public async override System.Threading.Tasks.Task Run()
         {
-            sample = File.ReadAllBytes("../../input_data/tcp.txt");
+            sample = File.ReadAllBytes("../../input_data/tcp_bytes.txt");
 
             var stream = new MemoryStream(sample, 0, sample.Length);
             var reader = new BinaryReader(stream);
@@ -42,6 +43,12 @@ namespace simplePackageFilter
                 await ClockAsync();
 
                 tcpBus.ThatOneVariableThatSaysIfWeAreDone = true;
+
+                string out1 = String.Format("Port: {0}", tcpBus.Port);
+                Console.WriteLine(out1);
+                string out2 = String.Format("Flag: {0}", tcpBus.Flags);
+                Console.WriteLine(out2);
+
                 await ClockAsync();
                 tcpBus.ThatOneVariableThatSaysIfWeAreDone = false;
             }

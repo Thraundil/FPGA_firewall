@@ -74,12 +74,12 @@ namespace simplePackageFilter
                 if (my_bool)
                 {
                     final_say.Accept_or_deny = true;
-                    Console.WriteLine("The package was Accepted");
+                    Console.WriteLine("The IP was Accepted");
                 }
                 // Deny the incoming package, as the IP was not on the whitelist.
                 else
                 {
-                    Console.WriteLine("The package was Denied");
+                    Console.WriteLine("The IP was Denied");
                     final_say.Accept_or_deny = false;
                 }
                 my_bool = false;
