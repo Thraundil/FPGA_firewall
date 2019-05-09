@@ -18,7 +18,7 @@ namespace simplePackageFilter
 
             // Number of rules, 
             int len_sources = rules.accepted_sources.Length;
-            // int max_number_connections = 1000;
+             int max_number_connections = 1;
             _ = rules.accepted_destinations.Length;
 
             using (var sim = new Simulation())
@@ -45,15 +45,24 @@ namespace simplePackageFilter
                     Bus_array_IP_whitelist[i] = temptemp.ruleVerdict;
                 }
 
-                // Bus array for the exsisting connections
-//                IBus_ITCP_RuleVerdict[] Bus_array_connections = new IBus_ITCP_RuleVerdict[max_number_connections];
+//                Bus array for the exsisting connections
+                IBus_ITCP_RuleVerdict[] Bus_array_connections = new IBus_ITCP_RuleVerdict[max_number_connections];
 
-//                for (int i = 0; i < max_number_connections; i++)
-//                {
-//                    // Inizialise every process to some default value that can never be matched
-//                    var temp = new Connection_process(tcp_input.tcp, 0, 0, 0, 0,0,0);
-//                    Bus_array_connections[i] = temp.ruleVerdict;
-//                }
+                for (int i = 0; i < max_number_connections; i++)
+                {
+                    if (i == 0)
+                    {
+                        var temp = new Connection_process(tcp_in.tcpBus, 16843009, 33686018, 42);
+                        Bus_array_connections[i] = temp.ruleVerdict;
+                    }
+                    else
+                    {
+                        // Inizialise every process to some default value that can never be matched
+                        var temp = new Connection_process(tcp_in.tcpBus, 0, 0, 0);
+                        Bus_array_connections[i] = temp.ruleVerdict;
+                    }
+                }
+                var final_verdict_tcP = new Final_check_Tcp(Bus_array_connections);
 
                 var Final_verdict = new Final_check(Bus_array_IP_whitelist);
 

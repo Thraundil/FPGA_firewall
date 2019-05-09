@@ -44,10 +44,10 @@ namespace simplePackageFilter
 
                 tcpBus.ThatOneVariableThatSaysIfWeAreDone = true;
 
-                string out1 = String.Format("Port: {0}", tcpBus.Port);
-                Console.WriteLine(out1);
-                string out2 = String.Format("Flag: {0}", tcpBus.Flags);
-                Console.WriteLine(out2);
+                //string out1 = String.Format("Port: {0}", tcpBus.Port);
+                //Console.WriteLine(out1);
+                //string out2 = String.Format("Flag: {0}", tcpBus.Flags);
+                //Console.WriteLine(out2);
 
                 await ClockAsync();
                 tcpBus.ThatOneVariableThatSaysIfWeAreDone = false;

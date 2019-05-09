@@ -102,12 +102,12 @@ namespace simplePackageFilter
         public IBus_ruleVerdict_out ruleVerdict = Scope.CreateBus<IBus_ruleVerdict_out>();
 
         // IP source range low/high as a LONG
-        private readonly long ip_low_source = new long();
-        private readonly long ip_high_source = new long();
+        private long ip_low_source { get; set; }
+        private long ip_high_source { get; set; }
 
         // IP destination range low/high as a LONG
-        private readonly long ip_low_dest = new long();
-        private readonly long ip_high_dest = new long();
+        private long ip_low_dest { get; set; }
+        private long ip_high_dest { get; set; }
 
         // ipv4Reader_Constructor
         public Rule_Process_Blacklist(IBus_IPv4_out busIn, long ip_low_source_in, long ip_high_source_in, long ip_low_dest_in, long ip_high_dest_in)

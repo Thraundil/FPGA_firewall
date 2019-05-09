@@ -16,7 +16,7 @@ namespace simplePackageFilter
         [FixedArrayLength(4)]
         IFixedArray<byte> DestIP { get; set; }
 
-        byte Port { get; set; }
+        int Port { get; set; }
 
         byte Flags { get; set; }
 
@@ -49,37 +49,29 @@ namespace simplePackageFilter
         [OutputBus]
         public IBus_ITCP_RuleVerdict ruleVerdict = Scope.CreateBus<IBus_ITCP_RuleVerdict>();
 
-        private long ip_low_source { get; set; }
-        private long ip_high_source { get; set; }
+        private long ip_source { get; set; }
+        private long ip_dest { get; set; }
 
-        // IP destination range low/high as a LONG
-        private long ip_low_dest { get; set; }
-        private long ip_high_dest { get; set; }
-
-        private int port_low_in { get; set; }
-        private int port_high_in { get; set; }
+        private int port_in { get; set; }
 
         readonly long doubl = (65536);    // 256*256
         readonly long triple = (16777216); // 256*256*256
-        public Connection_process(IBus_ITCP_In busIn, long ip_low_source_in, long ip_high_source_in, long ip_low_dest_in, long ip_high_dest_in, int port_low, int port_high)
+        public Connection_process(IBus_ITCP_In busIn, long ip_source_in, long ip_dest_in, int port)
         {
             TCP = busIn;
-            port_high_in = port_high;
-            port_low_in = port_low;
-            ip_low_source = ip_low_source_in;
-            ip_high_source = ip_high_source_in;
-            ip_low_dest = ip_low_dest_in;
-            ip_high_dest = ip_high_dest_in;
+            port_in = port;
+            ip_source = ip_source_in;
+            ip_dest = ip_dest_in;
         }
 
 
-        private bool DoesConnectExist(long low_source, long high_source, long low_dest, long high_dest, int port_low, int port_high, long tcp_source, long tcp_dest)
+        private bool DoesConnectExist(long source, long dest, int port, long tcp_source, long tcp_dest)
         {
-            if (low_source == tcp_source && tcp_source == high_source)
+            if (source == tcp_source)
             {
-                if (low_dest == tcp_dest && tcp_dest == high_dest)
+                if (dest == tcp_dest)
                 {
-                    if (port_low == TCP.Port && port_high == TCP.Port)
+                    if (port == TCP.Port)
                     {
                         // The received packet's Source IP was accepted, as it was
                         // inside the accepted IP ranges of a specific rule.
@@ -99,7 +91,7 @@ namespace simplePackageFilter
             {
                 long tcp_source = TCP.SourceIP[3] + (TCP.SourceIP[2] * 256) + (TCP.SourceIP[1] * doubl) + (TCP.SourceIP[0] * triple);
                 long tcp_dest = TCP.DestIP[3] + (TCP.DestIP[2] * 256) + (TCP.DestIP[1] * doubl) + (TCP.DestIP[0] * triple);
-                if (DoesConnectExist(ip_low_source, ip_high_source, ip_low_dest, ip_high_dest, port_low_in, port_high_in, tcp_source, tcp_dest))
+                if (DoesConnectExist(ip_source, ip_dest, port_in, tcp_source, tcp_dest))
                 {
                     // Update/check state before accepting!!
                     ruleVerdict.Accepted = true;
@@ -141,12 +133,12 @@ namespace simplePackageFilter
                 if (my_bool)
                 {
                     final_say.Accept_or_deny = true;
-                    Console.WriteLine("The package was Accepted");
+                    Console.WriteLine("The connection already exists");
                 }
                 // Deny the incoming package, as the IP was not on the whitelist.
                 else
                 {
-                    Console.WriteLine("The package was Denied");
+                    Console.WriteLine("The connection does not exist");
                     final_say.Accept_or_deny = false;
                 }
                 my_bool = false;
