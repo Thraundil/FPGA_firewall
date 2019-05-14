@@ -57,7 +57,7 @@ namespace simplePackageFilter
 
         public (long, long) Get_blacklisted_destinations(int x)
         {
-            return (Ip_str_to_long_tuple(this.blacklist_ip[x]));
+            return (Ip_str_to_long_tuple(this.blacklisted_destinations[x]));
         }
 
     }

@@ -47,13 +47,13 @@ namespace simplePackageFilter
                 }
 
                 // The Blacklisted IP rules
-                IBus_ruleVerdict_Out[] Bus_array_IP_blacklist = new IBus_ruleVerdict_Out[len_blacklist];
+                IBus_blacklist_ruleVerdict_out[] Bus_array_IP_blacklist = new IBus_blacklist_ruleVerdict_out[len_blacklist];
 
                 // Fills up the Blacklisted Destination IP rules, into above array
                 for (int i = 0; i < len_blacklist; i++)
                 {
                     var (low_dest, high_dest) = rules.Get_blacklisted_destinations(i);
-                    var temptemp = new Rule_Process_Blacklist(ipv4_out.ipv4, low_dest, high_dest,i);
+                    var temptemp = new Rule_Process_Blacklist(ipv4_out.ipv4, low_dest, high_dest);
                     Bus_array_IP_blacklist[i] = temptemp.ruleVerdict;
                 }
 

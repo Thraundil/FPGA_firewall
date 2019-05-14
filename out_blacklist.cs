@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace simplePackageFilter
 {
     [TopLevelInputBus]
-    public interface IBus_IPv4_out : IBus
+    public interface IBus_Blacklist_out : IBus
     {
         [FixedArrayLength(4)]
         IFixedArray<byte> SourceIP { get; set; }
@@ -25,7 +25,7 @@ namespace simplePackageFilter
     }
 
     [TopLevelInputBus]
-    public interface IBus_ruleVerdict_out : IBus
+    public interface IBus_blacklist_ruleVerdict_out : IBus
     {
         [InitialValue(false)]
         bool Accepted { get; set; }
@@ -49,7 +49,7 @@ namespace simplePackageFilter
     public class Final_check_Blacklist : SimpleProcess
     {
         [InputBus]
-        public IBus_ruleVerdict_out[] busList;
+        public IBus_blacklist_ruleVerdict_out[] busList;
 
         [OutputBus]
         public IBus_finalVerdict_out final_say = Scope.CreateBus<IBus_finalVerdict_out>();
@@ -58,7 +58,7 @@ namespace simplePackageFilter
         bool my_bool = false;
 
         // Constructor         
-        public Final_check_Blacklist(IBus_ruleVerdict_out[] busList_out)
+        public Final_check_Blacklist(IBus_blacklist_ruleVerdict_out[] busList_out)
         {
             busList = busList_out;
         }
@@ -99,7 +99,7 @@ namespace simplePackageFilter
         public IBus_Blacklist_out blacklist_out;
 
         [OutputBus]
-        public IBus_ruleVerdict_out ruleVerdict = Scope.CreateBus<IBus_ruleVerdict_out>();
+        public IBus_blacklist_ruleVerdict_out ruleVerdict = Scope.CreateBus<IBus_blacklist_ruleVerdict_out>();
 
         // IP source range low/high as a LONG
         private long dest_low { get; set; }
@@ -138,7 +138,7 @@ namespace simplePackageFilter
         {
             ruleVerdict.Accepted = false;
             ruleVerdict.IsSet = false;
-            if (blacklist_out.flag_readyOrNot)
+            if (blacklist_out.ThatOneVariableThatSaysIfWeAreDone)
             {
                 IP_Match(dest_low, dest_high);
                 ruleVerdict.IsSet = true;

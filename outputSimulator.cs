@@ -1,4 +1,5 @@
 using System.IO;
+using System;
 using SME;
 
 namespace simplePackageFilter
@@ -6,7 +7,7 @@ namespace simplePackageFilter
     public class OutputSimulator : SimulationProcess
     {
         [OutputBus, InputBus]
-        public IBus_IPv4_out ipv4 = Scope.CreateBus<IBus_IPv4_In>();
+        public IBus_Blacklist_out ipv4 = Scope.CreateBus<IBus_Blacklist_out>();
 
         // Used to read input from a .txt file
         byte[] sample;
@@ -23,13 +24,13 @@ namespace simplePackageFilter
 
             // reads every byte up until the source and destination IP's
             int length = (int)reader.BaseStream.Length;
+            Console.WriteLine(length);
             for (int j = 0; j < length / 10; j++)
             {
                 // FROM IP
                 for (int i = 0; i < 4; i++)
                 {
                     ipv4.SourceIP[i] = reader.ReadByte();
-                    reader.ReadByte();
                     await ClockAsync();
                 }
 
@@ -37,7 +38,6 @@ namespace simplePackageFilter
                 for (int i = 0; i < 4; i++)
                 {
                     ipv4.DestIP[i] = reader.ReadByte();
-                    reader.ReadByte();
                     await ClockAsync();
                 }
 
