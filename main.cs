@@ -18,7 +18,8 @@ namespace simplePackageFilter
 
             // Number of rules, 
             int len_sources = rules.accepted_sources.Length;
-             int max_number_connections = 1;
+            int len_blacklist = rules.blacklisted_destinations.Length;
+            int max_number_connections = 1;
             _ = rules.accepted_destinations.Length;
 
             using (var sim = new Simulation())
@@ -28,10 +29,10 @@ namespace simplePackageFilter
                 // CARL/KENNETH FIX PLZ
                 //                    .BuildVHDL();
 
-                // The input-simulators (for simulating actual intput/output)
-                var ipv4_in = new InputSimulator();
-                var tcp_in = new TcpSimulator();
-                //var output = new output_simulator();
+                // The input-simulators (for simulating actual intput/output for tests)
+                var ipv4_in  = new InputSimulator();
+                var ipv4_out = new OutputSimulator();
+                var tcp_in   = new TcpSimulator();
 
                 // The Whitelisted IP rules 
                 IBus_ruleVerdict_In[] Bus_array_IP_whitelist = new IBus_ruleVerdict_In[len_sources];
@@ -43,6 +44,17 @@ namespace simplePackageFilter
                     var (low_dest, high_dest) = rules.Get_destination(i);
                     var temptemp = new Rule_Process(ipv4_in.ipv4, low_src, high_src, low_dest, high_dest,i);
                     Bus_array_IP_whitelist[i] = temptemp.ruleVerdict;
+                }
+
+                // The Blacklisted IP rules
+                IBus_ruleVerdict_Out[] Bus_array_IP_blacklist = new IBus_ruleVerdict_Out[len_blacklist];
+
+                // Fills up the Blacklisted Destination IP rules, into above array
+                for (int i = 0; i < len_blacklist; i++)
+                {
+                    var (low_dest, high_dest) = rules.Get_blacklisted_destinations(i);
+                    var temptemp = new Rule_Process_Blacklist(ipv4_out.ipv4, low_dest, high_dest,i);
+                    Bus_array_IP_blacklist[i] = temptemp.ruleVerdict;
                 }
 
 //                Bus array for the exsisting connections
@@ -64,7 +76,11 @@ namespace simplePackageFilter
                 }
                 var final_verdict_tcP = new Final_check_Tcp(Bus_array_connections, Bus_array_IP_whitelist);
 
+                // Whitelist Verdict
                 var Final_verdict = new Final_check(Bus_array_IP_whitelist);
+
+                // Blacklist simulator
+                var Final_verdict_blacklist = new Final_check_Blacklist(Bus_array_IP_blacklist);
 
                 // Prints a file, for testing purposes
                 // print.print_file(rules.accepted_sources);

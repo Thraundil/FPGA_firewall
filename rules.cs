@@ -13,6 +13,7 @@ namespace simplePackageFilter
         public string[] accepted_ports = File.ReadAllLines("../../input_data/whitelist_ports_src.txt");
         public string[] accepted_sources = File.ReadAllLines("../../input_data/whitelist_ip_src.txt");
         public string[] accepted_destinations = File.ReadAllLines("../../input_data/whitelist_ip_dest.txt");
+        public string[] blacklisted_destinations = File.ReadAllLines("../../input_data/blacklist_ip.txt");
 
         public int[] Ip_str_to_int_array(string ip)
         {
@@ -52,6 +53,11 @@ namespace simplePackageFilter
         public (long, long) Get_destination(int x)
         {
             return (Ip_str_to_long_tuple(this.accepted_destinations[x]));
+        }
+
+        public (long, long) Get_blacklisted_destinations(int x)
+        {
+            return (Ip_str_to_long_tuple(this.blacklist_ip[x]));
         }
 
     }

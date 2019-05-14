@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace simplePackageFilter
 {
     [TopLevelInputBus]
-    public interface IBus_Blacklist_out : IBus
+    public interface IBus_IPv4_out : IBus
     {
         [FixedArrayLength(4)]
         IFixedArray<byte> SourceIP { get; set; }
@@ -18,10 +18,10 @@ namespace simplePackageFilter
 
         int SourcePort { get; set; }
 
-        int DestPort { get; set; }
+        byte Flags { get; set; }
 
         [InitialValue(false)]
-        bool flag_readyOrNot { get; set; }
+        bool ThatOneVariableThatSaysIfWeAreDone { get; set; }
     }
 
     [TopLevelInputBus]
