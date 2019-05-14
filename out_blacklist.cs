@@ -78,12 +78,12 @@ namespace simplePackageFilter
                 if (!my_bool)
                 {
                     final_say.Accept_or_deny = true;
-                    Console.WriteLine("The package was Accepted");
+                    Console.WriteLine("The outgoing package was NOT in the blacklist");
                 }
                 // Deny the incoming package, as the IP was not on the whitelist.
                 else
                 {
-                    Console.WriteLine("The package was Denied");
+                    Console.WriteLine("The outgoing package was dropped (part of Blacklist)");
                     final_say.Accept_or_deny = false;
                 }
                 my_bool = true;
@@ -124,7 +124,7 @@ namespace simplePackageFilter
             long ipv4_dest = blacklist_out.DestIP[3] + (blacklist_out.DestIP[2] * 256) + (blacklist_out.DestIP[1] * doubl) + (blacklist_out.DestIP[0] * triple);
 
             // Compares a given IP range with the received Source IP
-            if (dest_low >= ipv4_dest || dest_high <= ipv4_dest)
+            if (dest_low <= ipv4_dest || dest_high <= ipv4_dest)
             {
                     // The received packet's Source IP was accepted, as it was
                     // inside the accepted IP ranges of a specific rule.

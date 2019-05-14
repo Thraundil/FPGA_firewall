@@ -24,7 +24,6 @@ namespace simplePackageFilter
 
             // reads every byte up until the source and destination IP's
             int length = (int)reader.BaseStream.Length;
-            Console.WriteLine(length);
             for (int j = 0; j < length / 10; j++)
             {
                 // FROM IP
