@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace simplePackageFilter
 {
     [TopLevelInputBus]
-    public interface IBus_IPv4_out : IBus
+    public interface IBus_Blacklist_out : IBus
     {
         [FixedArrayLength(4)]
         IFixedArray<byte> SourceIP { get; set; }
@@ -75,7 +75,7 @@ namespace simplePackageFilter
                 final_say.Valid = true;
 
                 // Accept the incoming package
-                if (my_bool)
+                if (!my_bool)
                 {
                     final_say.Accept_or_deny = true;
                     Console.WriteLine("The package was Accepted");
@@ -86,7 +86,7 @@ namespace simplePackageFilter
                     Console.WriteLine("The package was Denied");
                     final_say.Accept_or_deny = false;
                 }
-                my_bool = false;
+                my_bool = true;
             }
         }
     }
@@ -96,48 +96,39 @@ namespace simplePackageFilter
     public class Rule_Process_Blacklist : SimpleProcess
     {
         [InputBus]
-        public IBus_IPv4_out ipv4_out;
+        public IBus_Blacklist_out blacklist_out;
 
         [OutputBus]
         public IBus_ruleVerdict_out ruleVerdict = Scope.CreateBus<IBus_ruleVerdict_out>();
 
         // IP source range low/high as a LONG
-        private long ip_low_source { get; set; }
-        private long ip_high_source { get; set; }
+        private long dest_low { get; set; }
+        private long dest_high { get; set; }
 
         // IP destination range low/high as a LONG
-        private long ip_low_dest { get; set; }
-        private long ip_high_dest { get; set; }
+
 
         // ipv4Reader_Constructor
-        public Rule_Process_Blacklist(IBus_IPv4_out busIn, long ip_low_source_in, long ip_high_source_in, long ip_low_dest_in, long ip_high_dest_in)
+        public Rule_Process_Blacklist(IBus_Blacklist_out busIn, long ip_dest_low, long ip_dest_high)
         {
-            ipv4_out = busIn;
-            ip_low_source = ip_low_source_in;
-            ip_high_source = ip_high_source_in;
-            ip_low_dest = ip_low_dest_in;
-            ip_high_dest = ip_high_dest_in;
-
+            blacklist_out = busIn;
+            dest_low = ip_dest_low;
+            dest_high = ip_dest_high;
         }
 
-        // An argument is needed, as VHDL does not allow function calls without an argument...?!
-        private void IsIPinRange(long low_source, long high_source, long low_dest, long high_dest)
+        private void IP_Match(long dest_low, long dest_high)
         {
             // Converts the received SOURCE IP into a long for comparison
             long doubl = (65536);    // 256*256
             long triple = (16777216); // 256*256*256
-            long ipv4_source = ipv4_out.SourceIP[3] + (ipv4_out.SourceIP[2] * 256) + (ipv4_out.SourceIP[1] * doubl) + (ipv4_out.SourceIP[0] * triple);
-            long ipv4_dest = ipv4_out.DestIP[3] + (ipv4_out.DestIP[2] * 256) + (ipv4_out.DestIP[1] * doubl) + (ipv4_out.DestIP[0] * triple);
+            long ipv4_dest = blacklist_out.DestIP[3] + (blacklist_out.DestIP[2] * 256) + (blacklist_out.DestIP[1] * doubl) + (blacklist_out.DestIP[0] * triple);
 
             // Compares a given IP range with the received Source IP
-            if (low_source >= ipv4_source || ipv4_source >= high_source)
+            if (dest_low >= ipv4_dest || dest_high <= ipv4_dest)
             {
-                if (low_dest >= ipv4_dest || ipv4_dest >= high_dest)
-                {
                     // The received packet's Source IP was accepted, as it was
                     // inside the accepted IP ranges of a specific rule.
                     ruleVerdict.Accepted = true;
-                }
             }
         }
 
@@ -147,9 +138,9 @@ namespace simplePackageFilter
         {
             ruleVerdict.Accepted = false;
             ruleVerdict.IsSet = false;
-            if (ipv4_out.flag_readyOrNot)
+            if (blacklist_out.flag_readyOrNot)
             {
-                IsIPinRange(ip_low_source, ip_high_source, ip_low_dest, ip_high_dest);
+                IP_Match(dest_low, dest_high);
                 ruleVerdict.IsSet = true;
                 //sourceComparePort(allowed_ports);
             }
