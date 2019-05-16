@@ -35,7 +35,7 @@ namespace simplePackageFilter
     }
 
     [TopLevelOutputBus]
-    public interface IBus_finalVerdict_out : IBus
+    public interface IBus_blacklist_finalVerdict_out : IBus
     {
         bool Accept_or_deny { get; set; }
 
@@ -52,7 +52,7 @@ namespace simplePackageFilter
         public IBus_blacklist_ruleVerdict_out[] busList;
 
         [OutputBus]
-        public IBus_finalVerdict_out final_say = Scope.CreateBus<IBus_finalVerdict_out>();
+        public IBus_blacklist_finalVerdict_out final_say = Scope.CreateBus<IBus_blacklist_finalVerdict_out>();
 
         // Class Variables
         bool my_bool = false;
@@ -78,12 +78,12 @@ namespace simplePackageFilter
                 if (!my_bool)
                 {
                     final_say.Accept_or_deny = true;
-                    Console.WriteLine("The outgoing package was NOT in the blacklist");
+                    Console.WriteLine("The package was Accepted");
                 }
                 // Deny the incoming package, as the IP was not on the whitelist.
                 else
                 {
-                    Console.WriteLine("The outgoing package was dropped (part of Blacklist)");
+                    Console.WriteLine("The package was Denied");
                     final_say.Accept_or_deny = false;
                 }
                 my_bool = true;
