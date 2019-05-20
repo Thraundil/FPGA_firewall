@@ -5,7 +5,7 @@ namespace simplePackageFilter
 {
     public class InputSimulator : SimulationProcess
     {
-        [OutputBus, InputBus]
+        [OutputBus]
         public IBus_IPv4_In ipv4 = Scope.CreateBus<IBus_IPv4_In>();
 
         // Used to read input from a .txt file

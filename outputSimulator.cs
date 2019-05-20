@@ -6,7 +6,7 @@ namespace simplePackageFilter
 {
     public class OutputSimulator : SimulationProcess
     {
-        [OutputBus, InputBus]
+        [OutputBus]
         public IBus_Blacklist_out ipv4 = Scope.CreateBus<IBus_Blacklist_out>();
 
         // Used to read input from a .txt file
@@ -48,9 +48,9 @@ namespace simplePackageFilter
                 ipv4.Flags = reader.ReadByte();
                 await ClockAsync();
 
-                ipv4.ThatOneVariableThatSaysIfWeAreDone = true;
+                ipv4.ReadyToWorkFlag = true;
                 await ClockAsync();
-                ipv4.ThatOneVariableThatSaysIfWeAreDone = false;
+                ipv4.ReadyToWorkFlag = false;
             }
         }
     }

@@ -21,7 +21,7 @@ namespace simplePackageFilter
         byte Flags { get; set; }
 
         [InitialValue(false)]
-        bool ThatOneVariableThatSaysIfWeAreDone { get; set; }
+        bool ReadyToWorkFlag { get; set; }
     }
 
     [TopLevelInputBus]
@@ -138,7 +138,7 @@ namespace simplePackageFilter
         {
             ruleVerdict.Accepted = false;
             ruleVerdict.IsSet = false;
-            if (blacklist_out.ThatOneVariableThatSaysIfWeAreDone)
+            if (blacklist_out.ReadyToWorkFlag)
             {
                 IP_Match(dest_low, dest_high);
                 ruleVerdict.IsSet = true;

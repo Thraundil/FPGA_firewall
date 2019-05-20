@@ -19,7 +19,7 @@ namespace simplePackageFilter
             // Number of rules, 
             int len_sources = rules.accepted_sources.Length;
             int len_blacklist = rules.blacklisted_destinations.Length;
-            int max_number_connections = 1;
+            int max_number_connections = 10;
             _ = rules.accepted_destinations.Length;
 
             using (var sim = new Simulation())
@@ -64,13 +64,13 @@ namespace simplePackageFilter
                 {
                     if (i == 0)
                     {
-                        var temp = new Connection_process(tcp_in.tcpBus, 16843009, 33686018, 42);
+                        var temp = new Connection_process(tcp_in.tcpBus, 16843009, 33686018, 42, i);
                         Bus_array_connections[i] = temp.ruleVerdict;
                     }
                     else
                     {
                         // Inizialise every process to some default value that can never be matched
-                        var temp = new Connection_process(tcp_in.tcpBus, 0, 0, 0);
+                        var temp = new Connection_process(tcp_in.tcpBus, 0, 0, 0, i);
                         Bus_array_connections[i] = temp.ruleVerdict;
                     }
                 }
