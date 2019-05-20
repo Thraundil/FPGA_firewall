@@ -135,6 +135,20 @@ namespace simplePackageFilter
         public IBus_Controller_to_state to_state = Scope.CreateBus<IBus_Controller_to_state>();
 
 
+        // CONSTRUCTOR
+        public Controller(IBus_blacklist_finalVerdict_out BUS_blacklist_input, IBus_Blacklist_out BUS_dataOut,
+                          IBus_IPv4_In BUS_ipv4_in, IBus_ITCP_In BUS_stateful_in,
+                          IBus_Update_State BUS_update, IBus_Connection_In_Use[] BUS_in_use,
+                          IBus_Controller_to_state BUS_to_state)
+        {
+            update = BUS_update;
+            in_use = BUS_in_use;
+            ipv4_in = BUS_ipv4_in;
+            dataOut = BUS_dataOut;
+            to_state = BUS_to_state;
+            stateful_in = BUS_stateful_in;
+            blacklist_input = BUS_blacklist_input;
+        }
 
 
         protected async override System.Threading.Tasks.Task OnTickAsync()
