@@ -7,6 +7,41 @@ using SME;
 
 namespace simplePackageFilter
 {
+    [InputBus]
+    public interface IBus_Connection_In_Use : IBus
+    {
+        bool In_use { get; set; }
+
+        int Id { get; set; }
+    }
+    [InputBus]
+    public interface IBus_Update_State : IBus
+    {
+        [FixedArrayLength(4)]
+        IFixedArray<byte> SourceIP { get; set; }
+
+        [FixedArrayLength(4)]
+        IFixedArray<byte> DestIP { get; set; }
+        int Port { get; set; }
+        [InitialValue(false)]
+        bool Flag { get; set; }
+
+        int Id { get; set; }
+
+        // We can need to update 2 entries in the state at the same time
+
+        [FixedArrayLength(4)]
+        IFixedArray<byte> SourceIP_2 { get; set; }
+
+        [FixedArrayLength(4)]
+        IFixedArray<byte> DestIP_2 { get; set; }
+
+        int Port_2 { get; set; }
+        [InitialValue(false)]
+        bool Flag_2 { get; set; }
+        
+        int Id_2 { get; set; }
+    }
     [TopLevelInputBus]
     public interface IBus_ITCP_In : IBus
     {
@@ -29,68 +64,111 @@ namespace simplePackageFilter
     public interface IBus_ITCP_RuleVerdict : IBus
     {
         [InitialValue(false)]
-        bool Accepted { get; set; }
+        bool Accepted_ipv4 { get; set; }
 
         [InitialValue(false)]
-        bool IsSet { get; set; }
-    }
-    [TopLevelOutputBus]
-    public interface IBus_finalVerdict_tcp_In : IBus
-    {
-        bool Accept_or_deny { get; set; }
+        bool IsSet_ipv4 { get; set; }
 
-        bool Valid { get; set; }
+        [InitialValue(false)]
+        bool Accepted_state { get; set; }
+
+        [InitialValue(false)]
+        bool IsSet_state { get; set; }
+
+        [InitialValue(false)]
+        bool Accepted_out { get; set; }
+
+        [InitialValue(false)]
+        bool IsSet_out { get; set; }
+
     }
+
     [ClockedProcess]
     public class Connection_process : SimpleProcess
     {
-        [InputBus]
-        public IBus_ITCP_In TCP;
+
+        //[InputBus]
+        //private readonly IBus_Controller_to_state data = Scope.CreateOrLoadBus<IBus_Controller_to_state>();
+
 
         [InputBus]
-        public IBus_Controller_to_state data;
+        public IBus_blacklist_finalVerdict_out blacklist_input;
+
+        [InputBus]
+        public IBus_Blacklist_out dataOut;
+
+        // Input bus from the ipv4 header check
+        [InputBus]
+        public IBus_IPv4_In ipv4_in;
+
+        // Input but from the stateful check
+        [InputBus]
+        public IBus_ITCP_In stateful_in;
+
+        // Input bus to check if we need to update state
+        [InputBus]
+        private readonly IBus_Update_State update = Scope.CreateOrLoadBus<IBus_Update_State>();
 
         [OutputBus]
         public IBus_ITCP_RuleVerdict ruleVerdict = Scope.CreateBus<IBus_ITCP_RuleVerdict>();
 
-        [OutputBus] IBus_Connection_In_Use in_use = Scope.CreateBus<IBus_Connection_In_Use>();
+        [OutputBus]
+        public IBus_Connection_In_Use in_use = Scope.CreateOrLoadBus<IBus_Connection_In_Use>();
 
-        private long ip_source { get; set; }
-        private long ip_dest { get; set; }
-
-        private int port_in { get; set; }
+        private long Ip_source { get; set; }
+        private long Ip_dest { get; set; }
+        private int Port_in { get; set; }
 
         readonly long doubl = (65536);    // 256*256
         readonly long triple = (16777216); // 256*256*256
 
-        private int my_id;
+        private readonly int my_id;
 
-        private int timeout_counter;
+        private int timeout_counter = 10000;
 
         private bool connection_in_use;
-        public Connection_process(IBus_ITCP_In busIn, long ip_source_in, long ip_dest_in, int port, int ids)
+        public Connection_process(long ip_source_in, long ip_dest_in, int port, int ids, IBus_ITCP_In stateful, IBus_IPv4_In ipv4, 
+            IBus_Blacklist_out data_Out, IBus_blacklist_finalVerdict_out blacklistinput)
+
         {
-            TCP = busIn;
-            port_in = port;
-            ip_source = ip_source_in;
-            ip_dest = ip_dest_in;
+            Port_in = port;
+            Ip_source = ip_source_in;
+            Ip_dest = ip_dest_in;
             my_id = ids;
+            stateful_in = stateful;
+            ipv4_in = ipv4;
+            dataOut = data_Out;
+            blacklist_input = blacklistinput;
         }
 
 
         private bool DoesConnectExist(long source, long dest, int port, long tcp_source, long tcp_dest)
         {
-            if (source == tcp_source)
+            if (source == tcp_source && dest == tcp_dest && port == stateful_in.Port)
             {
-                if (dest == tcp_dest)
-                {
-                    if (port == TCP.Port)
-                    {
-                        // The received packet's Source IP was accepted, as it was
-                        // inside the accepted IP ranges of a specific rule.
-                        return true;
-                    }
-                }
+
+                // The received packet's Source IP was accepted, as it was
+                // inside the accepted IP ranges of a specific rule.
+                timeout_counter = 10000;
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool ipv4_checker(long source, long dest)
+        {
+            long doubl = (65536);    // 256*256
+            long triple = (16777216); // 256*256*256
+            long ipv4_source = ipv4_in.SourceIP[3] + (ipv4_in.SourceIP[2] * 256) + (ipv4_in.SourceIP[1] * doubl) + (ipv4_in.SourceIP[0] * triple);
+            long ipv4_dest = ipv4_in.DestIP[3] + (ipv4_in.DestIP[2] * 256) + (ipv4_in.DestIP[1] * doubl) + (ipv4_in.DestIP[0] * triple);
+            if (source == ipv4_source && dest == ipv4_dest)
+            {
+
+                // The received packet's Source IP was accepted, as it was
+                // inside the accepted IP ranges of a specific rule.
+                timeout_counter = 10000;
+                return true;
             }
 
             return false;
@@ -98,106 +176,60 @@ namespace simplePackageFilter
 
         protected override void OnTick()
         {
-            ruleVerdict.IsSet = false;
-            ruleVerdict.Accepted = false;
-
-            if(timeout_counter == 0)
-            {
-                connection_in_use = false;
-                in_use.Id = my_id;
-                in_use.In_use = false;
-            }
-            if (data.Update_Flag  && data.Update_Id == my_id)
-            {
-                // overwrite it settings here
-                connection_in_use = true;
-                in_use.Id = my_id;
-                in_use.In_use = true;
-            }
-            if (data.Update_Flag_2 && data.Update_Id_2 == my_id)
-            {
-                // overwrite its settings here
-                connection_in_use = true;
-                in_use.Id = my_id;
-                in_use.In_use = true;
-            }
+            // Set all the potential flags
+            ruleVerdict.IsSet_ipv4 = false;
+            ruleVerdict.Accepted_ipv4 = false;
+            ruleVerdict.IsSet_state = false;
+            ruleVerdict.Accepted_state = false;
+            ruleVerdict.IsSet_out = false;
+            ruleVerdict.Accepted_out = false;
 
             if (connection_in_use)
             {
-                if (TCP.ThatOneVariableThatSaysIfWeAreDone)
+                if (timeout_counter == 0)
                 {
-                    long tcp_source = TCP.SourceIP[3] + (TCP.SourceIP[2] * 256) + (TCP.SourceIP[1] * doubl) + (TCP.SourceIP[0] * triple);
-                    long tcp_dest = TCP.DestIP[3] + (TCP.DestIP[2] * 256) + (TCP.DestIP[1] * doubl) + (TCP.DestIP[0] * triple);
-                    if (DoesConnectExist(ip_source, ip_dest, port_in, tcp_source, tcp_dest))
-                    {
-                        // Update/check state before accepting!!
-                        ruleVerdict.Accepted = true;
-                    }
-                    ruleVerdict.IsSet = true;
+                    connection_in_use = false;
+                    in_use.Id = my_id;
+                    in_use.In_use = false;
                 }
-            }
-            timeout_counter=- 1;
-        }
-    }
-
-    public class Final_check_Tcp : SimpleProcess
-    {
-        [InputBus]
-        public IBus_ITCP_RuleVerdict[] connection_list;
-
-        [InputBus]
-        public IBus_ruleVerdict_In[] rule_list;
-
-        [OutputBus]
-        public IBus_finalVerdict_tcp_In final_say = Scope.CreateBus<IBus_finalVerdict_tcp_In>();
-
-        // Class Variables
-        bool connection_bool = false;
-
-        bool rule_bool = false;
-
-        // Constructor         
-        public Final_check_Tcp(IBus_ITCP_RuleVerdict[] busList_in, IBus_ruleVerdict_In[] rule_list_in )
-        {
-            connection_list = busList_in;
-            rule_list = rule_list_in;
-
-        }
-
-        protected override void OnTick()
-        {
-            final_say.Valid = false;
-            final_say.Accept_or_deny = false;
-            if (connection_list[0].IsSet)
-            {
-                // Checks if any rule process returns TRUE.
-                //my_bool = busList.Any(val => val.Accepted);
-                connection_bool = connection_list.AsParallel().Any(val => val.Accepted);
-                final_say.Valid = true;
-
-                // Accept the incoming package
-                if (connection_bool)
+                if (update.Flag && update.Id == my_id)
                 {
-                    final_say.Accept_or_deny = true;
-                    Console.WriteLine("The connection already exists");
+                    // overwrite it settings here
+                    connection_in_use = true;
+                    in_use.Id = my_id;
+                    in_use.In_use = true;
+                }
+                if (update.Flag_2 && update.Id_2 == my_id)
+                {
+                    // overwrite its settings here
+                    connection_in_use = true;
+                    in_use.Id = my_id;
+                    in_use.In_use = true;
                 }
 
-                else
+                if(ipv4_in.ClockCheck)
                 {
-                    rule_bool = rule_list.AsParallel().Any(val => val.Accepted);
-                    if (rule_bool) // And some flags are correct - in parituclar the syn flag
+                    if(ipv4_checker(Ip_source, Ip_dest))
                     {
-                        Console.WriteLine("The connection does not exist but matches a whitelisted rule");
-                        final_say.Accept_or_deny = true;
+                        ruleVerdict.Accepted_ipv4 = true;
                     }
-                    else
-                    {
-                        Console.WriteLine("The connection does neither match a connection or a rule");
-                        final_say.Accept_or_deny = false;
-                    }
+                    ruleVerdict.IsSet_ipv4 = true;
                 }
-                connection_bool = false;
-                rule_bool = false;
+
+
+                // Needs to go through all the flags
+                if (stateful_in.ThatOneVariableThatSaysIfWeAreDone)
+                {
+                    long tcp_source = stateful_in.SourceIP[3] + (stateful_in.SourceIP[2] * 256) + (stateful_in.SourceIP[1] * doubl) + (stateful_in.SourceIP[0] * triple);
+                    long tcp_dest = stateful_in.DestIP[3] + (stateful_in.DestIP[2] * 256) + (stateful_in.DestIP[1] * doubl) + (stateful_in.DestIP[0] * triple);
+                    if (DoesConnectExist(Ip_source, Ip_dest, Port_in, tcp_source, tcp_dest))
+                    {
+                        // check state for potential flags as well!!
+                        ruleVerdict.Accepted_state = true;
+                    }
+                    ruleVerdict.IsSet_state = true;
+                }
+                timeout_counter = -1;
             }
         }
     }

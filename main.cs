@@ -19,7 +19,7 @@ namespace simplePackageFilter
             // Number of rules, 
             int len_sources = rules.accepted_sources.Length;
             int len_blacklist = rules.blacklisted_destinations.Length;
-            int max_number_connections = 10;
+            int max_number_connections = 100;
             _ = rules.accepted_destinations.Length;
 
             using (var sim = new Simulation())
@@ -42,7 +42,7 @@ namespace simplePackageFilter
                 {
                     var (low_src, high_src) = rules.Get_sources(i);
                     var (low_dest, high_dest) = rules.Get_destination(i);
-                    var temptemp = new Rule_Process(ipv4_in.ipv4, low_src, high_src, low_dest, high_dest,i);
+                    var temptemp = new Rule_Process(ipv4_in.ipv4, low_src, high_src, low_dest, high_dest);
                     Bus_array_IP_whitelist[i] = temptemp.ruleVerdict;
                 }
 
@@ -57,33 +57,33 @@ namespace simplePackageFilter
                     Bus_array_IP_blacklist[i] = temptemp.ruleVerdict;
                 }
 
-//                Bus array for the exsisting connections
+                // Blacklist simulator
+                var Final_verdict_blacklist = new Final_check_Blacklist(Bus_array_IP_blacklist);
+
+                //                Bus array for the exsisting connections
                 IBus_ITCP_RuleVerdict[] Bus_array_connections = new IBus_ITCP_RuleVerdict[max_number_connections];
+                IBus_Connection_In_Use[] process_in_use = new IBus_Connection_In_Use[max_number_connections];
 
                 for (int i = 0; i < max_number_connections; i++)
                 {
                     if (i == 0)
                     {
-                        var temp = new Connection_process(tcp_in.tcpBus, 16843009, 33686018, 42, i);
+                        var temp = new Connection_process(16843009, 33686018, 42, i, tcp_in.tcpBus, ipv4_in.ipv4, ipv4_out.ipv4, Final_verdict_blacklist.final_say);
                         Bus_array_connections[i] = temp.ruleVerdict;
                     }
                     else
                     {
                         // Inizialise every process to some default value that can never be matched
-                        var temp = new Connection_process(tcp_in.tcpBus, 0, 0, 0, i);
+                        var temp = new Connection_process(0, 0, 0, i, tcp_in.tcpBus, ipv4_in.ipv4, ipv4_out.ipv4, Final_verdict_blacklist.final_say);
+                        process_in_use[i] = temp.in_use;
                         Bus_array_connections[i] = temp.ruleVerdict;
                     }
                 }
-                var final_verdict_tcP = new Final_check_Tcp(Bus_array_connections, Bus_array_IP_whitelist);
+
+                var final_verdict_tcP = new Final_check_state(Bus_array_connections, Bus_array_IP_whitelist, Final_verdict_blacklist.final_say, ipv4_out.ipv4, tcp_in.tcpBus);
 
                 // Whitelist Verdict
                 var Final_verdict = new Final_check(Bus_array_IP_whitelist);
-
-                // Blacklist simulator
-                var Final_verdict_blacklist = new Final_check_Blacklist(Bus_array_IP_blacklist);
-
-                // Prints a file, for testing purposes
-                // print.print_file(rules.accepted_sources);
                 sim.Run();
             }
         }

@@ -33,8 +33,9 @@ namespace simplePackageFilter
     [TopLevelOutputBus]
     public interface IBus_finalVerdict_In : IBus
     {
+        [InitialValue(false)]
         bool Accept_or_deny { get; set; }
-
+        [InitialValue(false)]
         bool Valid { get; set; }
     }
 
@@ -91,9 +92,20 @@ namespace simplePackageFilter
 
     public class Rule_Process : SimpleProcess
     {
+
+        // Input bus from the ipv4 header check
         [InputBus]
         public IBus_IPv4_In ipv4;
 
+        [InputBus]
+        public IBus_blacklist_finalVerdict_out blacklist_input;
+
+        [InputBus]
+        public IBus_Blacklist_out dataOut;
+
+        // Input but from the stateful check
+        [InputBus]
+        public IBus_ITCP_In stateful_in;
         [OutputBus]
         public IBus_ruleVerdict_In ruleVerdict = Scope.CreateBus<IBus_ruleVerdict_In>();
 
@@ -105,17 +117,15 @@ namespace simplePackageFilter
         private  long ip_low_dest { get;  set; }
         private  long ip_high_dest { get; set; }
 
-        private readonly int my_id = new int();
 
         // ipv4Reader_Constructor
-        public Rule_Process(IBus_IPv4_In busIn, long ip_low_source_in, long ip_high_source_in, long ip_low_dest_in, long ip_high_dest_in, int the_id)
+        public Rule_Process(IBus_IPv4_In busIn, long ip_low_source_in, long ip_high_source_in, long ip_low_dest_in, long ip_high_dest_in)
         {
             ipv4 = busIn;
             ip_low_source = ip_low_source_in;
             ip_high_source = ip_high_source_in;
             ip_low_dest = ip_low_dest_in;
             ip_high_dest = ip_high_dest_in;
-            my_id = the_id;
 
         }
 

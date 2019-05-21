@@ -7,38 +7,7 @@ using SME;
 
 namespace simplePackageFilter
 {
-    [InputBus]
-    public interface IBus_Connection_In_Use : IBus
-    {
-        bool In_use { get; set; }
 
-        int Id { get; set; }
-    }
-
-    public interface IBus_Update_State : IBus
-    {
-        [FixedArrayLength(4)]
-        IFixedArray<byte> SourceIP { get; set; }
-
-        [FixedArrayLength(4)]
-        IFixedArray<byte> DestIP { get; set; }
-
-        int Port { get; set; }
-
-        bool Flag { get; set; }
-
-        // We can need to update 2 entries in the state at the same time
-
-        [FixedArrayLength(4)]
-        IFixedArray<byte> SourceIP_2 { get; set; }
-
-        [FixedArrayLength(4)]
-        IFixedArray<byte> DestIP_2 { get; set; }
-
-        int Port_2 { get; set; }
-
-        bool Flag_2 { get; set; }
-    }
 
     [InputBus]
     public interface IBus_Controller_to_state : IBus
@@ -88,6 +57,7 @@ namespace simplePackageFilter
 
         int Update_Id { get; set; }
 
+        [InitialValue(false)]
         bool Update_Flag { get; set; }
 
         [FixedArrayLength(4)]
@@ -100,6 +70,7 @@ namespace simplePackageFilter
 
         int Update_Id_2 { get; set; }
 
+        [InitialValue(false)]
         bool Update_Flag_2 { get; set; }
 
     }
@@ -108,46 +79,47 @@ namespace simplePackageFilter
     {
         // The bus from the blacklist. If it is blacklisted then should set the valid flag to false and true otherwise.
         [InputBus]
-        public IBus_blacklist_finalVerdict_out blacklist_input;
-
+        private readonly IBus_blacklist_finalVerdict_out blacklist_input = Scope.CreateOrLoadBus<IBus_blacklist_finalVerdict_out>();
         // Input bus containing the data, eg port's and ip's
         [InputBus]
-        public IBus_Blacklist_out dataOut;
-
+        private readonly IBus_Blacklist_out dataOut = Scope.CreateOrLoadBus<IBus_Blacklist_out>();
 
         // Input bus from the ipv4 header check
         [InputBus]
-        public IBus_IPv4_In ipv4_in;
+        private readonly IBus_IPv4_In ipv4_in = Scope.CreateOrLoadBus<IBus_IPv4_In>();
 
         // Input but from the stateful check
         [InputBus]
-        public IBus_ITCP_In stateful_in;
+        private readonly IBus_ITCP_In stateful_in = Scope.CreateOrLoadBus<IBus_ITCP_In>();
 
         // Input bus to check if we need to update state
         [InputBus]
-        public IBus_Update_State update;
+        private readonly IBus_Update_State update = Scope.CreateOrLoadBus<IBus_Update_State>();
 
         [InputBus]
+        //private readonly IBus_Connection_In_Use in_use = Scope.CreateOrLoadBus<IBus_Connection_In_Use>();
         public IBus_Connection_In_Use[] in_use;
 
         // This is the output bus to the processes(state) 
         [OutputBus]
-        public IBus_Controller_to_state to_state = Scope.CreateBus<IBus_Controller_to_state>();
+        private readonly IBus_Controller_to_state to_state = Scope.CreateOrLoadBus<IBus_Controller_to_state>();
 
 
+
+        // old constructor
+        //public Controller(IBus_blacklist_finalVerdict_out BUS_blacklist_input, IBus_Blacklist_out BUS_dataOut,
+        //          IBus_IPv4_In BUS_ipv4_in, IBus_ITCP_In BUS_stateful_in,
+        //          IBus_Update_State BUS_update, IBus_Connection_In_Use[] BUS_in_use)
         // CONSTRUCTOR
-        public Controller(IBus_blacklist_finalVerdict_out BUS_blacklist_input, IBus_Blacklist_out BUS_dataOut,
-                          IBus_IPv4_In BUS_ipv4_in, IBus_ITCP_In BUS_stateful_in,
-                          IBus_Update_State BUS_update, IBus_Connection_In_Use[] BUS_in_use,
-                          IBus_Controller_to_state BUS_to_state)
+        public Controller(IBus_Connection_In_Use[] BUS_in_use)
+
         {
-            update = BUS_update;
+        //    update = BUS_update;
             in_use = BUS_in_use;
-            ipv4_in = BUS_ipv4_in;
-            dataOut = BUS_dataOut;
-            to_state = BUS_to_state;
-            stateful_in = BUS_stateful_in;
-            blacklist_input = BUS_blacklist_input;
+        //    ipv4_in = BUS_ipv4_in;
+        //    dataOut = BUS_dataOut;
+        //    stateful_in = BUS_stateful_in;
+        //    blacklist_input = BUS_blacklist_input;
         }
 
 
@@ -155,7 +127,7 @@ namespace simplePackageFilter
         {
             // While the blacklist, the statefull check and the ip check didnt send us anything wait
             // if just one of them did go on
-            while (!blacklist_input.Valid || ipv4_in.ClockCheck || stateful_in.ThatOneVariableThatSaysIfWeAreDone || update.Flag || update.Flag_2)
+            while (!blacklist_input.Valid) //|| ipv4_in.ClockCheck || stateful_in.ThatOneVariableThatSaysIfWeAreDone || update.Flag || update.Flag_2)
             {
                 await ClockAsync();
             }

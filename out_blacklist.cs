@@ -37,8 +37,9 @@ namespace simplePackageFilter
     [TopLevelOutputBus]
     public interface IBus_blacklist_finalVerdict_out : IBus
     {
+        [InitialValue(false)]
         bool Accept_or_deny { get; set; }
-
+        [InitialValue(false)]
         bool Valid { get; set; }
     }
 
@@ -52,7 +53,7 @@ namespace simplePackageFilter
         public IBus_blacklist_ruleVerdict_out[] busList;
 
         [OutputBus]
-        public IBus_blacklist_finalVerdict_out final_say = Scope.CreateBus<IBus_blacklist_finalVerdict_out>();
+        public readonly IBus_blacklist_finalVerdict_out final_say = Scope.CreateOrLoadBus<IBus_blacklist_finalVerdict_out>();
 
         // Class Variables
         bool my_bool = false;
