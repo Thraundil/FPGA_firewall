@@ -15,14 +15,14 @@ namespace simplePackageFilter
         public string[] accepted_destinations = File.ReadAllLines("../../input_data/whitelist_ip_dest.txt");
         public string[] blacklisted_destinations = File.ReadAllLines("../../input_data/blacklist_ip.txt");
 
-        public int[] Ip_str_to_int_array(string ip)
-        {
-            int[] ip_array = new int[4];
-            ip_array = ip.Split('.').Select(Int32.Parse).ToArray();
-            return ip_array;
-        }
+//        public int[] Ip_str_to_int_array(string ip)
+//        {
+//            int[] ip_array = new int[4];
+//            ip_array = ip.Split('.').Select(Int32.Parse).ToArray();
+//            return ip_array;
+//        }
 
-        public (long, long) Ip_str_to_long_tuple(string ip)
+        private (byte[], byte[]) Ip_str_to_byte_array(string ip)
         {
             string[] ip_array = new string[2];
             int[] low = new int[4];
@@ -36,28 +36,31 @@ namespace simplePackageFilter
             low = ip_array[0].Split('.').Select(Int32.Parse).ToArray();
             high = ip_array[1].Split('.').Select(Int32.Parse).ToArray();
 
-            // Converts the IP address into a Long, for easier comparisons used later on
-            long doubl = (65536);    // 256*256
-            long triple = (16777216); // 256*256*256
-            long low_long = low[3] + (low[2] * 256) + (low[1] * doubl) + (low[0] * triple);
-            long high_long = high[3] + (high[2] * 256) + (high[1] * doubl) + (high[0] * triple);
+            byte_low  = low.Select(i => (byte) i).ToArray();
+            byte_high = high.Select(i => (byte) i).ToArray();
 
-            return (low_long, high_long);
+//            // Converts the IP address into a Long, for easier comparisons used later on
+//            long doubl = (65536);    // 256*256
+//            long triple = (16777216); // 256*256*256
+//            long low_long = low[3] + (low[2] * 256) + (low[1] * doubl) + (low[0] * triple);
+//            long high_long = high[3] + (high[2] * 256) + (high[1] * doubl) + (high[0] * triple);
+
+            return (byte_low, byte_high);
         }
 
-        public (long, long) Get_sources(int x)
+        public (byte[], byte[]) Get_sources(int x)
         {
-            return (Ip_str_to_long_tuple(this.accepted_sources[x]));
+            return (Ip_str_to_byte_array(this.accepted_sources[x]));
         }
 
-        public (long, long) Get_destination(int x)
+        public (byte[], byte[]) Get_destination(int x)
         {
-            return (Ip_str_to_long_tuple(this.accepted_destinations[x]));
+            return (Ip_str_to_byte_array(this.accepted_destinations[x]));
         }
 
-        public (long, long) Get_blacklisted_destinations(int x)
+        public (byte[], byte[]) Get_blacklisted_destinations(int x)
         {
-            return (Ip_str_to_long_tuple(this.blacklisted_destinations[x]));
+            return (Ip_str_to_byte_array(this.blacklisted_destinations[x]));
         }
 
     }

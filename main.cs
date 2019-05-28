@@ -19,7 +19,7 @@ namespace simplePackageFilter
             // Number of rules, 
             int len_sources = rules.accepted_sources.Length;
             int len_blacklist = rules.blacklisted_destinations.Length;
-            int max_number_connections = 1000;
+            int max_number_connections = 10;
             _ = rules.accepted_destinations.Length;
 
             using (var sim = new Simulation())

@@ -22,7 +22,9 @@ namespace simplePackageFilter
 
         [FixedArrayLength(4)]
         IFixedArray<byte> DestIP { get; set; }
+
         int Port { get; set; }
+
         [InitialValue(false)]
         bool Flag { get; set; }
 

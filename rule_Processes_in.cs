@@ -109,44 +109,97 @@ namespace simplePackageFilter
         [OutputBus]
         public IBus_ruleVerdict_In ruleVerdict = Scope.CreateBus<IBus_ruleVerdict_In>();
 
-        // IP source range low/high as a LONG
-        private  long ip_low_source { get; set; }
-        private  long ip_high_source { get; set; }
+        // IP source range low/high as a byte array
+        private  byte[] ip_low_source { get; set; }
+        private  byte[] ip_high_source { get; set; }
 
-        // IP destination range low/high as a LONG
-        private  long ip_low_dest { get;  set; }
-        private  long ip_high_dest { get; set; }
+        // IP destination range low/high as a byte array
+        private  byte[] ip_low_dest { get;  set; }
+        private  byte[] ip_high_dest { get; set; }
 
 
         // ipv4Reader_Constructor
-        public Rule_Process(IBus_IPv4_In busIn, long ip_low_source_in, long ip_high_source_in, long ip_low_dest_in, long ip_high_dest_in)
+        public Rule_Process(IBus_IPv4_In busIn, byte[] ip_low_source_in, byte[] ip_high_source_in, byte[] ip_low_dest_in, byte[] ip_high_dest_in)
         {
             ipv4 = busIn;
             ip_low_source = ip_low_source_in;
             ip_high_source = ip_high_source_in;
             ip_low_dest = ip_low_dest_in;
             ip_high_dest = ip_high_dest_in;
-
         }
 
         // An argument is needed, as VHDL does not allow function calls without an argument...?!
-        private void IsIPinRange(long low_source, long high_source, long low_dest, long high_dest)
+        private void IsIPinRange(byte[] low_source, byte[] high_source, byte[] low_dest, byte[] high_dest)
         {
-            // Converts the received SOURCE IP into a long for comparison
-            long doubl = (65536);    // 256*256
-            long triple = (16777216); // 256*256*256
-            long ipv4_source = ipv4.SourceIP[3] + (ipv4.SourceIP[2] * 256) + (ipv4.SourceIP[1] * doubl) + (ipv4.SourceIP[0] * triple);
-            long ipv4_dest = ipv4.DestIP[3] + (ipv4.DestIP[2] * 256) + (ipv4.DestIP[1] * doubl) + (ipv4.DestIP[0] * triple);
 
-            // Compares a given IP range with the received Source IP
-            if (low_source <= ipv4_source && ipv4_source <= high_source)
-            {
-                if (low_dest <= ipv4_dest && ipv4_dest <= high_dest)
-                {
-                    // The received packet's Source IP was accepted, as it was
-                    // inside the accepted IP ranges of a specific rule.
-                    ruleVerdict.Accepted = true;
+            bool doesItMatch = true;
+            int x = 0;
+
+            // TO BE PARALLELISED
+            // Src Low
+            while (x < low_source.Length) {
+                if (low_source[x] < ipv4.SourceIP[x]){
+                    x = low_source.Length;
                 }
+                else if (low_source[x] == ipv4.SourceIP[x]) {
+                    x++;
+                }
+                else {
+                    doesItMatch = false;
+                    x = low_source.Length;
+                }
+            }
+
+            x = 0;
+
+            // Src High
+            while (x < high_source.Length) {
+                if (high_source[x] > ipv4.SourceIP[x]){
+                    x = high_source.Length;
+                }
+                else if (high_source[x] == ipv4.SourceIP[x]) {
+                    x++;
+                }
+                else{
+                    doesItMatch = false;
+                    x = high_source.Length;
+                }
+            }
+
+            x = 0;
+
+            // Dest Low
+            while (x < low_dest.Length) {
+                if (low_dest[x] < ipv4.DestIP[x]){
+                    x = low_dest.Length;
+                }
+                else if (low_dest[x] == ipv4.DestIP[x]) {
+                    x++;
+                }
+                else{
+                    doesItMatch = false;
+                    x = low_dest.Length;
+                }
+            }
+
+            x = 0;
+
+            // Dest High
+            while (x < high_dest.Length) {
+                if (high_dest[x] > ipv4.DestIP[x]){
+                    x = high_dest.Length;
+                }
+                else if (high_dest[x] == ipv4.DestIP[x]) {
+                    x++;
+                }
+                else{
+                    doesItMatch = false;
+                    x = high_dest.Length;
+                }
+            }
+
+            if (doesItMatch){
+                ruleVerdict.Accepted = true;
             }
         }
 

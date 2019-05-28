@@ -102,34 +102,40 @@ namespace simplePackageFilter
         [OutputBus]
         public IBus_blacklist_ruleVerdict_out ruleVerdict = Scope.CreateBus<IBus_blacklist_ruleVerdict_out>();
 
-        // IP source range low/high as a LONG
-        private long dest_low { get; set; }
-        private long dest_high { get; set; }
-
-        // IP destination range low/high as a LONG
+        // IP source range low/high as a byte array
+        private byte[] dest_low { get; set; }
+        private byte[] dest_high { get; set; }
 
 
         // ipv4Reader_Constructor
-        public Rule_Process_Blacklist(IBus_Blacklist_out busIn, long ip_dest_low, long ip_dest_high)
+        public Rule_Process_Blacklist(IBus_Blacklist_out busIn, byte[] ip_dest_low, byte[] ip_dest_high)
         {
             blacklist_out = busIn;
             dest_low = ip_dest_low;
             dest_high = ip_dest_high;
         }
 
-        private void IP_Match(long dest_low, long dest_high)
+        private void IP_Match(byte[] dest_low, byte[] dest_high)
         {
-            // Converts the received SOURCE IP into a long for comparison
-            long doubl = (65536);    // 256*256
-            long triple = (16777216); // 256*256*256
-            long ipv4_dest = blacklist_out.DestIP[3] + (blacklist_out.DestIP[2] * 256) + (blacklist_out.DestIP[1] * doubl) + (blacklist_out.DestIP[0] * triple);
 
-            // Compares a given IP range with the received Source IP
-            if (dest_low <= ipv4_dest || dest_high <= ipv4_dest)
-            {
-                    // The received packet's Source IP was accepted, as it was
-                    // inside the accepted IP ranges of a specific rule.
-                    ruleVerdict.Accepted = true;
+            int x = 0;
+            bool doesItMatch = true;
+
+            while (x < dest_low.Length) {
+
+                if (dest_low[x] == blacklist_out.DestIP[x] || dest_high[x] == blacklist_out.DestIP[x]){
+                    x++;
+                }
+                else{
+                    if ((dest_low[x] > blacklist_out.DestIP[x]) || (dest_high[x] < blacklist_out.DestIP[x])){
+                        doesItMatch = false;
+                        x = dest_low.Length;
+                    }
+                }
+            }
+
+            if (doesItMatch){
+                ruleVerdict.Accepted = true;
             }
         }
 
