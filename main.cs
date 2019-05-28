@@ -19,7 +19,7 @@ namespace simplePackageFilter
             // Number of rules, 
             int len_sources = rules.accepted_sources.Length;
             int len_blacklist = rules.blacklisted_destinations.Length;
-            int max_number_connections = 100;
+            int max_number_connections = 1000;
             _ = rules.accepted_destinations.Length;
 
             using (var sim = new Simulation())
@@ -83,7 +83,7 @@ namespace simplePackageFilter
                 var final_verdict_tcP = new Final_check_state(Bus_array_connections, Bus_array_IP_whitelist, Final_verdict_blacklist.final_say, ipv4_out.ipv4, tcp_in.tcpBus);
 
                 // Whitelist Verdict
-                var Final_verdict = new Final_check(Bus_array_IP_whitelist);
+                var Final_verdict = new Final_check_rules(Bus_array_IP_whitelist);
                 sim.Run();
             }
         }

@@ -43,7 +43,7 @@ namespace simplePackageFilter
     // ****************************************************************************
 
 
-    public class Final_check : SimpleProcess
+    public class Final_check_rules : SimpleProcess
     {
         [InputBus]
         public IBus_ruleVerdict_In[] busList;
@@ -55,7 +55,7 @@ namespace simplePackageFilter
         bool my_bool = false;
 
         // Constructor         
-        public Final_check(IBus_ruleVerdict_In[] busList_in)
+        public Final_check_rules(IBus_ruleVerdict_In[] busList_in)
         {
             busList = busList_in;
         }
