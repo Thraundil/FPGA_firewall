@@ -23,13 +23,8 @@ namespace simplePackageFilter
 
             // reads every byte up until the source and destination IP's
             int length = (int)reader.BaseStream.Length;
-            for (int j = 0; j < length / 20; j++)
+            for (int j = 0; j < length / 8; j++)
             {
-                for (int i = 0; i < 12; i++)
-                {
-                    reader.ReadByte();
-                    await ClockAsync();
-                }
                 for (int i = 0; i < 4; i++)
                 {
                     ipv4.SourceIP[i] = reader.ReadByte();
