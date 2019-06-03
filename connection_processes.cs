@@ -179,11 +179,11 @@ namespace simplePackageFilter
         protected override void OnTick()
         {
             // Set all the potential flags
-            ruleVerdict.IsSet_ipv4 = false;
+            ruleVerdict.IsSet_ipv4 = ipv4_in.ClockCheck;
             ruleVerdict.Accepted_ipv4 = false;
-            ruleVerdict.IsSet_state = false;
+            ruleVerdict.IsSet_state = stateful_in.ThatOneVariableThatSaysIfWeAreDone;
             ruleVerdict.Accepted_state = false;
-            ruleVerdict.IsSet_out = false;
+            ruleVerdict.IsSet_out = dataOut.ReadyToWorkFlag;
             ruleVerdict.Accepted_out = false;
 
             if (connection_in_use)
@@ -215,7 +215,6 @@ namespace simplePackageFilter
                     {
                         ruleVerdict.Accepted_ipv4 = true;
                     }
-                    ruleVerdict.IsSet_ipv4 = true;
                 }
 
 
@@ -229,9 +228,18 @@ namespace simplePackageFilter
                         // check state for potential flags as well!!
                         ruleVerdict.Accepted_state = true;
                     }
-                    ruleVerdict.IsSet_state = true;
                 }
-                timeout_counter = -1;
+                if(dataOut.ReadyToWorkFlag)
+                {
+                    if(blacklist_input.Valid && blacklist_input.Accept_or_deny)
+                    {
+                        if (DoesConnectExist(Ip_source, Ip_dest, Port_in, dataOut.SourceIP, dataOut.DestIP))
+                        {
+                            ruleVerdict.Accepted_out = true;
+                        }
+                    }
+                }
+                timeout_counter -= 1;
             }
         }
     }
