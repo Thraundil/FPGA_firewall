@@ -3,11 +3,11 @@ import os
 
 # IPV4 incoming (Src/Dest)
 ipv4_incoming = [
-                 ["130.226.237.173", "91.224.211.71"],
-                 ["120.120.120.120", "121.121.121.121"],
-                 ["1.1.1.1"        , "2.2.2.2"],
-                 ["45.45.45.45"    , "46.46.46.46"],
-                 ["91.224.211.80"  , "46.46.46.46"]
+                 ["130.226.237.173", "1.1.1.1"],
+                 ["120.120.120.120", "1.1.1.1"],
+                 ["2.2.2.2"        , "1.1.1.1"],
+                 ["45.45.45.45"    , "1.1.1.1"],
+                 ["91.224.211.80"  , "1.1.1.1"]
                 ]
 
 # IPV4 outgoing (Src/Dest/port/syn_ack_flag)
@@ -18,6 +18,7 @@ ipv4_outgoing = [
                 ]
 
 # SRC/DST ranges Whitelist
+# Incoming IPV4 packeges SOURCE must be in either the whitelist or state.
 whitelist_src_dest = [
                       ["130.226.237.173 - 130.226.237.175", "0.0.0.0 - 255.255.255.255"],
                       ["91.224.211.71   - 91.224.212.255" , "0.0.0.0 - 255.255.255.255"],
@@ -25,7 +26,7 @@ whitelist_src_dest = [
                      ]
 
 # DST ranges Blacklist
-blacklist =          ["66.66.66.66-66.66.66.66"]
+blacklist =          ["66.66.66.65-66.66.66.67"]
 
 
 # ********* Please don't modify anything below this point **********

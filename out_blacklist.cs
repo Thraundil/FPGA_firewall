@@ -122,7 +122,6 @@ namespace simplePackageFilter
             bool doesItMatch = true;
 
             while (x < dest_low.Length) {
-
                 if (dest_low[x] == blacklist_out.DestIP[x] || dest_high[x] == blacklist_out.DestIP[x]){
                     x++;
                 }
@@ -131,10 +130,16 @@ namespace simplePackageFilter
                         doesItMatch = false;
                         x = dest_low.Length;
                     }
+                    else{
+                        doesItMatch = true;
+                        x++;
+                    }
                 }
             }
 
+            // if 'doesItMatch', it means that the given IP was in the blacklist range
             if (doesItMatch){
+                // This indicates that it IS on the blacklist and should be BLOCKED
                 ruleVerdict.Accepted = true;
             }
         }

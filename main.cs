@@ -64,20 +64,20 @@ namespace simplePackageFilter
                 IBus_ITCP_RuleVerdict[] Bus_array_connections = new IBus_ITCP_RuleVerdict[max_number_connections];
                 IBus_Connection_In_Use[] process_in_use = new IBus_Connection_In_Use[max_number_connections];
 
+                // Empty byte-array for the Connection_process
+                var emptyByteArray = new byte[4];
+                for (int i = 0; i < emptyByteArray.Length; i++)
+                {
+                    emptyByteArray[i] = 0x00;
+                }
+
+
                 for (int i = 0; i < max_number_connections; i++)
                 {
-                    if (i == 0)
-                    {
-                        var temp = new Connection_process(16843009, 33686018, 42, i, tcp_in.tcpBus, ipv4_in.ipv4, ipv4_out.ipv4, Final_verdict_blacklist.final_say);
-                        Bus_array_connections[i] = temp.ruleVerdict;
-                    }
-                    else
-                    {
-                        // Inizialise every process to some default value that can never be matched
-                        var temp = new Connection_process(0, 0, 0, i, tcp_in.tcpBus, ipv4_in.ipv4, ipv4_out.ipv4, Final_verdict_blacklist.final_say);
-                        process_in_use[i] = temp.in_use;
-                        Bus_array_connections[i] = temp.ruleVerdict;
-                    }
+                    // Inizialise every process to some default value that can never be matched
+                    var temp = new Connection_process(emptyByteArray, emptyByteArray, 0, i, tcp_in.tcpBus, ipv4_in.ipv4, ipv4_out.ipv4, Final_verdict_blacklist.final_say);
+                    process_in_use[i] = temp.in_use;
+                    Bus_array_connections[i] = temp.ruleVerdict;
                 }
 
                 var final_verdict_tcP = new Final_check_state(Bus_array_connections, Bus_array_IP_whitelist, Final_verdict_blacklist.final_say, ipv4_out.ipv4, tcp_in.tcpBus);

@@ -117,19 +117,16 @@ namespace simplePackageFilter
         [OutputBus]
         public IBus_Connection_In_Use in_use = Scope.CreateOrLoadBus<IBus_Connection_In_Use>();
 
-        private long Ip_source { get; set; }
-        private long Ip_dest { get; set; }
+        private byte[] Ip_source { get; set; }
+        private byte[] Ip_dest { get; set; }
         private int Port_in { get; set; }
-
-        readonly long doubl = (65536);    // 256*256
-        readonly long triple = (16777216); // 256*256*256
 
         private readonly int my_id;
 
         private int timeout_counter = 10000;
 
         private bool connection_in_use;
-        public Connection_process(long ip_source_in, long ip_dest_in, int port, int ids, IBus_ITCP_In stateful, IBus_IPv4_In ipv4, 
+        public Connection_process(byte[] ip_source_in, byte[] ip_dest_in, int port, int ids, IBus_ITCP_In stateful, IBus_IPv4_In ipv4, 
             IBus_Blacklist_out data_Out, IBus_blacklist_finalVerdict_out blacklistinput)
 
         {
@@ -143,37 +140,47 @@ namespace simplePackageFilter
             blacklist_input = blacklistinput;
         }
 
-
-        private bool DoesConnectExist(long source, long dest, int port, long tcp_source, long tcp_dest)
+        // For comparing INCOMING 'TCP/IP' (Src, Dst, Port)
+        private bool DoesConnectExist(byte[] source, byte[] dest, int port, IFixedArray<byte> incoming_source, IFixedArray<byte> incoming_dest, int incoming_port)
         {
-            if (source == tcp_source && dest == tcp_dest && port == stateful_in.Port)
-            {
+            int x = 0;
+            bool doesItMatch = true;
 
-                // The received packet's Source IP was accepted, as it was
-                // inside the accepted IP ranges of a specific rule.
-                timeout_counter = 10000;
-                return true;
+            while (x < source.Length) {
+                // IMPROVEMENT: remove the port-compare, as it is needlesly compared 4 times, instead of one.
+                if (source[x] == incoming_source[x] && dest[x] == incoming_dest[x] && port == incoming_port) {
+                    x++;
+                }
+                else {
+                    doesItMatch = false;
+                    x = source.Length;
+                }
             }
 
-            return false;
+            if (doesItMatch) {
+                timeout_counter = 10000;
+            }
+
+            return doesItMatch;
         }
 
-        private bool ipv4_checker(long source, long dest)
+        // For comparing INCOMING 'IP only' (Src, Dst)
+        private bool ipv4_checker(byte[] source, byte[] dest, IFixedArray<byte> incoming_source, IFixedArray<byte> incoming_dest)
         {
-            long doubl = (65536);    // 256*256
-            long triple = (16777216); // 256*256*256
-            long ipv4_source = ipv4_in.SourceIP[3] + (ipv4_in.SourceIP[2] * 256) + (ipv4_in.SourceIP[1] * doubl) + (ipv4_in.SourceIP[0] * triple);
-            long ipv4_dest = ipv4_in.DestIP[3] + (ipv4_in.DestIP[2] * 256) + (ipv4_in.DestIP[1] * doubl) + (ipv4_in.DestIP[0] * triple);
-            if (source == ipv4_source && dest == ipv4_dest)
-            {
+            int x = 0;
+            bool doesItMatch = true;
 
-                // The received packet's Source IP was accepted, as it was
-                // inside the accepted IP ranges of a specific rule.
-                timeout_counter = 10000;
-                return true;
+            while (x < source.Length) {
+                if (source[x] == incoming_source[x] && dest[x] == incoming_dest[x]) {
+                    x++;
+                }
+                else {
+                    doesItMatch = false;
+                    x = source.Length;
+                }
             }
 
-            return false;
+            return doesItMatch;
         }
 
         protected override void OnTick()
@@ -211,7 +218,7 @@ namespace simplePackageFilter
 
                 if(ipv4_in.ClockCheck)
                 {
-                    if(ipv4_checker(Ip_source, Ip_dest))
+                    if(ipv4_checker(Ip_source, Ip_dest, ipv4_in.SourceIP, ipv4_in.DestIP))
                     {
                         ruleVerdict.Accepted_ipv4 = true;
                     }
@@ -221,9 +228,7 @@ namespace simplePackageFilter
                 // Needs to go through all the flags
                 if (stateful_in.ThatOneVariableThatSaysIfWeAreDone)
                 {
-                    long tcp_source = stateful_in.SourceIP[3] + (stateful_in.SourceIP[2] * 256) + (stateful_in.SourceIP[1] * doubl) + (stateful_in.SourceIP[0] * triple);
-                    long tcp_dest = stateful_in.DestIP[3] + (stateful_in.DestIP[2] * 256) + (stateful_in.DestIP[1] * doubl) + (stateful_in.DestIP[0] * triple);
-                    if (DoesConnectExist(Ip_source, Ip_dest, Port_in, tcp_source, tcp_dest))
+                    if (DoesConnectExist(Ip_source, Ip_dest, Port_in, stateful_in.SourceIP, stateful_in.DestIP, stateful_in.Port))
                     {
                         // check state for potential flags as well!!
                         ruleVerdict.Accepted_state = true;
@@ -233,7 +238,7 @@ namespace simplePackageFilter
                 {
                     if(blacklist_input.Valid && blacklist_input.Accept_or_deny)
                     {
-                        if (DoesConnectExist(Ip_source, Ip_dest, Port_in, dataOut.SourceIP, dataOut.DestIP))
+                        if (DoesConnectExist(Ip_source, Ip_dest, Port_in, dataOut.SourceIP, dataOut.DestIP, dataOut.SourcePort))
                         {
                             ruleVerdict.Accepted_out = true;
                         }
