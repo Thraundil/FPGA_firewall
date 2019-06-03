@@ -10,6 +10,17 @@ ipv4_incoming = [
                  ["91.224.211.80"  , "1.1.1.1"]
                 ]
 
+# TCP incoming (Src/Dest/Port/syn_ack_flag)
+#   PLEASE NOTE, for testing purposes, ONLY include the above
+#   ipv4_incoming addresses that WILL pass the whitelist/state.
+tcp_incoming  = [
+                 ["130.226.237.173", "1.1.1.1", "42", "2"],
+                 ["120.120.120.120", "1.1.1.1", "42", "2"],
+                 ["0.0.0.0", "0.0.0.0", "0", "0"], # To delay the tcp_incoming to match ipv4_incoming
+                 ["0.0.0.0", "0.0.0.0", "0", "0"],
+                 ["91.224.211.80"  , "1.1.1.1", "42", "2"]
+                ]
+
 # IPV4 outgoing (Src/Dest/port/syn_ack_flag)
 ipv4_outgoing = [
                  ["1.1.1.1", "2.2.2.2"    , "42", "2"],
@@ -76,6 +87,36 @@ def ipv4_out():
     return output
 
 
+def tcp_in():
+    output = ""
+    for x in tcp_incoming:
+        split0 = x[0].split('.')
+        split1 = x[1].split('.')
+        for y in (split0+split1):
+            converted = str(hex(int(y)))
+            if (len(converted) == 3):
+                output += ('0' + converted)
+            else:
+                output += converted
+
+        port = str(hex(int(x[2])))
+        flag = str(hex(int(x[3])))
+
+        if (len(port) == 3):
+            output += ('0' + port)
+        else:
+            output += port
+
+        if (len(flag) == 3):
+            output += ('0' + flag)
+        else:
+            output += flag
+        output += '\n'
+    output = output.replace('0x','')
+    return output
+
+
+
 def white():
     src, dest = "",""
     for x in whitelist_src_dest:
@@ -99,6 +140,7 @@ def main():
 
     # Opens/creates the files to write to
     ipv4_incoming_file = open("ipv4_incoming.txt", "w")
+    tcp_incoming_file  = open("tcp_incoming.txt", "w")
     ipv4_outgoing_file = open("ipv4_outgoing.txt", "w")
     whitelist_src  = open("whitelist_src.txt", "w")
     whitelist_dest = open("whitelist_dest.txt", "w")
@@ -106,12 +148,14 @@ def main():
 
     # Retrieves/calculates data to be written
     ipv4_incoming = ipv4_in()
+    tcp_incoming  = tcp_in()
     ipv4_outgoing = ipv4_out()
     white_src, white_dest = white()
     black_dest = black()
 
     # Writes the data to file(s)
     ipv4_incoming_file.write(ipv4_incoming)
+    tcp_incoming_file.write(tcp_incoming)
     ipv4_outgoing_file.write(ipv4_outgoing)
     whitelist_src.write(white_src)
     whitelist_dest.write(white_dest)
@@ -119,6 +163,7 @@ def main():
 
     # Closes the files properly
     ipv4_incoming_file.close()
+    tcp_incoming_file.close()
     ipv4_outgoing_file.close()
     whitelist_src.close()
     whitelist_dest.close()
@@ -126,8 +171,9 @@ def main():
 
     # Converts the file full of ascii bytes into 'actual' bytes
     os.system('xxd -p -r ipv4_incoming.txt > ipv4_incoming_bytes')
+    os.system('xxd -p -r tcp_incoming.txt > tcp_incoming_bytes')
     os.system('xxd -p -r ipv4_outgoing.txt > ipv4_outgoing_bytes')
-    os.system('rm ipv4_incoming.txt ipv4_outgoing.txt')
+    os.system('rm ipv4_incoming.txt ipv4_outgoing.txt tcp_incoming.txt')
 
 if __name__== "__main__":
     main()

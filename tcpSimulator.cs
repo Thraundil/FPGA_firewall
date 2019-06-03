@@ -14,7 +14,7 @@ namespace simplePackageFilter
 
         public async override System.Threading.Tasks.Task Run()
         {
-            sample = File.ReadAllBytes("../../input_data/tcp_bytes.txt");
+            sample = File.ReadAllBytes("../../input_data/tcp_incoming_bytes");
 
             var stream = new MemoryStream(sample, 0, sample.Length);
             var reader = new BinaryReader(stream);
