@@ -7,83 +7,7 @@ using SME;
 
 namespace simplePackageFilter
 {
-    [InputBus]
-    public interface IBus_Connection_In_Use : IBus
-    {
-        bool In_use { get; set; }
 
-        int Id { get; set; }
-    }
-    [InputBus]
-    public interface IBus_Update_State : IBus
-    {
-        [FixedArrayLength(4)]
-        IFixedArray<byte> SourceIP { get; set; }
-
-        [FixedArrayLength(4)]
-        IFixedArray<byte> DestIP { get; set; }
-
-        int Port { get; set; }
-
-        [InitialValue(false)]
-        bool Flag { get; set; }
-
-        int Id { get; set; }
-
-        // We can need to update 2 entries in the state at the same time
-
-        [FixedArrayLength(4)]
-        IFixedArray<byte> SourceIP_2 { get; set; }
-
-        [FixedArrayLength(4)]
-        IFixedArray<byte> DestIP_2 { get; set; }
-
-        int Port_2 { get; set; }
-        [InitialValue(false)]
-        bool Flag_2 { get; set; }
-        
-        int Id_2 { get; set; }
-    }
-    [TopLevelInputBus]
-    public interface IBus_ITCP_In : IBus
-    {
-        [FixedArrayLength(4)]
-        IFixedArray<byte> SourceIP { get; set; }
-
-        [FixedArrayLength(4)]
-        IFixedArray<byte> DestIP { get; set; }
-
-        int Port { get; set; }
-
-        byte Flags { get; set; }
-
-        [InitialValue(false)]
-        bool ThatOneVariableThatSaysIfWeAreDone { get; set; }
-
-
-    }
-    [TopLevelInputBus]
-    public interface IBus_ITCP_RuleVerdict : IBus
-    {
-        [InitialValue(false)]
-        bool Accepted_ipv4 { get; set; }
-
-        [InitialValue(false)]
-        bool IsSet_ipv4 { get; set; }
-
-        [InitialValue(false)]
-        bool Accepted_state { get; set; }
-
-        [InitialValue(false)]
-        bool IsSet_state { get; set; }
-
-        [InitialValue(false)]
-        bool Accepted_out { get; set; }
-
-        [InitialValue(false)]
-        bool IsSet_out { get; set; }
-
-    }
 
     [ClockedProcess]
     public class Connection_process : SimpleProcess
@@ -91,10 +15,6 @@ namespace simplePackageFilter
 
         //[InputBus]
         //private readonly IBus_Controller_to_state data = Scope.CreateOrLoadBus<IBus_Controller_to_state>();
-
-
-        [InputBus]
-        public IBus_blacklist_finalVerdict_out blacklist_input;
 
         [InputBus]
         public IBus_Blacklist_out dataOut;
@@ -127,7 +47,7 @@ namespace simplePackageFilter
 
         private bool connection_in_use;
         public Connection_process(byte[] ip_source_in, byte[] ip_dest_in, int port, int ids, IBus_ITCP_In stateful, IBus_IPv4_In ipv4, 
-            IBus_Blacklist_out data_Out, IBus_blacklist_finalVerdict_out blacklistinput)
+            IBus_Blacklist_out data_Out)
 
         {
             Port_in = port;
@@ -137,7 +57,6 @@ namespace simplePackageFilter
             stateful_in = stateful;
             ipv4_in = ipv4;
             dataOut = data_Out;
-            blacklist_input = blacklistinput;
         }
 
         // For comparing INCOMING 'TCP/IP' (Src, Dst, Port)
@@ -236,13 +155,10 @@ namespace simplePackageFilter
                 }
                 if(dataOut.ReadyToWorkFlag)
                 {
-                    if(blacklist_input.Valid && blacklist_input.Accept_or_deny)
-                    {
                         if (DoesConnectExist(Ip_source, Ip_dest, Port_in, dataOut.SourceIP, dataOut.DestIP, dataOut.SourcePort))
                         {
                             ruleVerdict.Accepted_out = true;
                         }
-                    }
                 }
                 timeout_counter -= 1;
             }

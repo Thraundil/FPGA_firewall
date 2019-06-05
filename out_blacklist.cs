@@ -7,53 +7,13 @@ using System.Threading.Tasks;
 
 namespace simplePackageFilter
 {
-    [TopLevelInputBus]
-    public interface IBus_Blacklist_out : IBus
-    {
-        [FixedArrayLength(4)]
-        IFixedArray<byte> SourceIP { get; set; }
-
-        [FixedArrayLength(4)]
-        IFixedArray<byte> DestIP { get; set; }
-
-        int SourcePort { get; set; }
-
-        byte Flags { get; set; }
-
-        [InitialValue(false)]
-        bool ReadyToWorkFlag { get; set; }
-    }
-
-    [TopLevelInputBus]
-    public interface IBus_blacklist_ruleVerdict_out : IBus
-    {
-        [InitialValue(false)]
-        bool Accepted { get; set; }
-
-        [InitialValue(false)]
-        bool IsSet { get; set; }
-    }
-
-    [TopLevelOutputBus]
-    public interface IBus_blacklist_finalVerdict_out : IBus
-    {
-        [InitialValue(false)]
-        bool Accept_or_deny { get; set; }
-        [InitialValue(false)]
-        bool Valid { get; set; }
-    }
-
-
-    // ****************************************************************************
-
-
     public class Final_check_Blacklist : SimpleProcess
     {
         [InputBus]
         public IBus_blacklist_ruleVerdict_out[] busList;
 
         [OutputBus]
-        public readonly IBus_blacklist_finalVerdict_out final_say = Scope.CreateOrLoadBus<IBus_blacklist_finalVerdict_out>();
+        public readonly IBus_blacklist_finalVerdict_out final_say = Scope.CreateBus<IBus_blacklist_finalVerdict_out>();
 
         // Class Variables
         bool my_bool = false;
@@ -66,28 +26,34 @@ namespace simplePackageFilter
 
         protected override void OnTick()
         {
-            final_say.Valid = false;
-            final_say.Accept_or_deny = false;
             if (busList[0].IsSet)
             {
-                // Checks if any rule process returns TRUE.
-                //my_bool = busList.Any(val => val.Accepted);
-                my_bool = busList.AsParallel().Any(val => val.Accepted);
                 final_say.Valid = true;
+                // Checks if any rule process returns TRUE.
+                // my_bool = busList.Any(val => val.Accepted);
+                for (int i = 0; i > busList.Length; i++)
+                {
+                    my_bool |= busList[i].Accepted;
+                }
 
                 // Accept the incoming package
                 if (!my_bool)
                 {
                     final_say.Accept_or_deny = true;
-                    Console.WriteLine("The package was Accepted");
+                    Console.WriteLine("The blacklist Accepted the package");
                 }
                 // Deny the incoming package, as the IP was not on the whitelist.
                 else
                 {
-                    Console.WriteLine("The package was Denied");
+                    Console.WriteLine("The blacklist denied the package");
                     final_say.Accept_or_deny = false;
                 }
                 my_bool = true;
+            }
+            else
+            {
+                final_say.Valid = false;
+                final_say.Accept_or_deny = false;
             }
         }
     }
@@ -142,19 +108,26 @@ namespace simplePackageFilter
                 // This indicates that it IS on the blacklist and should be BLOCKED
                 ruleVerdict.Accepted = true;
             }
+            else
+            {
+                ruleVerdict.Accepted = false;
+            }
         }
 
 
         // On Tick (ipv4Readers 'main')
         protected override void OnTick()
         {
-            ruleVerdict.Accepted = false;
-            ruleVerdict.IsSet = false;
             if (blacklist_out.ReadyToWorkFlag)
             {
                 IP_Match(dest_low, dest_high);
                 ruleVerdict.IsSet = true;
                 //sourceComparePort(allowed_ports);
+            }
+            else
+            {
+                ruleVerdict.Accepted = false;
+                ruleVerdict.IsSet = false;
             }
         }
     }

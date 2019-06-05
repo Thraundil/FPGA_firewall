@@ -42,7 +42,7 @@ namespace simplePackageFilter
                 {
                     var (low_src, high_src) = rules.Get_sources(i);
                     var (low_dest, high_dest) = rules.Get_destination(i);
-                    var temptemp = new Rule_Process(ipv4_in.ipv4, low_src, high_src, low_dest, high_dest);
+                    var temptemp = new Rule_Process(ipv4_in.ipv4, tcp_in.tcpBus, low_src, high_src, low_dest, high_dest);
                     Bus_array_IP_whitelist[i] = temptemp.ruleVerdict;
                 }
 
@@ -58,7 +58,7 @@ namespace simplePackageFilter
                 }
 
                 // Blacklist simulator
-                var Final_verdict_blacklist = new Final_check_Blacklist(Bus_array_IP_blacklist);
+                // var Final_verdict_blacklist = new Final_check_Blacklist(Bus_array_IP_blacklist);
 
                 //                Bus array for the exsisting connections
                 IBus_ITCP_RuleVerdict[] Bus_array_connections = new IBus_ITCP_RuleVerdict[max_number_connections];
@@ -75,15 +75,13 @@ namespace simplePackageFilter
                 for (int i = 0; i < max_number_connections; i++)
                 {
                     // Inizialise every process to some default value that can never be matched
-                    var temp = new Connection_process(emptyByteArray, emptyByteArray, 0, i, tcp_in.tcpBus, ipv4_in.ipv4, ipv4_out.ipv4, Final_verdict_blacklist.final_say);
+                    var temp = new Connection_process(emptyByteArray, emptyByteArray, 0, i, tcp_in.tcpBus, ipv4_in.ipv4, ipv4_out.ipv4);
                     process_in_use[i] = temp.in_use;
                     Bus_array_connections[i] = temp.ruleVerdict;
                 }
 
-                var final_verdict_tcP = new Final_check_state(Bus_array_connections, Bus_array_IP_whitelist, Final_verdict_blacklist.final_say, ipv4_out.ipv4, tcp_in.tcpBus);
+                var final_verdict_tcP = new Final_check_state(Bus_array_connections, Bus_array_IP_whitelist, Bus_array_IP_blacklist, ipv4_out.ipv4, tcp_in.tcpBus);
 
-                // Whitelist Verdict
-                var Final_verdict = new Final_check_rules(Bus_array_IP_whitelist);
                 sim.Run();
             }
         }
