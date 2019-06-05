@@ -83,20 +83,18 @@ namespace simplePackageFilter
             return doesItMatch;
         }
 
-        // For comparing INCOMING 'IP only' (Src, Dst)
+        // Compares with known "source/dest" pais in STATE
         private bool ipv4_checker(byte[] source, byte[] dest, IFixedArray<byte> incoming_source, IFixedArray<byte> incoming_dest)
         {
-            int x = 0;
-            bool doesItMatch = true;
+            bool doesItMatch = false;
 
-            while (x < source.Length) {
-                if (source[x] == incoming_source[x] && dest[x] == incoming_dest[x]) {
-                    x++;
-                }
-                else {
-                    doesItMatch = false;
-                    x = source.Length;
-                }
+            uint source_uint          = ByteArrayToUint.convert(dest);
+            uint dest_uint            = ByteArrayToUint.convert(source);
+            uint incoming_source_uint = ByteArrayToUint.convertIFixed(incoming_source);
+            uint incoming_dest_uint   = ByteArrayToUint.convertIFixed(incoming_dest);
+
+            if ((source_uint == incoming_source_uint) && (dest_uint == incoming_dest_uint)) {
+                doesItMatch = true;
             }
 
             return doesItMatch;

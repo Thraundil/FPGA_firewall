@@ -45,74 +45,25 @@ namespace simplePackageFilter
             ip_high_dest = ip_high_dest_in;
         }
 
-        // An argument is needed, as VHDL does not allow function calls without an argument...?!
+        // Compares if incoming IP 'destination' is in the whitelisted range.
         private bool IsIPinRange(byte[] low_source, byte[] high_source, byte[] low_dest, byte[] high_dest, IFixedArray<byte> ip_source, IFixedArray<byte> ip_dest)
         {
 
-            bool doesItMatch = true;
-            int x = 0;
+            bool doesItMatch = false;
 
-            // TO BE PARALLELISED
-            // Src Low
-            while (x < low_source.Length) {
-                if (low_source[x] < ip_source[x]){
-                    x = low_source.Length;
-                }
-                else if (low_source[x] == ip_source[x]) {
-                    x++;
-                }
-                else {
-                    doesItMatch = false;
-                    x = low_source.Length;
-                }
-            }
+            // The ranges
+            uint low_source_uint  = ByteArrayToUint.convert(low_source);
+            uint high_source_uint = ByteArrayToUint.convert(high_source);
+            uint low_dest_uint    = ByteArrayToUint.convert(low_dest);
+            uint high_dest_uint   = ByteArrayToUint.convert(high_dest);
 
-            x = 0;
+            // The incoming IP source/dest
+            uint incoming_source_uint = ByteArrayToUint.convertIFixed(ip_source);
+            uint incoming_dest_uint   = ByteArrayToUint.convertIFixed(ip_dest);
 
-            // Src High
-            while (x < high_source.Length) {
-                if (high_source[x] > ip_source[x]){
-                    x = high_source.Length;
-                }
-                else if (high_source[x] == ip_source[x]) {
-                    x++;
-                }
-                else{
-                    doesItMatch = false;
-                    x = high_source.Length;
-                }
-            }
-
-            x = 0;
-
-            // Dest Low
-            while (x < low_dest.Length) {
-                if (low_dest[x] < ip_dest[x]){
-                    x = low_dest.Length;
-                }
-                else if (low_dest[x] == ip_dest[x]) {
-                    x++;
-                }
-                else{
-                    doesItMatch = false;
-                    x = low_dest.Length;
-                }
-            }
-
-            x = 0;
-
-            // Dest High
-            while (x < high_dest.Length) {
-                if (high_dest[x] > ip_dest[x]){
-                    x = high_dest.Length;
-                }
-                else if (high_dest[x] == ip_dest[x]) {
-                    x++;
-                }
-                else{
-                    doesItMatch = false;
-                    x = high_dest.Length;
-                }
+            if ((low_source_uint <= incoming_source_uint && incoming_source_uint <= high_source_uint) &&
+                (low_dest_uint <= incoming_dest_uint && incoming_dest_uint <= high_dest_uint)) {
+                doesItMatch = true;
             }
 
             return doesItMatch;

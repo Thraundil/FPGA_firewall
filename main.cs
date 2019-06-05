@@ -22,6 +22,14 @@ namespace simplePackageFilter
             int max_number_connections = 10;
             _ = rules.accepted_destinations.Length;
 
+
+            // ************* TEST AREA **********************
+            Console.WriteLine("*** QUICK TESTS START ***");
+
+            Console.WriteLine("*** QUICK TESTS STOP ***");
+            // ************* TEST AREA **********************
+
+
             using (var sim = new Simulation())
             {
                 sim
