@@ -63,7 +63,7 @@ namespace simplePackageFilter
 
     }
     [TopLevelInputBus]
-    public interface IBus_ITCP_RuleVerdict : IBus
+    public interface IBus_RuleVerdict_IPV4 : IBus
     {
         [InitialValue(false)]
         bool Accepted_ipv4 { get; set; }
@@ -84,6 +84,27 @@ namespace simplePackageFilter
         bool IsSet_out { get; set; }
 
     }
+
+    [TopLevelInputBus]
+    public interface IBus_RuleVerdict_TCP : IBus
+    {
+        [InitialValue(false)]
+        bool Accepted_state { get; set; }
+
+        [InitialValue(false)]
+        bool IsSet_state { get; set; }
+    }
+
+    [TopLevelInputBus]
+    public interface IBus_RuleVerdict_Outgoing : IBus
+    {
+        [InitialValue(false)]
+        bool Accepted_ipv4 { get; set; }
+
+        [InitialValue(false)]
+        bool IsSet_ipv4 { get; set; }
+    }
+
     [TopLevelInputBus]
     public interface IBus_State_Verdict : IBus
     {

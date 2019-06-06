@@ -8,60 +8,12 @@ using SME;
 namespace simplePackageFilter
 {
 
+// ****************************************************************************
 
-    [ClockedProcess]
-    public class Connection_process : SimpleProcess
+    public static class Shared_functions
     {
-
-        //[InputBus]
-        //private readonly IBus_Controller_to_state data = Scope.CreateOrLoadBus<IBus_Controller_to_state>();
-
-        [InputBus]
-        public IBus_Blacklist_out dataOut;
-
-        // Input bus from the ipv4 header check
-        [InputBus]
-        public IBus_IPv4_In ipv4_in;
-
-        // Input but from the stateful check
-        [InputBus]
-        public IBus_ITCP_In stateful_in;
-
-        // Input bus to check if we need to update state
-        [InputBus]
-        private readonly IBus_Update_State update = Scope.CreateOrLoadBus<IBus_Update_State>();
-
-        [OutputBus]
-        public IBus_ITCP_RuleVerdict ruleVerdict = Scope.CreateBus<IBus_ITCP_RuleVerdict>();
-
-        [OutputBus]
-        public IBus_Connection_In_Use in_use = Scope.CreateOrLoadBus<IBus_Connection_In_Use>();
-
-        private byte[] Ip_source { get; set; }
-        private byte[] Ip_dest { get; set; }
-        private int Port_in { get; set; }
-
-        private readonly int my_id;
-
-        private int timeout_counter = 10000;
-
-        private bool connection_in_use;
-        public Connection_process(byte[] ip_source_in, byte[] ip_dest_in, int port, int ids, IBus_ITCP_In stateful, IBus_IPv4_In ipv4, 
-            IBus_Blacklist_out data_Out)
-
-        {
-            Port_in = port;
-            Ip_source = ip_source_in;
-            Ip_dest = ip_dest_in;
-            my_id = ids;
-            stateful_in = stateful;
-            ipv4_in = ipv4;
-            dataOut = data_Out;
-        }
-
-
-        // For comparing INCOMING 'TCP/IP' (Src, Dst, Port)
-        private bool DoesConnectExist(byte[] source, byte[] dest, int port, IFixedArray<byte> incoming_source, IFixedArray<byte> incoming_dest, int incoming_port)
+        public static bool DoesConnectExist(byte[] source, byte[] dest, int port,IFixedArray<byte> incoming_source,
+                                            IFixedArray<byte> incoming_dest, int incoming_port)
         {
             bool doesItMatch = false;
 
@@ -79,7 +31,8 @@ namespace simplePackageFilter
         }
 
         // Compares with known "source/dest" pairs in STATE
-        private bool ipv4_checker(byte[] source, byte[] dest, IFixedArray<byte> incoming_source, IFixedArray<byte> incoming_dest)
+        public static bool ipv4_checker(byte[] source, byte[] dest, IFixedArray<byte> incoming_source,
+                                        IFixedArray<byte> incoming_dest)
         {
             bool doesItMatch = false;
 
@@ -94,17 +47,138 @@ namespace simplePackageFilter
 
             return doesItMatch;
         }
+    }
 
+
+// ****************************************************************************
+
+    public class Connection_process_IPV4_incoming : SimpleProcess
+    {
+
+        // Incoming IPV4
+        [InputBus]
+        public IBus_IPv4_In ipv4_in;
+
+        // Input bus to check if we need to update state
+        [InputBus]
+        private readonly IBus_Update_State update = Scope.CreateOrLoadBus<IBus_Update_State>();
+
+        [OutputBus]
+        public IBus_ITCP_RuleVerdict ruleVerdict = Scope.CreateBus<IBus_RuleVerdict_IPV4>();
+
+        [OutputBus]
+        public IBus_Connection_In_Use in_use = Scope.CreateOrLoadBus<IBus_Connection_In_Use>();
+
+        // Variable declerations for the constructor
+        private byte[] Ip_source { get; set; }
+        private byte[] Ip_dest { get; set; }
+        private readonly int my_id;
+
+        private bool connection_in_use;
+        public Connection_process_IPV4_incoming(byte[] ip_source_in, byte[] ip_dest_in, int ids, IBus_IPv4_In ipv4)
+        {
+            Ip_source = ip_source_in;
+            Ip_dest   = ip_dest_in;
+            my_id     = ids;
+            ipv4_in   = ipv4;
+        }
 
         protected override void OnTick()
         {
             // Set all the potential flags
-            ruleVerdict.IsSet_ipv4 = ipv4_in.ClockCheck;
+            ruleVerdict.IsSet_ipv4    = ipv4_in.ClockCheck;
             ruleVerdict.Accepted_ipv4 = false;
+
+            if (update.Flag && update.Id == my_id)
+            {
+                // overwrite it settings here
+                connection_in_use = true;
+                in_use.Id = my_id;
+                in_use.In_use = true;
+
+                // Update the state process with incoming information
+                for (int k = 0; k<4; k++)
+                {
+                    Ip_source[k] = update.SourceIP[k];
+                    Ip_dest[k]   = update.DestIP[k];
+                }
+            }
+
+            if (connection_in_use)
+            {
+                if(ipv4_in.ClockCheck)
+                {
+                    if(Shared_functions.ipv4_checker(Ip_source, Ip_dest, ipv4_in.SourceIP, ipv4_in.DestIP))
+                    {
+                        ruleVerdict.Accepted_ipv4 = true;
+                    }
+                }
+            }
+        }
+    }
+
+// ****************************************************************************
+
+    [ClockedProcess] // ClockedProcess due to having a COUNTER (timer)
+    public class Connection_process_TCP_incoming : SimpleProcess
+    {
+
+        // Input but from the stateful
+        [InputBus]
+        public IBus_ITCP_In stateful_in;
+
+        // Input bus to check if we need to update state
+        [InputBus]
+        private readonly IBus_Update_State update = Scope.CreateOrLoadBus<IBus_Update_State>();
+
+        [OutputBus]
+        public IBus_ITCP_RuleVerdict ruleVerdict = Scope.CreateBus<IBus_RuleVerdict_TCP>();
+
+        [OutputBus]
+        public IBus_Connection_In_Use in_use = Scope.CreateOrLoadBus<IBus_Connection_In_Use>();
+
+        // Variables for the constructor
+        private byte[] Ip_source { get; set; }
+        private byte[] Ip_dest { get; set; }
+        private int Port_in { get; set; }
+
+        private readonly int my_id;
+
+        private int timeout_counter = 10000;
+        private bool connection_in_use;
+
+        public Connection_process(byte[] ip_source_in, byte[] ip_dest_in, int port, int ids, IBus_ITCP_In stateful)
+        {
+            Port_in     = port;
+            Ip_source   = ip_source_in;
+            Ip_dest     = ip_dest_in;
+            my_id       = ids;
+            stateful_in = stateful;
+        }
+
+        protected override void OnTick()
+        {
+            // Set all the potential flags
             ruleVerdict.IsSet_state = stateful_in.ThatOneVariableThatSaysIfWeAreDone;
             ruleVerdict.Accepted_state = false;
-            ruleVerdict.IsSet_out = dataOut.ReadyToWorkFlag;
-            ruleVerdict.Accepted_out = false;
+
+            if (update.Flag && update.Id == my_id)
+            {
+                // overwrite it settings here
+                connection_in_use = true;
+                in_use.Id = my_id;
+                in_use.In_use = true;
+                
+                // Update the state process with incoming information
+                for (int k = 0; k<4; k++)
+                {
+                    Ip_source[k] = update.SourceIP[k];
+                    Ip_dest[k]   = update.DestIP[k];
+                }
+                // Updates port
+                Port_in = update.Port;
+
+            }
 
             if (connection_in_use)
             {
@@ -114,47 +188,88 @@ namespace simplePackageFilter
                     in_use.Id = my_id;
                     in_use.In_use = false;
                 }
-                if (update.Flag && update.Id == my_id)
-                {
-                    // overwrite it settings here
-                    connection_in_use = true;
-                    in_use.Id = my_id;
-                    in_use.In_use = true;
-                }
-                if (update.Flag_2 && update.Id_2 == my_id)
-                {
-                    // overwrite its settings here
-                    connection_in_use = true;
-                    in_use.Id = my_id;
-                    in_use.In_use = true;
-                }
-
-                if(ipv4_in.ClockCheck)
-                {
-                    if(ipv4_checker(Ip_source, Ip_dest, ipv4_in.SourceIP, ipv4_in.DestIP))
-                    {
-                        ruleVerdict.Accepted_ipv4 = true;
-                    }
-                }
-
 
                 // Needs to go through all the flags
                 if (stateful_in.ThatOneVariableThatSaysIfWeAreDone)
                 {
-                    if (DoesConnectExist(Ip_source, Ip_dest, Port_in, stateful_in.SourceIP, stateful_in.DestIP, stateful_in.Port))
+                    if (Shared_functions.DoesConnectExist(Ip_source, Ip_dest, Port_in, stateful_in.SourceIP, stateful_in.DestIP, stateful_in.Port))
                     {
                         // check state for potential flags as well!!
                         ruleVerdict.Accepted_state = true;
                     }
                 }
-                if(dataOut.ReadyToWorkFlag)
-                {
-                        if (DoesConnectExist(Ip_source, Ip_dest, Port_in, dataOut.SourceIP, dataOut.DestIP, dataOut.SourcePort))
-                        {
-                            ruleVerdict.Accepted_out = true;
-                        }
-                }
                 timeout_counter -= 1;
+            }
+        }
+    }
+
+
+// ****************************************************************************
+
+    public class Connection_process_outgoing : SimpleProcess
+    {
+
+        [InputBus]
+        public IBus_Blacklist_out dataOut;
+
+        // Input bus to check if we need to update state
+        [InputBus]
+        private readonly IBus_Update_State update = Scope.CreateOrLoadBus<IBus_Update_State>();
+
+        [OutputBus]
+        public IBus_ITCP_RuleVerdict ruleVerdict = Scope.CreateBus<IBus_RuleVerdict_Outgoing>();
+
+        [OutputBus]
+        public IBus_Connection_In_Use in_use = Scope.CreateOrLoadBus<IBus_Connection_In_Use>();
+
+        private byte[] Ip_source { get; set; }
+        private byte[] Ip_dest { get; set; }
+        private int Port_in { get; set; }
+
+        private readonly int my_id;
+
+        private bool connection_in_use;
+        public Connection_process(byte[] ip_source_in, byte[] ip_dest_in, int port, int ids, IBus_Blacklist_out data_Out)
+
+        {
+            Port_in = port;
+            Ip_source = ip_source_in;
+            Ip_dest = ip_dest_in;
+            my_id = ids;
+            dataOut = data_Out;
+        }
+
+
+        protected override void OnTick()
+        {
+            // Set all the potential flags
+            ruleVerdict.IsSet_out = dataOut.ReadyToWorkFlag;
+            ruleVerdict.Accepted_out = false;
+
+
+            if (update.Flag && update.Id == my_id)
+            {
+                // overwrite it settings here
+                connection_in_use = true;
+                in_use.Id = my_id;
+                in_use.In_use = true;
+
+                // Update the state process with incoming information
+                for (int k = 0; k<4; k++)
+                {
+                    Ip_source[k] = update.SourceIP[k];
+                    Ip_dest[k]   = update.DestIP[k];
+                }
+                // Updates port
+                Port_in = update.Port;
+            }
+
+            if (connection_in_use && dataOut.ReadyToWorkFlag)
+            {
+                if (Shared_functions.DoesConnectExist(Ip_source, Ip_dest, Port_in, dataOut.SourceIP, dataOut.DestIP, dataOut.SourcePort))
+                {
+                    ruleVerdict.Accepted_out = true;
+                }
             }
         }
     }
