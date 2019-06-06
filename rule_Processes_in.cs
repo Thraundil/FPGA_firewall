@@ -35,7 +35,8 @@ namespace simplePackageFilter
 
 
         // ipv4Reader_Constructor
-        public Rule_Process(IBus_IPv4_In busIn, IBus_ITCP_In tcpin, byte[] ip_low_source_in, byte[] ip_high_source_in, byte[] ip_low_dest_in, byte[] ip_high_dest_in)
+        public Rule_Process(IBus_IPv4_In busIn, IBus_ITCP_In tcpin, byte[] ip_low_source_in,
+                            byte[] ip_high_source_in, byte[] ip_low_dest_in, byte[] ip_high_dest_in)
         {
             ipv4 = busIn;
             stateful_in = tcpin;
@@ -46,7 +47,8 @@ namespace simplePackageFilter
         }
 
         // Compares if incoming IP 'destination' is in the whitelisted range.
-        private bool IsIPinRange(byte[] low_source, byte[] high_source, byte[] low_dest, byte[] high_dest, IFixedArray<byte> ip_source, IFixedArray<byte> ip_dest)
+        private bool IsIPinRange(byte[] low_source, byte[] high_source, byte[] low_dest,
+                                 byte[] high_dest, IFixedArray<byte> ip_source, IFixedArray<byte> ip_dest)
         {
 
             bool doesItMatch = false;
@@ -79,7 +81,8 @@ namespace simplePackageFilter
             ruleVerdict.ipv4_Accepted = false;
             if (ipv4.ClockCheck)
             {
-                if (IsIPinRange(ip_low_source, ip_high_source, ip_low_dest, ip_high_dest, ipv4.SourceIP, ipv4.DestIP))
+                if (IsIPinRange(ip_low_source, ip_high_source,ip_low_dest,
+                                ip_high_dest, ipv4.SourceIP, ipv4.DestIP))
                 {
                     ruleVerdict.ipv4_Accepted = true;
                 }
@@ -89,7 +92,8 @@ namespace simplePackageFilter
             if(stateful_in.ThatOneVariableThatSaysIfWeAreDone)
             {
                 ruleVerdict.tcp_IsSet = true;
-                if (IsIPinRange(ip_low_source, ip_high_source, ip_low_dest, ip_high_dest, stateful_in.SourceIP, stateful_in.DestIP))
+                if (IsIPinRange(ip_low_source, ip_high_source, ip_low_dest, ip_high_dest,
+                                stateful_in.SourceIP, stateful_in.DestIP))
                 {
                     ruleVerdict.tcp_Accepted = true;
                 }

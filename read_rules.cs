@@ -35,7 +35,7 @@ namespace simplePackageFilter
             // Splits both strings by '.' into lists, converts to int
             low = ip_array[0].Split('.').Select(Int32.Parse).ToArray();
             high = ip_array[1].Split('.').Select(Int32.Parse).ToArray();
-
+            // Converts low/high (lists) into byte arrays
             byte_low  = low.Select(i => (byte) i).ToArray();
             byte_high = high.Select(i => (byte) i).ToArray();
 
