@@ -59,37 +59,32 @@ namespace simplePackageFilter
             dataOut = data_Out;
         }
 
+
         // For comparing INCOMING 'TCP/IP' (Src, Dst, Port)
         private bool DoesConnectExist(byte[] source, byte[] dest, int port, IFixedArray<byte> incoming_source, IFixedArray<byte> incoming_dest, int incoming_port)
         {
-            int x = 0;
-            bool doesItMatch = true;
+            bool doesItMatch = false;
 
-            while (x < source.Length) {
-                // IMPROVEMENT: remove the port-compare, as it is needlesly compared 4 times, instead of one.
-                if (source[x] == incoming_source[x] && dest[x] == incoming_dest[x] && port == incoming_port) {
-                    x++;
-                }
-                else {
-                    doesItMatch = false;
-                    x = source.Length;
-                }
-            }
+            uint source_uint          = ByteArrayToUint.convert(source);
+            uint dest_uint            = ByteArrayToUint.convert(dest);
+            uint incoming_source_uint = ByteArrayToUint.convertIFixed(incoming_source);
+            uint incoming_dest_uint   = ByteArrayToUint.convertIFixed(incoming_dest);
 
-            if (doesItMatch) {
+            if (((source_uint == incoming_source_uint) && (dest_uint == incoming_dest_uint)) && (port == incoming_port)) {
+                doesItMatch = true;
                 timeout_counter = 10000;
             }
 
             return doesItMatch;
         }
 
-        // Compares with known "source/dest" pais in STATE
+        // Compares with known "source/dest" pairs in STATE
         private bool ipv4_checker(byte[] source, byte[] dest, IFixedArray<byte> incoming_source, IFixedArray<byte> incoming_dest)
         {
             bool doesItMatch = false;
 
-            uint source_uint          = ByteArrayToUint.convert(dest);
-            uint dest_uint            = ByteArrayToUint.convert(source);
+            uint source_uint          = ByteArrayToUint.convert(source);
+            uint dest_uint            = ByteArrayToUint.convert(dest);
             uint incoming_source_uint = ByteArrayToUint.convertIFixed(incoming_source);
             uint incoming_dest_uint   = ByteArrayToUint.convertIFixed(incoming_dest);
 
@@ -99,6 +94,7 @@ namespace simplePackageFilter
 
             return doesItMatch;
         }
+
 
         protected override void OnTick()
         {
