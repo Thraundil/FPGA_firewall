@@ -14,6 +14,13 @@ namespace simplePackageFilter
         bool ipv4_ready_flag { get; set; }
     }
 
+    [TopLevelInputBus]
+    public interface tcp_verdict_to_sim :IBus
+    {
+        [InitialValue(false)]
+        bool tcp_ready_flag { get; set; }
+    }
+
     [InputBus]
     public interface IBus_Connection_In_Use : IBus
     {

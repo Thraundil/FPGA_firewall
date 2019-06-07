@@ -33,7 +33,7 @@ namespace simplePackageFilter
                 // The input-simulators (for simulating actual intput/output for tests)
                 var ipv4_in  = new InputSimulator();
                 //var ipv4_out = new OutputSimulator();
-                //var tcp_in   = new TcpSimulator();
+                var tcp_in   = new TcpSimulator();
 
                 // The Whitelisted IP rules 
                 IBus_Rule_Verdict_IPV4[] Bus_array_IP_whitelist = new IBus_Rule_Verdict_IPV4[len_sources];
@@ -46,10 +46,10 @@ namespace simplePackageFilter
                     var (low_dest, high_dest) = rules.Get_destination(i);
 
                     var temptemp = new Rule_Process_IPV4(ipv4_in.ipv4, low_src, high_src, low_dest, high_dest);
-                    //var temptemp1 = new Rule_Process_TCP(tcp_in.tcpBus, low_src, high_src, low_dest, high_dest);
+                    var temptemp1 = new Rule_Process_TCP(tcp_in.tcpBus, low_src, high_src, low_dest, high_dest);
 
                     Bus_array_IP_whitelist[i] = temptemp.ruleVerdict;
-                    //Bus_array_IP_whitelist1[i] = temptemp1.ruleVerdict;
+                    Bus_array_IP_whitelist1[i] = temptemp1.ruleVerdict;
                 }
 
                 // The Blacklisted IP rules
@@ -69,7 +69,7 @@ namespace simplePackageFilter
                 // Bus array for the exsisting connections
 
                 IBus_Process_Verdict_IPV4[] ipv4_connections = new IBus_Process_Verdict_IPV4[max_number_connections];
-                //IBus_Process_Verdict_TCP[] tcp_connections = new IBus_Process_Verdict_TCP[max_number_connections];
+                IBus_Process_Verdict_TCP[] tcp_connections = new IBus_Process_Verdict_TCP[max_number_connections];
                 //IBus_Process_Verdict_Outgoing[] outgoing_connections = new IBus_Process_Verdict_Outgoing[max_number_connections];
 
 
@@ -87,17 +87,17 @@ namespace simplePackageFilter
                 {
                     // Inizialise every process to some default value that can never be matched
                     var temp_ipv4 = new Connection_process_IPV4_incoming(emptyByteArray, emptyByteArray,i,ipv4_in.ipv4);
-                    //var temp_tcp = new Connection_process_TCP_incoming(emptyByteArray, emptyByteArray, 0, i, tcp_in.tcpBus);
+                    var temp_tcp = new Connection_process_TCP_incoming(emptyByteArray, emptyByteArray, 0, i, tcp_in.tcpBus);
                     //var temp_out = new Connection_process_outgoing(emptyByteArray, emptyByteArray, 0, i,ipv4_out.ipv4);
 
-                    //process_in_use[i] = temp_tcp.in_use;
-                    //tcp_connections[i] = temp_tcp.ruleVerdict;
+                    process_in_use[i] = temp_tcp.in_use;
+                    tcp_connections[i] = temp_tcp.ruleVerdict;
                     ipv4_connections[i] = temp_ipv4.ruleVerdict;
                     //outgoing_connections = temp_out.ruleVerdict;
 
                 }
 
-                //var final_verdict_tcP = new Final_check_state(Bus_array_connections, Bus_array_IP_whitelist, Bus_array_IP_blacklist, ipv4_out.ipv4, tcp_in.tcpBus);
+                var final_verdict_tcP = new stateful_state_verdict(tcp_connections, Bus_array_IP_whitelist1, tcp_in.tcpBus);
                 var Ipv4_state_verdict = new Ipv4_state_verdict(ipv4_connections, ipv4_in.ipv4, Bus_array_IP_whitelist);
                 // var final_verdict_outgoing = 
                 sim.Run();
