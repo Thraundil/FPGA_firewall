@@ -141,14 +141,18 @@ namespace simplePackageFilter
     }
 
     [TopLevelInputBus]
-    public interface IBus_ruleVerdict_In : IBus
+    public interface IBus_Rule_Verdict_IPV4 : IBus
     {
         [InitialValue(false)]
         bool ipv4_Accepted { get; set; }
 
         [InitialValue(false)]
         bool ipv4_IsSet { get; set; }
+    }
 
+    [TopLevelInputBus]
+    public interface IBus_Rule_Verdict_TCP : IBus
+    {
         [InitialValue(false)]
         bool tcp_Accepted { get; set; }
 
