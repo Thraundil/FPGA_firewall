@@ -93,14 +93,14 @@ namespace simplePackageFilter
         public IBus_Connection_In_Use in_use = Scope.CreateOrLoadBus<IBus_Connection_In_Use>();
 
         // Variables for the constructor
-        private byte[] Ip_source { get; set; }
-        private byte[] Ip_dest { get; set; }
-        private int Port_in { get; set; }
+        byte[] Ip_source { get; set; }
+        byte[] Ip_dest { get; set; }
+        int Port_in { get; set; }
 
         private readonly int my_id;
 
         private int timeout_counter = 10000;
-        private bool connection_in_use;
+        private bool connection_in_use = false;
 
         public Connection_process_TCP_incoming(byte[] ip_source_in, byte[] ip_dest_in, int port, int ids, IBus_ITCP_In stateful)
         {
@@ -117,7 +117,7 @@ namespace simplePackageFilter
             ruleVerdict.IsSet_state = stateful_in.ThatOneVariableThatSaysIfWeAreDone;
             ruleVerdict.Accepted_state = false;
 
-            if (update.Flag && update.Id == my_id)
+            if (update.Flag && (update.Id == my_id))
             {
                 // overwrite it settings here
                 connection_in_use = true;
@@ -125,9 +125,10 @@ namespace simplePackageFilter
                 in_use.In_use = true;
                 
                 // Update the state process with incoming information
-                for (int k = 0; k<4; k++)
+                for (int k = 0; k < 4; k++)
                 {
-                    Ip_source[k] = update.SourceIP[k];
+                    //Console.WriteLine(update.DestIP[k]);
+                    Ip_source[k] = 5; // update.SourceIP[k];
                     Ip_dest[k]   = update.DestIP[k];
                 }
                 // Updates port
@@ -147,10 +148,13 @@ namespace simplePackageFilter
                 // Needs to go through all the flags
                 if (stateful_in.ThatOneVariableThatSaysIfWeAreDone)
                 {
+                    Console.WriteLine("{0} {1} {2} {3}", Ip_source[0], Ip_source[1], Ip_source[2], Ip_source[3]);
+                    //Console.WriteLine("{0} {1} {2} {3}", stateful_in.DestIP[0], stateful_in.DestIP[1], stateful_in.DestIP[2], stateful_in.DestIP[3]);
+                    //Console.WriteLine("{0}", stateful_in.Port);
                     if (Shared_functions.DoesConnectExist(Ip_source, Ip_dest, Port_in, stateful_in.SourceIP, stateful_in.DestIP, stateful_in.Port))
                     {
-                        // check state for potential flags as well!!
                         ruleVerdict.Accepted_state = true;
+                        Console.WriteLine("it does!!!");
                     }
                 }
                 timeout_counter -= 1;
