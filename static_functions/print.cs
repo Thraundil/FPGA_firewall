@@ -3,9 +3,9 @@
 
 namespace simplePackageFilter
 {
-    public class Print
+    public static class Print
     {
-        public void print_int_array(int[] int_array)
+        public static void print_int_array(int[] int_array)
         {
             for (int i = 0; i < int_array.Length; i++)
             {
@@ -14,7 +14,7 @@ namespace simplePackageFilter
             Console.WriteLine("");
         }
 
-        public void print_byte_array(byte[] byte_array)
+        public static void print_byte_array(byte[] byte_array)
         {
             for (int i = 0; i < byte_array.Length; i++)
             {
