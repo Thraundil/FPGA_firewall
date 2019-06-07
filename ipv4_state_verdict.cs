@@ -19,7 +19,7 @@ namespace simplePackageFilter
 
         // stuff from the ipv4 rule processes
         [InputBus]
-        public IBus_ruleVerdict_In[] rule_list;
+        public IBus_Rule_Verdict_IPV4[] rule_list;
 
         // if we accept or deny the ipv4 header/packet
         [OutputBus]
@@ -33,7 +33,7 @@ namespace simplePackageFilter
 
         bool rule_bool = false;
 
-        public Ipv4_state_verdict(IBus_Process_Verdict_IPV4[] con_process, IBus_IPv4_In ipv4_data, IBus_ruleVerdict_In[] rule_process)
+        public Ipv4_state_verdict(IBus_Process_Verdict_IPV4[] con_process, IBus_IPv4_In ipv4_data, IBus_Rule_Verdict_IPV4[] rule_process)
         {
             connection_list = con_process;
             ipv4_in = ipv4_data;

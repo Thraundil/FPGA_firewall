@@ -13,7 +13,7 @@ namespace simplePackageFilter
         public IBus_Process_Verdict_TCP[] connection_list;
 
         [InputBus]
-        public IBus_ruleVerdict_In[] rule_list;
+        public IBus_Rule_Verdict_TCP[] rule_list;
 
         [InputBus]
         public IBus_ITCP_In stateful_in;

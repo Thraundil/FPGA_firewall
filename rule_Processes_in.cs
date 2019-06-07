@@ -63,7 +63,7 @@ namespace simplePackageFilter
         public Rule_Process_IPV4(IBus_IPv4_In busIn, byte[] ip_low_source_in, byte[] ip_high_source_in,
                                  byte[] ip_low_dest_in, byte[] ip_high_dest_in)
         {
-            ipv4_in        = busIn;
+            ipv4        = busIn;
             ip_low_source  = ip_low_source_in;
             ip_high_source = ip_high_source_in;
             ip_low_dest    = ip_low_dest_in;
@@ -76,10 +76,10 @@ namespace simplePackageFilter
             ruleVerdict.ipv4_IsSet = false;
             ruleVerdict.ipv4_Accepted = false;
 
-            if (ipv4_in.ClockCheck)
+            if (ipv4.ClockCheck)
             {
                 if (Shared_functions.IsIPinRange(ip_low_source, ip_high_source,ip_low_dest,
-                                ip_high_dest, ipv4_in.SourceIP, ipv4_in.DestIP))
+                                ip_high_dest, ipv4.SourceIP, ipv4.DestIP))
                 {
                     ruleVerdict.ipv4_Accepted = true;
                 }

@@ -242,8 +242,9 @@ namespace simplePackageFilter
         protected override void OnTick()
         {
             // Set all the potential flags
-            ruleVerdict.IsSet_out = dataOut.ReadyToWorkFlag;
-            ruleVerdict.Accepted_out = false;
+
+            ruleVerdict.IsSet_outgoing = dataOut.ReadyToWorkFlag;
+            ruleVerdict.Accepted_outgoing = false;
 
 
             if (update.Flag && update.Id == my_id)
@@ -267,7 +268,7 @@ namespace simplePackageFilter
             {
                 if (Shared_functions.DoesConnectExist(Ip_source, Ip_dest, Port_in, dataOut.SourceIP, dataOut.DestIP, dataOut.SourcePort))
                 {
-                    ruleVerdict.Accepted_out = true;
+                    ruleVerdict.Accepted_outgoing = true;
                 }
             }
         }

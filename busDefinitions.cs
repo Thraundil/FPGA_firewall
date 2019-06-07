@@ -93,10 +93,10 @@ namespace simplePackageFilter
     public interface IBus_Process_Verdict_Outgoing : IBus
     {
         [InitialValue(false)]
-        bool Accepted_ipv4 { get; set; }
+        bool Accepted_outgoing { get; set; }
 
         [InitialValue(false)]
-        bool IsSet_ipv4 { get; set; }
+        bool IsSet_outgoing { get; set; }
     }
 
     [TopLevelInputBus]

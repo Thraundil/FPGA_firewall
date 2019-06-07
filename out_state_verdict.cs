@@ -14,7 +14,7 @@ namespace simplePackageFilter
         public IBus_blacklist_ruleVerdict_out[] blacklist_input;
 
         [InputBus]
-        public IBus_ITCP_RuleVerdict[] connection_list;
+        public IBus_Process_Verdict_Outgoing[] connection_list;
 
         [InputBus]
         public IBus_Blacklist_out dataOut;
@@ -25,9 +25,9 @@ namespace simplePackageFilter
 
         protected override async Task OnTickAsync()
         {
-            while(!connection_list[0].IsSet_out || !blacklist_input[0].IsSet)
+            while(!connection_list[0].IsSet_outgoing || !blacklist_input[0].IsSet)
             {
-                if(connection_list[0].IsSet_out)
+                if(connection_list[0].IsSet_outgoing)
                 {
                     //set flag to make this stop doing anything
                 }

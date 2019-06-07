@@ -5,6 +5,9 @@ namespace simplePackageFilter
 {
     public class InputSimulator : SimulationProcess
     {
+        [InputBus]
+        public ipv4_verdict_to_sim can_we_send;
+
         [OutputBus]
         public IBus_IPv4_In ipv4 = Scope.CreateBus<IBus_IPv4_In>();
 
@@ -22,6 +25,8 @@ namespace simplePackageFilter
             // updates the Toplevel Inputbus Bus_IPv4
 
             // reads every byte up until the source and destination IP's
+
+            // We collect the entire packet, we wait until we can send and then we send it
             int length = (int)reader.BaseStream.Length;
             for (int j = 0; j < length / 8; j++)
             {
@@ -35,6 +40,13 @@ namespace simplePackageFilter
                     ipv4.DestIP[i] = reader.ReadByte();
                     await ClockAsync();
                 }
+
+                // We have to wait for the ipv4 to be ready to recieve the next package
+                while(!can_we_send.ipv4_ready_flag)
+                {
+                    await ClockAsync();
+                }
+
                 ipv4.ClockCheck = true;
                 await ClockAsync();
                 ipv4.ClockCheck = false;
