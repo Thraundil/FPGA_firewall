@@ -24,7 +24,6 @@ namespace simplePackageFilter
 
             if (((source_uint == incoming_source_uint) && (dest_uint == incoming_dest_uint)) && (port == incoming_port)) {
                 doesItMatch = true;
-                timeout_counter = 10000;
             }
 
             return doesItMatch;
@@ -64,7 +63,7 @@ namespace simplePackageFilter
         private readonly IBus_Update_State update = Scope.CreateOrLoadBus<IBus_Update_State>();
 
         [OutputBus]
-        public IBus_ITCP_RuleVerdict ruleVerdict = Scope.CreateBus<IBus_RuleVerdict_IPV4>();
+        public IBus_Process_Verdict_IPV4 ruleVerdict = Scope.CreateBus<IBus_Process_Verdict_IPV4>();
 
         [OutputBus]
         public IBus_Connection_In_Use in_use = Scope.CreateOrLoadBus<IBus_Connection_In_Use>();
@@ -132,7 +131,7 @@ namespace simplePackageFilter
         private readonly IBus_Update_State update = Scope.CreateOrLoadBus<IBus_Update_State>();
 
         [OutputBus]
-        public IBus_ITCP_RuleVerdict ruleVerdict = Scope.CreateBus<IBus_RuleVerdict_TCP>();
+        public IBus_Process_Verdict_TCP ruleVerdict = Scope.CreateBus<IBus_Process_Verdict_TCP>();
 
         [OutputBus]
         public IBus_Connection_In_Use in_use = Scope.CreateOrLoadBus<IBus_Connection_In_Use>();
@@ -147,7 +146,7 @@ namespace simplePackageFilter
         private int timeout_counter = 10000;
         private bool connection_in_use;
 
-        public Connection_process(byte[] ip_source_in, byte[] ip_dest_in, int port, int ids, IBus_ITCP_In stateful)
+        public Connection_process_TCP_incoming(byte[] ip_source_in, byte[] ip_dest_in, int port, int ids, IBus_ITCP_In stateful)
         {
             Port_in     = port;
             Ip_source   = ip_source_in;
@@ -217,7 +216,7 @@ namespace simplePackageFilter
         private readonly IBus_Update_State update = Scope.CreateOrLoadBus<IBus_Update_State>();
 
         [OutputBus]
-        public IBus_ITCP_RuleVerdict ruleVerdict = Scope.CreateBus<IBus_RuleVerdict_Outgoing>();
+        public IBus_Process_Verdict_Outgoing ruleVerdict = Scope.CreateBus<IBus_Process_Verdict_Outgoing>();
 
         [OutputBus]
         public IBus_Connection_In_Use in_use = Scope.CreateOrLoadBus<IBus_Connection_In_Use>();
@@ -229,7 +228,7 @@ namespace simplePackageFilter
         private readonly int my_id;
 
         private bool connection_in_use;
-        public Connection_process(byte[] ip_source_in, byte[] ip_dest_in, int port, int ids, IBus_Blacklist_out data_Out)
+        public Connection_process_outgoing(byte[] ip_source_in, byte[] ip_dest_in, int port, int ids, IBus_Blacklist_out data_Out)
 
         {
             Port_in = port;

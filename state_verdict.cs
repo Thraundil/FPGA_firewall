@@ -47,6 +47,8 @@ namespace simplePackageFilter
 
         bool out_bool = true;
 
+        uint counter_id = 1;
+
         // Constructor         
         public Final_check_state(IBus_ITCP_RuleVerdict[] busList_in, IBus_ruleVerdict_In[] rule_list_in, IBus_blacklist_ruleVerdict_out[] blacklist_bool,
             IBus_Blacklist_out data_Out, IBus_ITCP_In state)
@@ -67,89 +69,8 @@ namespace simplePackageFilter
             update.Flag = false;
             update.Flag_2 = false;
 
-
-            if (connection_list[0].IsSet_ipv4)
-            {
-                // Checks if any rule process returns TRUE.
-                //my_bool = busList.Any(val => val.Accepted);
-                // Need to just OR them all 
-                for (int i = 0; i < connection_list.Length; i++)
-                {
-                    connection_bool |= connection_list[i].Accepted_ipv4;
-                }
-                final_say_ipv4.Accepted = true;
-
-                // Accept the incoming package
-                if (connection_bool)
-                {
-                    final_say_ipv4.Accepted = true;
-                    Console.WriteLine("The ipv4 header connection already exists");
-                }
-                else
-                {
-                    for (int i = 0; i < rule_list.Length; i++)
-                    {
-                        rule_bool |= rule_list[i].ipv4_Accepted;
-                    }
-                    if (rule_bool) // And some flags are correct - in parituclar the syn flag
-                    {
-                        Console.WriteLine("The ipv4 header matches a rule or a connection");
-                        // do more stuff herel
-                        final_say_ipv4.Accepted = true;
-                    }
-                    else
-                    {
-                        Console.WriteLine("The ipv4 header does not match a rule or connection");
-                        final_say_ipv4.Accepted = false;
-                    }
-                }
-                connection_bool = false;
-                rule_bool = false;
-            }
-            if(connection_list[0].IsSet_state)
-            {
-                for (int i = 0; i < connection_list.Length; i++)
-                {
-                    connection_bool |= connection_list[i].Accepted_state;
-                }
-                final_say_tcp_in.Valid = true;
-
-                // Accept the incoming package
-                if (connection_bool)
-                {
-                    final_say_tcp_in.Accept_or_deny = true;
-                    Console.WriteLine("The tcp connection already exists");
-                }
-                else
-                {
-                    for (int i = 0; i < rule_list.Length; i++)
-                    {
-                        rule_bool |= rule_list[i].tcp_Accepted;
-                    }
-                    if (rule_bool) // And some flags are correct - in parituclar the syn flag
-                    {
-                        Console.WriteLine("The tcp connection does not exist but matches a whitelisted rule");
-                        // do more stuff herel
-                        final_say_tcp_in.Accept_or_deny = true;
-                        update.Flag = true;
-                        update.SourceIP = stateful_in.SourceIP;
-                        update.DestIP = stateful_in.DestIP;
-                        update.Port = stateful_in.Port;
-                        update.Id = 1; // Fix this!!!l
-                    }
-                    else
-                    {
-                        Console.WriteLine("The tcp connection does neither match a connection or a rule");
-                        final_say_tcp_in.Accept_or_deny = false;
-                    }
-                }
-                connection_bool = false;
-                rule_bool = false;
-            }
             if(connection_list[0].IsSet_out)
             {
-                Console.WriteLine("damn");
-                Console.WriteLine(blacklist_input[0].IsSet);
                 if(blacklist_input[0].IsSet)
                 {
                     // Checks if any rule process returns TRUE.
@@ -168,7 +89,7 @@ namespace simplePackageFilter
                         {
                             connection_bool |= connection_list[i].Accepted_out;
                         }
-                        final_say_tcp_in.Valid = true;
+                        final_say_out.Valid = true;
 
                         if (connection_bool)
                         {
@@ -182,7 +103,7 @@ namespace simplePackageFilter
                             update.SourceIP_2 = stateful_in.SourceIP;
                             update.DestIP_2 = stateful_in.DestIP;
                             update.Port_2 = stateful_in.Port;
-                            update.Id_2 = 2; // Fix this!!!l
+                            update.Id_2 = 2; // Fix this!!!
                         }
                         connection_bool = false;
                     }

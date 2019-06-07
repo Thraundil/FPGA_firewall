@@ -23,13 +23,6 @@ namespace simplePackageFilter
             _ = rules.accepted_destinations.Length;
 
 
-            // ************* TEST AREA **********************
-            Console.WriteLine("*** QUICK TESTS START ***");
-
-            Console.WriteLine("*** QUICK TESTS STOP ***");
-            // ************* TEST AREA **********************
-
-
             using (var sim = new Simulation())
             {
                 sim
@@ -68,8 +61,12 @@ namespace simplePackageFilter
                 // Blacklist simulator
                 // var Final_verdict_blacklist = new Final_check_Blacklist(Bus_array_IP_blacklist);
 
-                //                Bus array for the exsisting connections
-                IBus_ITCP_RuleVerdict[] Bus_array_connections = new IBus_ITCP_RuleVerdict[max_number_connections];
+                // Bus array for the exsisting connections
+                IBus_Process_Verdict_TCP[] tcp_connections = new IBus_Process_Verdict_TCP[max_number_connections];
+                IBus_Process_Verdict_IPV4[] ipv4_connections = new IBus_Process_Verdict_IPV4[max_number_connections];
+                IBus_Process_Verdict_Outgoing[] outgoing_connections = new IBus_Process_Verdict_Outgoing[max_number_connections];
+
+
                 IBus_Connection_In_Use[] process_in_use = new IBus_Connection_In_Use[max_number_connections];
 
                 // Empty byte-array for the Connection_process
@@ -83,13 +80,20 @@ namespace simplePackageFilter
                 for (int i = 0; i < max_number_connections; i++)
                 {
                     // Inizialise every process to some default value that can never be matched
-                    var temp = new Connection_process(emptyByteArray, emptyByteArray, 0, i, tcp_in.tcpBus, ipv4_in.ipv4, ipv4_out.ipv4);
-                    process_in_use[i] = temp.in_use;
-                    Bus_array_connections[i] = temp.ruleVerdict;
+                    var temp_ipv4 = new Connection_process_IPV4_incoming(emptyByteArray, emptyByteArray,i,ipv4_in.ipv4);
+                    var temp_tcp = new Connection_process_TCP_incoming(emptyByteArray, emptyByteArray, 0, i, tcp_in.tcpBus);
+                    var temp_out = new Connection_process_outgoing(emptyByteArray, emptyByteArray, 0, i,ipv4_out.ipv4);
+
+                    //process_in_use[i] = temp_tcp.in_use;
+                    tcp_connections[i] = temp_tcp.ruleVerdict;
+                    ipv4_connections[i] = temp_ipv4.ruleVerdict;
+                    //outgoing_connections = temp_out.ruleVerdict;
+
                 }
 
-                var final_verdict_tcP = new Final_check_state(Bus_array_connections, Bus_array_IP_whitelist, Bus_array_IP_blacklist, ipv4_out.ipv4, tcp_in.tcpBus);
-
+                //var final_verdict_tcP = new Final_check_state(Bus_array_connections, Bus_array_IP_whitelist, Bus_array_IP_blacklist, ipv4_out.ipv4, tcp_in.tcpBus);
+                var Ipv4_state_verdict = new Ipv4_state_verdict(ipv4_connections, ipv4_in.ipv4, "rule processes here!")
+                // var final_verdict_outgoing = 
                 sim.Run();
             }
         }

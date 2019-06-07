@@ -7,6 +7,12 @@ using SME;
 
 namespace simplePackageFilter
 {
+    [TopLevelInputBus]
+    public interface ipv4_verdict_to_sim : IBus
+    {
+        bool ipv4_ready_flag { get; set; }
+    }
+
     [InputBus]
     public interface IBus_Connection_In_Use : IBus
     {
@@ -28,7 +34,7 @@ namespace simplePackageFilter
         [InitialValue(false)]
         bool Flag { get; set; }
 
-        int Id { get; set; }
+        uint Id { get; set; }
 
         // We can need to update 2 entries in the state at the same time
 
@@ -63,7 +69,7 @@ namespace simplePackageFilter
 
     }
     [TopLevelInputBus]
-    public interface IBus_RuleVerdict_IPV4 : IBus
+    public interface IBus_Process_Verdict_IPV4 : IBus
     {
         [InitialValue(false)]
         bool Accepted_ipv4 { get; set; }
@@ -71,22 +77,10 @@ namespace simplePackageFilter
         [InitialValue(false)]
         bool IsSet_ipv4 { get; set; }
 
-        [InitialValue(false)]
-        bool Accepted_state { get; set; }
-
-        [InitialValue(false)]
-        bool IsSet_state { get; set; }
-
-        [InitialValue(false)]
-        bool Accepted_out { get; set; }
-
-        [InitialValue(false)]
-        bool IsSet_out { get; set; }
-
     }
 
     [TopLevelInputBus]
-    public interface IBus_RuleVerdict_TCP : IBus
+    public interface IBus_Process_Verdict_TCP : IBus
     {
         [InitialValue(false)]
         bool Accepted_state { get; set; }
@@ -96,7 +90,7 @@ namespace simplePackageFilter
     }
 
     [TopLevelInputBus]
-    public interface IBus_RuleVerdict_Outgoing : IBus
+    public interface IBus_Process_Verdict_Outgoing : IBus
     {
         [InitialValue(false)]
         bool Accepted_ipv4 { get; set; }
