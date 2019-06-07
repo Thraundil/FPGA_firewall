@@ -15,8 +15,8 @@ namespace simplePackageFilter
         public IBus_IPv4_In ipv4_in;
 
         // Input bus to check if we need to update state
-        [InputBus]
-        private readonly IBus_Update_State update = Scope.CreateOrLoadBus<IBus_Update_State>();
+        //[InputBus]
+        //private readonly IBus_Update_State update = Scope.CreateOrLoadBus<IBus_Update_State>();
 
         [OutputBus]
         public IBus_Process_Verdict_IPV4 ruleVerdict = Scope.CreateBus<IBus_Process_Verdict_IPV4>();
@@ -44,20 +44,20 @@ namespace simplePackageFilter
             ruleVerdict.IsSet_ipv4    = ipv4_in.ClockCheck;
             ruleVerdict.Accepted_ipv4 = false;
 
-            if (update.Flag && update.Id == my_id)
-            {
-                // overwrite it settings here
-                connection_in_use = true;
-                in_use.Id = my_id;
-                in_use.In_use = true;
+            //if (update.Flag && update.Id == my_id)
+            //{
+             //   // overwrite it settings here
+             //   connection_in_use = true;
+              //  in_use.Id = my_id;
+              //  in_use.In_use = true;
 
                 // Update the state process with incoming information
-                for (int k = 0; k<4; k++)
-                {
-                    Ip_source[k] = update.SourceIP[k];
-                    Ip_dest[k]   = update.DestIP[k];
-                }
-            }
+              //  for (int k = 0; k<4; k++)
+              //  {
+              //      Ip_source[k] = update.SourceIP[k];
+              //      Ip_dest[k]   = update.DestIP[k];
+              //  }
+              // }
 
             if (connection_in_use)
             {

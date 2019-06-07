@@ -64,7 +64,7 @@ namespace simplePackageFilter
                 await ClockAsync();
 
             // They should all always be true :)
-            Console.WriteLine("{0} {1} {2} {3} {4}", connection_list[0].IsSet_ipv4, connection_list[1].IsSet_ipv4, connection_list[2].IsSet_ipv4, connection_list[3].IsSet_ipv4);
+            //Console.WriteLine("{0} {1} {2} {3}", connection_list[0].IsSet_ipv4, connection_list[1].IsSet_ipv4, connection_list[2].IsSet_ipv4, connection_list[3].IsSet_ipv4);
 
             // we have recieved a msg from both the data(simulator process) and the state processes
             // so we are good to go

@@ -10,6 +10,7 @@ namespace simplePackageFilter
     [TopLevelInputBus]
     public interface ipv4_verdict_to_sim : IBus
     {
+        [InitialValue(false)]
         bool ipv4_ready_flag { get; set; }
     }
 

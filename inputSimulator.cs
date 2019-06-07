@@ -6,7 +6,7 @@ namespace simplePackageFilter
     public class InputSimulator : SimulationProcess
     {
         [InputBus]
-        public ipv4_verdict_to_sim can_we_send;
+        public ipv4_verdict_to_sim can_we_send = Scope.CreateOrLoadBus<ipv4_verdict_to_sim>();
 
         [OutputBus]
         public IBus_IPv4_In ipv4 = Scope.CreateBus<IBus_IPv4_In>();
