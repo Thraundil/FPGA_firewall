@@ -1,9 +1,9 @@
 using System;
-
+using SME;
 
 namespace simplePackageFilter
 {
-    public static class Shared_Functions
+    public static class Shared_functions
     {
         // Compares if incoming IP 'destination' is in the whitelisted range.
         public static bool IsIPinRange(byte[] low_source, byte[] high_source, byte[] low_dest,
