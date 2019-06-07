@@ -103,7 +103,7 @@ namespace simplePackageFilter
                     update.DestIP = stateful_in.DestIP;
                     update.Port = stateful_in.Port;
                     update.Id = counter_id; // This is not the correct way to do it
-                    counter_id += 1; 
+                    counter_id += 1;
                     //Console.WriteLine("{0} {1} {2} {3}", stateful_in.SourceIP[0], stateful_in.SourceIP[1], stateful_in.SourceIP[2], stateful_in.SourceIP[3]);
                     //Console.WriteLine("{0} {1} {2} {3}", stateful_in.DestIP[0], stateful_in.DestIP[1], stateful_in.DestIP[2], stateful_in.DestIP[3]);
                     //Console.WriteLine("{0}", stateful_in.Port);

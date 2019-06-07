@@ -14,7 +14,7 @@ namespace simplePackageFilter
         {
             // General classes, compiled before simulation
             var rules = new Rules();
-            _ = new Print();
+//            _ = new Print();
 
             // Number of rules, 
             int len_sources = rules.accepted_sources.Length;
@@ -75,19 +75,11 @@ namespace simplePackageFilter
 
                 IBus_Connection_In_Use[] process_in_use = new IBus_Connection_In_Use[max_number_connections];
 
-                // Empty byte-array for the Connection_process
-                var emptyByteArray = new byte[4];
-                for (int i = 0; i < emptyByteArray.Length; i++)
-                {
-                    emptyByteArray[i] = 0x00;
-                }
-
-
                 for (int i = 0; i < max_number_connections; i++)
                 {
                     // Inizialise every process to some default value that can never be matched
-                    var temp_ipv4 = new Connection_process_IPV4_incoming(emptyByteArray, emptyByteArray,i,ipv4_in.ipv4);
-                    var temp_tcp = new Connection_process_TCP_incoming(emptyByteArray, emptyByteArray, 0, i, tcp_in.tcpBus);
+                    var temp_ipv4 = new Connection_process_IPV4_incoming(new byte[4] { 0x00, 0x00, 0x00, 0x00 }, new byte[4] { 0x00, 0x00, 0x00, 0x00 },i,ipv4_in.ipv4);
+                    var temp_tcp = new Connection_process_TCP_incoming(new byte[4] { 0x00, 0x00, 0x00, 0x00 }, new byte[4] { 0x00, 0x00, 0x00, 0x00 }, 0, i, tcp_in.tcpBus);
                     //var temp_out = new Connection_process_outgoing(emptyByteArray, emptyByteArray, 0, i,ipv4_out.ipv4);
 
                     process_in_use[i] = temp_tcp.in_use;

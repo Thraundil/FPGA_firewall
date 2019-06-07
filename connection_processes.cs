@@ -127,9 +127,8 @@ namespace simplePackageFilter
                 // Update the state process with incoming information
                 for (int k = 0; k < 4; k++)
                 {
-                    //Console.WriteLine(update.DestIP[k]);
-                    Ip_source[k] = 5; // update.SourceIP[k];
                     Ip_dest[k]   = update.DestIP[k];
+                    Ip_source[k] = update.SourceIP[k];
                 }
                 // Updates port
                 Port_in = update.Port;
@@ -149,7 +148,7 @@ namespace simplePackageFilter
                 if (stateful_in.ThatOneVariableThatSaysIfWeAreDone)
                 {
                     Console.WriteLine("{0} {1} {2} {3}", Ip_source[0], Ip_source[1], Ip_source[2], Ip_source[3]);
-                    //Console.WriteLine("{0} {1} {2} {3}", stateful_in.DestIP[0], stateful_in.DestIP[1], stateful_in.DestIP[2], stateful_in.DestIP[3]);
+                    Console.WriteLine("{0} {1} {2} {3}", Ip_dest[0], Ip_dest[1], Ip_dest[2], Ip_dest[3]);
                     //Console.WriteLine("{0}", stateful_in.Port);
                     if (Shared_functions.DoesConnectExist(Ip_source, Ip_dest, Port_in, stateful_in.SourceIP, stateful_in.DestIP, stateful_in.Port))
                     {
