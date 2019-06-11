@@ -7,6 +7,7 @@ using System.Net;
 
 namespace simplePackageFilter
 {
+    [ClockedProcess]
     public class Rule_Process_IPV4 : SimpleProcess
     {
 

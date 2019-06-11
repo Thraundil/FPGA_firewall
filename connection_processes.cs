@@ -7,6 +7,7 @@ using SME;
 
 namespace simplePackageFilter
 {
+    [ClockedProcess]
     public class Connection_process_IPV4_incoming : SimpleProcess
     {
 
