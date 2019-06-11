@@ -81,7 +81,7 @@ namespace simplePackageFilter
             if (connection_bool_tcp)
             {
                 final_say_tcp_in.Accept_or_deny = true;
-                Console.WriteLine("The tcp connection already exists");
+                Console.WriteLine("Incoming TCP:      Matches (connection)");
                 // we do nothing if the connection already exist
             }
             // if the state processes did not find a match check the rules processes
@@ -93,7 +93,7 @@ namespace simplePackageFilter
                 }
                 if (rule_bool) // And some flags are correct - in parituclar the syn flag
                 {
-                    Console.WriteLine("The tcp connection does not exist but matches a whitelisted rule");
+                    Console.WriteLine("Incoming TCP:      Matches (whitelist)");
                     final_say_tcp_in.Accept_or_deny = true;
                     update_tcp.Flag = true;
                     update_tcp.set_in_use = true;
@@ -108,7 +108,7 @@ namespace simplePackageFilter
                 }
                 else
                 {
-                    Console.WriteLine("The tcp connection does neither match a connection or a rule");
+                    Console.WriteLine("Incoming TCP:      Blocked");
                     final_say_tcp_in.Accept_or_deny = false;
                 }
             }

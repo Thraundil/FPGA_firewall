@@ -80,12 +80,12 @@ namespace simplePackageFilter
                 }
                 if (connection_bool_out)
                 {
-                    Console.WriteLine("The outgoing packet is already part of a connection");
+                    Console.WriteLine("Outgoing Package:  Exists (state) ");
                     // and so nothing needs to be done
                 }
                 else
                 {
-                    Console.WriteLine("The outgoing packet is not part of a connection!");
+                    Console.WriteLine("Outgoing Package:  New (outgoing)");
                     // and so we must update the stack accordingly
                     update_out.Flag = true;
                     update_out.set_in_use = true;
@@ -102,12 +102,10 @@ namespace simplePackageFilter
             }
             else
             {
-                Console.WriteLine("blacklist denied the package");
+                Console.WriteLine("Outgoing Package:  Blocked (Blacklist)");
                 final_say_out.Valid = true;
                 final_say_out.Accept_or_deny = false;
             }
-
-
         }
     }
 }

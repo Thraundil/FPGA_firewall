@@ -82,7 +82,7 @@ namespace simplePackageFilter
                 if (connection_bool)
                 {
                     final_say_ipv4.Accepted = true;
-                    Console.WriteLine("The ipv4 header matches a connection");
+                    Console.WriteLine("Incoming IPV4:     Matches (connection)");
                 }
                 else
                 {
@@ -92,12 +92,12 @@ namespace simplePackageFilter
                     }
                     if (rule_bool)
                     {
-                        Console.WriteLine("The ipv4 header matches a rule");
+                        Console.WriteLine("Incoming IPV4:     Matches (whitelist)");
                         final_say_ipv4.Accepted = true;
                     }
                     else
                     {
-                        Console.WriteLine("The ipv4 header does not match a rule or connection");
+                        Console.WriteLine("Incoming IPV4:     Blocked");
                         //final_say_ipv4.Accepted = false;
                         // no need to set the flag to false since it will already be false
                     }
