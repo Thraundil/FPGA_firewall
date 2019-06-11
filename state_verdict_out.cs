@@ -80,12 +80,12 @@ namespace simplePackageFilter
                 }
                 if (connection_bool_out)
                 {
-                    Console.WriteLine("Outgoing Package:  Exists (state) ");
+                    Console.WriteLine("Outgoing Package:  Exists  (state) ");
                     // and so nothing needs to be done
                 }
                 else
                 {
-                    Console.WriteLine("Outgoing Package:  New (outgoing)");
+                    Console.WriteLine("Outgoing Package:  New     (outgoing)");
                     // and so we must update the stack accordingly
                     update_out.Flag = true;
                     update_out.set_in_use = true;

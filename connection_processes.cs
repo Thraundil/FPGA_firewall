@@ -269,7 +269,7 @@ namespace simplePackageFilter
 
             if (connection_in_use && dataOut.ReadyToWorkFlag)
             {
-                if (Shared_functions.DoesConnectExist(Ip_source, Ip_dest, Port_in, dataOut.SourceIP, dataOut.DestIP, dataOut.SourcePort))
+                if (Shared_functions.DoesConnectExist(Ip_source, Ip_dest, Port_in, dataOut.DestIP, dataOut.SourceIP, dataOut.SourcePort))
                 {
                     ruleVerdict.Accepted_outgoing = true;
                 }
