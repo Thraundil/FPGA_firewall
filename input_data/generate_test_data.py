@@ -6,9 +6,10 @@ ipv4_incoming = [
                  ["45.45.45.45"    , "1.1.1.1"], # False
                  ["130.226.237.173", "1.1.1.1"], # True
                  ["120.120.120.120", "1.1.1.1"], # True
-                 ["2.2.2.2"        , "1.1.1.1"], # False
+                 ["2.2.2.2"        , "1.1.1.1"], # True (IF outgoing 2.2.2.2 was saved to state)
                  ["91.224.211.80"  , "1.1.1.1"], # True
                  ["45.45.45.45"    , "1.1.1.1"], # True (IF outgoing 45.45.45.45 was saved to state)
+                 ["99.99.99.99"    , "1.1.1.1"], # False
                  ["120.120.120.120", "1.1.1.1"]  # True
                 ]
 
@@ -16,11 +17,13 @@ ipv4_incoming = [
 #   PLEASE NOTE, for testing purposes, ONLY include the above
 #   ipv4_incoming addresses that WILL pass the whitelist/state.
 tcp_incoming  = [
+                 ["0.0.0.0", "0.0.0.0", "0", "0"],          # False
                  ["130.226.237.173", "1.1.1.1", "42", "2"], # True
                  ["120.120.120.120", "1.1.1.1", "42", "2"], # True
-                 ["0.0.0.0", "0.0.0.0", "0", "0"],          # False
-                 ["45.45.45.45"    , "1.1.1.1", "42", "2"], # True (IF outgoing 45.45.45.45 was saved to state)
+                 ["2.2.2.2"        , "1.1.1.1", "42", "2"], # True
                  ["91.224.211.80"  , "1.1.1.1", "42", "2"], # True
+                 ["45.45.45.45"    , "1.1.1.1", "42", "2"], # True (IF outgoing 45.45.45.45 was saved to state)
+                 ["0.0.0.0", "0.0.0.0", "0", "0"],          # False
                  ["120.120.120.120", "1.1.1.1", "42", "2"]  # True
                 ]
 
