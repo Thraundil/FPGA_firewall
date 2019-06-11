@@ -21,15 +21,26 @@ namespace simplePackageFilter
         bool tcp_ready_flag { get; set; }
     }
 
+    [TopLevelInputBus]
+    public interface out_verdict_to_sim : IBus
+    {
+        [InitialValue(false)]
+        bool out_ready_flag { get; set; }
+    }
+
+
+
     [InputBus]
     public interface IBus_Connection_In_Use : IBus
     {
         bool In_use { get; set; }
 
         int Id { get; set; }
+
+        bool timeout { get; set; }
     }
     [InputBus]
-    public interface IBus_Update_State : IBus
+    public interface IBus_Update_State_tcp : IBus
     {
         [FixedArrayLength(4)]
         IFixedArray<byte> SourceIP { get; set; }
@@ -42,22 +53,31 @@ namespace simplePackageFilter
         [InitialValue(false)]
         bool Flag { get; set; }
 
-        uint Id { get; set; }
-
-        // We can need to update 2 entries in the state at the same time
-
-        [FixedArrayLength(4)]
-        IFixedArray<byte> SourceIP_2 { get; set; }
-
-        [FixedArrayLength(4)]
-        IFixedArray<byte> DestIP_2 { get; set; }
-
-        int Port_2 { get; set; }
         [InitialValue(false)]
-        bool Flag_2 { get; set; }
+        bool set_in_use { get; set; }
 
-        int Id_2 { get; set; }
+        uint Id { get; set; }
     }
+
+    public interface IBus_Update_State_out : IBus
+    {
+        [FixedArrayLength(4)]
+        IFixedArray<byte> SourceIP { get; set; }
+
+        [FixedArrayLength(4)]
+        IFixedArray<byte> DestIP { get; set; }
+
+        int Port { get; set; }
+
+        [InitialValue(false)]
+        bool Flag { get; set; }
+
+        [InitialValue(false)]
+        bool set_in_use { get; set; }
+
+        uint Id { get; set; }
+    }
+
     [TopLevelInputBus]
     public interface IBus_ITCP_In : IBus
     {
@@ -168,19 +188,6 @@ namespace simplePackageFilter
         bool tcp_IsSet { get; set; }
     }
 
-    [TopLevelOutputBus]
-    public interface IBus_finalVerdict_In : IBus
-    {
-        [InitialValue(false)]
-        bool ipv4_Accept_or_deny { get; set; }
-        [InitialValue(false)]
-        bool ipv4_Valid { get; set; }
-
-        [InitialValue(false)]
-        bool tcp_Accept_or_deny { get; set; }
-        [InitialValue(false)]
-        bool tcp_Valid { get; set; }
-    }
     [TopLevelInputBus]
     public interface IBus_Blacklist_out : IBus
     {

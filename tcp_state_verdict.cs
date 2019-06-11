@@ -18,16 +18,19 @@ namespace simplePackageFilter
         [InputBus]
         public IBus_ITCP_In stateful_in;
 
+        [InputBus]
+        IBus_Connection_In_Use in_use; 
+
         [OutputBus]
         public IBus_finalVerdict_tcp_In final_say_tcp_in = Scope.CreateBus<IBus_finalVerdict_tcp_In>();
 
         [OutputBus]
-        private readonly IBus_Update_State update = Scope.CreateOrLoadBus<IBus_Update_State>();
+        public IBus_Update_State_tcp update_tcp = Scope.CreateOrLoadBus<IBus_Update_State_tcp>();
 
         [OutputBus]
         public tcp_verdict_to_sim to_sim = Scope.CreateOrLoadBus<tcp_verdict_to_sim>();
 
-        bool connection_bool = false;
+        bool connection_bool_tcp = false;
 
         bool rule_bool = false;
 
@@ -47,10 +50,10 @@ namespace simplePackageFilter
             // reset the flags
             final_say_tcp_in.Valid = false; // valid is
             final_say_tcp_in.Accept_or_deny = false; // did we 
-            connection_bool = false; // see if you are in the connection set
+            connection_bool_tcp = false; // see if you are in the connection set
             rule_bool = false; // see if you are in the rule set
             to_sim.tcp_ready_flag = true; // We are ready to receive here! Right?
-            update.Flag = false;
+            update_tcp.Flag = false;
             // need a flag to say if we are ready to recieve the next packet from the group! :)
 
 
@@ -62,30 +65,24 @@ namespace simplePackageFilter
             // until the rules and the connection processes have responded
             to_sim.tcp_ready_flag = false;
 
-            while (!rule_list[0].tcp_IsSet)
+            while(!rule_list[0].tcp_IsSet || !connection_list[0].IsSet_state)
             {
                 await ClockAsync();
             }
-
-            // we wait for both of them before progressing
-            while (!connection_list[0].IsSet_state)
-            {
-                await ClockAsync();
-            }
-            // we have gotten a msg from everybody and are ready to work
 
             // Check if the state processes found a match
             for (int i = 0; i < connection_list.Length; i++)
             {
-                connection_bool |= connection_list[i].Accepted_state;
+                connection_bool_tcp |= connection_list[i].Accepted_state;
             }
             final_say_tcp_in.Valid = true;
 
             // Accept the incoming package
-            if (connection_bool)
+            if (connection_bool_tcp)
             {
                 final_say_tcp_in.Accept_or_deny = true;
                 Console.WriteLine("The tcp connection already exists");
+                // we do nothing if the connection already exist
             }
             // if the state processes did not find a match check the rules processes
             else
@@ -98,11 +95,12 @@ namespace simplePackageFilter
                 {
                     Console.WriteLine("The tcp connection does not exist but matches a whitelisted rule");
                     final_say_tcp_in.Accept_or_deny = true;
-                    update.Flag = true;
-                    update.SourceIP = stateful_in.SourceIP;
-                    update.DestIP = stateful_in.DestIP;
-                    update.Port = stateful_in.Port;
-                    update.Id = counter_id; // This is not the correct way to do it
+                    update_tcp.Flag = true;
+                    update_tcp.set_in_use = true;
+                    update_tcp.SourceIP = stateful_in.SourceIP;
+                    update_tcp.DestIP = stateful_in.DestIP;
+                    update_tcp.Port = stateful_in.Port;
+                    update_tcp.Id = counter_id; // This is not the correct way to do it
                     counter_id += 1;
                     //Console.WriteLine("{0} {1} {2} {3}", stateful_in.SourceIP[0], stateful_in.SourceIP[1], stateful_in.SourceIP[2], stateful_in.SourceIP[3]);
                     //Console.WriteLine("{0} {1} {2} {3}", stateful_in.DestIP[0], stateful_in.DestIP[1], stateful_in.DestIP[2], stateful_in.DestIP[3]);
@@ -114,7 +112,7 @@ namespace simplePackageFilter
                     final_say_tcp_in.Accept_or_deny = false;
                 }
             }
-            connection_bool = false;
+            connection_bool_tcp = false;
             rule_bool = false;
         }
     }

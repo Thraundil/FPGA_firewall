@@ -6,6 +6,10 @@ namespace simplePackageFilter
 {
     public class OutputSimulator : SimulationProcess
     {
+
+        [InputBus]
+        public out_verdict_to_sim from_out = Scope.CreateOrLoadBus<out_verdict_to_sim>();
+
         [OutputBus]
         public IBus_Blacklist_out ipv4 = Scope.CreateBus<IBus_Blacklist_out>();
 
@@ -48,9 +52,15 @@ namespace simplePackageFilter
                 ipv4.Flags = reader.ReadByte();
                 await ClockAsync();
 
+                while (!from_out.out_ready_flag)
+                {
+                    await ClockAsync();
+                }
+
                 ipv4.ReadyToWorkFlag = true;
                 await ClockAsync();
                 ipv4.ReadyToWorkFlag = false;
+                await ClockAsync();
             }
         }
     }

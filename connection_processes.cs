@@ -15,14 +15,14 @@ namespace simplePackageFilter
         public IBus_IPv4_In ipv4_in;
 
         // Input bus to check if we need to update state
-        //[InputBus]
-        //private readonly IBus_Update_State update = Scope.CreateOrLoadBus<IBus_Update_State>();
+        [InputBus]
+        private readonly IBus_Update_State_tcp update_tcp = Scope.CreateOrLoadBus<IBus_Update_State_tcp>();
+
+        [InputBus]
+        private readonly IBus_Update_State_out update_out = Scope.CreateOrLoadBus<IBus_Update_State_out>();
 
         [OutputBus]
         public IBus_Process_Verdict_IPV4 ruleVerdict = Scope.CreateBus<IBus_Process_Verdict_IPV4>();
-
-        [OutputBus]
-        public IBus_Connection_In_Use in_use = Scope.CreateOrLoadBus<IBus_Connection_In_Use>();
 
         // Variable declerations for the constructor
         private byte[] Ip_source { get; set; }
@@ -44,20 +44,31 @@ namespace simplePackageFilter
             ruleVerdict.IsSet_ipv4    = ipv4_in.ClockCheck;
             ruleVerdict.Accepted_ipv4 = false;
 
-            //if (update.Flag && update.Id == my_id)
-            //{
-             //   // overwrite it settings here
-             //   connection_in_use = true;
-              //  in_use.Id = my_id;
-              //  in_use.In_use = true;
+            if (update_tcp.Flag && update_tcp.Id == my_id)
+            {
+                // overwrite it settings here
+                connection_in_use = update_tcp.set_in_use;
 
                 // Update the state process with incoming information
-              //  for (int k = 0; k<4; k++)
-              //  {
-              //      Ip_source[k] = update.SourceIP[k];
-              //      Ip_dest[k]   = update.DestIP[k];
-              //  }
-              // }
+                for (int k = 0; k<4; k++)
+                {
+                    Ip_source[k] = update_tcp.SourceIP[k];
+                    Ip_dest[k]   = update_tcp.DestIP[k];
+                }
+            }
+
+            if (update_out.Flag && update_out.Id == my_id)
+            {
+                // overwrite it settings here
+                connection_in_use = update_out.set_in_use;
+
+                // Update the state process with incoming information
+                for (int k = 0; k < 4; k++)
+                {
+                    Ip_source[k] = update_out.SourceIP[k];
+                    Ip_dest[k] = update_out.DestIP[k];
+                }
+            }
 
             if (connection_in_use)
             {
@@ -84,13 +95,16 @@ namespace simplePackageFilter
 
         // Input bus to check if we need to update state
         [InputBus]
-        private readonly IBus_Update_State update = Scope.CreateOrLoadBus<IBus_Update_State>();
+        private readonly IBus_Update_State_tcp update_tcp = Scope.CreateOrLoadBus<IBus_Update_State_tcp>();
+
+        [InputBus]
+        private readonly IBus_Update_State_out update_out = Scope.CreateOrLoadBus<IBus_Update_State_out>();
 
         [OutputBus]
         public IBus_Process_Verdict_TCP ruleVerdict = Scope.CreateBus<IBus_Process_Verdict_TCP>();
 
         [OutputBus]
-        public IBus_Connection_In_Use in_use = Scope.CreateOrLoadBus<IBus_Connection_In_Use>();
+        public IBus_Connection_In_Use in_use = Scope.CreateBus<IBus_Connection_In_Use>();
 
         // Variables for the constructor
         byte[] Ip_source { get; set; }
@@ -117,22 +131,44 @@ namespace simplePackageFilter
             ruleVerdict.IsSet_state = stateful_in.ThatOneVariableThatSaysIfWeAreDone;
             ruleVerdict.Accepted_state = false;
 
-            if (update.Flag && (update.Id == my_id))
+            if (update_tcp.Flag && update_tcp.Id == my_id)
             {
                 // overwrite it settings here
-                connection_in_use = true;
+                connection_in_use = update_tcp.set_in_use;
                 in_use.Id = my_id;
-                in_use.In_use = true;
-                
+                in_use.In_use = update_tcp.set_in_use;
+
                 // Update the state process with incoming information
                 for (int k = 0; k < 4; k++)
                 {
-                    Ip_dest[k]   = update.DestIP[k];
-                    Ip_source[k] = update.SourceIP[k];
+                    Ip_source[k] = update_tcp.SourceIP[k];
+                    Ip_dest[k] = update_tcp.DestIP[k];
                 }
-                // Updates port
-                Port_in = update.Port;
+                Port_in = update_tcp.Port;
+                //Console.WriteLine("tcp_in");
+                //Console.WriteLine("{0} {1} {2} {3}", Ip_source[0], Ip_source[1], Ip_source[2], Ip_source[3]);
+                //Console.WriteLine("{0} {1} {2} {3}", Ip_dest[0], Ip_dest[1], Ip_dest[2], Ip_dest[3]);
+                //Console.WriteLine("{0}", stateful_in.Port);
+            }
 
+            if (update_out.Flag && update_out.Id == my_id)
+            {
+                // overwrite it settings here
+                connection_in_use = update_out.set_in_use;
+                in_use.Id = my_id;
+                in_use.In_use = update_out.set_in_use;
+
+                // Update the state process with incoming information
+                for (int k = 0; k < 4; k++)
+                {
+                    Ip_source[k] = update_out.SourceIP[k];
+                    Ip_dest[k] = update_out.DestIP[k];
+                }
+                Port_in = update_out.Port;
+                //Console.WriteLine("outgoing");
+                //Console.WriteLine("{0} {1} {2} {3}", Ip_source[0], Ip_source[1], Ip_source[2], Ip_source[3]);
+                //Console.WriteLine("{0} {1} {2} {3}", Ip_dest[0], Ip_dest[1], Ip_dest[2], Ip_dest[3]);
+                //Console.WriteLine("{0}", stateful_in.Port);
             }
 
             if (connection_in_use)
@@ -147,13 +183,9 @@ namespace simplePackageFilter
                 // Needs to go through all the flags
                 if (stateful_in.ThatOneVariableThatSaysIfWeAreDone)
                 {
-                    Console.WriteLine("{0} {1} {2} {3}", Ip_source[0], Ip_source[1], Ip_source[2], Ip_source[3]);
-                    Console.WriteLine("{0} {1} {2} {3}", Ip_dest[0], Ip_dest[1], Ip_dest[2], Ip_dest[3]);
-                    //Console.WriteLine("{0}", stateful_in.Port);
                     if (Shared_functions.DoesConnectExist(Ip_source, Ip_dest, Port_in, stateful_in.SourceIP, stateful_in.DestIP, stateful_in.Port))
                     {
                         ruleVerdict.Accepted_state = true;
-                        Console.WriteLine("it does!!!");
                     }
                 }
                 timeout_counter -= 1;
@@ -164,21 +196,21 @@ namespace simplePackageFilter
 
 // ****************************************************************************
 
+    [ClockedProcess]
     public class Connection_process_outgoing : SimpleProcess
     {
 
         [InputBus]
         public IBus_Blacklist_out dataOut;
 
-        // Input bus to check if we need to update state
         [InputBus]
-        private readonly IBus_Update_State update = Scope.CreateOrLoadBus<IBus_Update_State>();
+        private readonly IBus_Update_State_tcp update_tcp = Scope.CreateOrLoadBus<IBus_Update_State_tcp>();
+
+        [InputBus]
+        private readonly IBus_Update_State_out update_out = Scope.CreateOrLoadBus<IBus_Update_State_out>();
 
         [OutputBus]
         public IBus_Process_Verdict_Outgoing ruleVerdict = Scope.CreateBus<IBus_Process_Verdict_Outgoing>();
-
-        [OutputBus]
-        public IBus_Connection_In_Use in_use = Scope.CreateOrLoadBus<IBus_Connection_In_Use>();
 
         private byte[] Ip_source { get; set; }
         private byte[] Ip_dest { get; set; }
@@ -206,21 +238,32 @@ namespace simplePackageFilter
             ruleVerdict.Accepted_outgoing = false;
 
 
-            if (update.Flag && update.Id == my_id)
+            if (update_tcp.Flag && update_tcp.Id == my_id)
             {
                 // overwrite it settings here
-                connection_in_use = true;
-                in_use.Id = my_id;
-                in_use.In_use = true;
+                connection_in_use = update_tcp.set_in_use;
 
                 // Update the state process with incoming information
-                for (int k = 0; k<4; k++)
+                for (int k = 0; k < 4; k++)
                 {
-                    Ip_source[k] = update.SourceIP[k];
-                    Ip_dest[k]   = update.DestIP[k];
+                    Ip_source[k] = update_tcp.SourceIP[k];
+                    Ip_dest[k] = update_tcp.DestIP[k];
                 }
-                // Updates port
-                Port_in = update.Port;
+                Port_in = update_tcp.Port;
+            }
+
+            if (update_out.Flag && update_out.Id == my_id)
+            {
+                //overwrite its settings here
+                connection_in_use = update_out.set_in_use;
+
+                //Update the state process with incoming information
+                for (int k = 0; k < 4; k++)
+                {
+                    Ip_source[k] = update_out.SourceIP[k];
+                    Ip_dest[k] = update_out.DestIP[k];
+                }
+                Port_in = update_out.Port;
             }
 
             if (connection_in_use && dataOut.ReadyToWorkFlag)

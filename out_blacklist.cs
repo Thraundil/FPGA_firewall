@@ -7,7 +7,7 @@ using System;
 
 namespace simplePackageFilter
 {
-
+    [ClockedProcess]
     public class Rule_Process_Blacklist : SimpleProcess
     {
         [InputBus]

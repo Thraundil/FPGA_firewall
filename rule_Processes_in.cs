@@ -57,7 +57,7 @@ namespace simplePackageFilter
     }
 
     // ****************************************************************************
-
+    [ClockedProcess]
     public class Rule_Process_TCP : SimpleProcess
     {
 
