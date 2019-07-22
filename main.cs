@@ -28,7 +28,8 @@ namespace simplePackageFilter
                 sim
                     .BuildCSVFile();
                 // CARL/KENNETH FIX PLZ
-                //                    .BuildVHDL();
+//                    .BuildCSVFile()
+//                    .BuildVHDL();
 
                 // The input-simulators (for simulating actual intput/output for tests)
                 var ipv4_in  = new InputSimulator();
