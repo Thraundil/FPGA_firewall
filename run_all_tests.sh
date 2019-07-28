@@ -1,44 +1,27 @@
 #!/usr/bin/env sh
 
-# *** Test_0 ***
-cd "input_data"
-echo "Generating test data..."
-python "../tests/test_0.py"
-echo "Test data generated! \n"
-cd ".."
+# Change this to match the number of tests
+numberOfTests=5
 
-msbuild -nologo -verbosity:q
-cd "bin/Debug"
-echo "************** Test_0 Start ***************"
-mono "sme_example.exe"
-cd '../..'
-echo "************** Test_0 Done ****************"
+touch "tests/output.txt"
+echo "" > 'tests/output.txt'
 
+var="$(seq -s ' ' 0 $numberOfTests)"
+for i in $var
+do
+    cd "input_data"
+    python "../tests/test_$i.py"
+    echo ""
+    cd ".."
 
-# # *** Test_1 ***
-# cd "input_data"
-# echo "Generating test data..."
-# python "../tests/test_1.py"
-# echo "Test data generated! \n"
-# cd ".."
-# 
-# msbuild
-# cd "bin/Debug"
-# echo "************** C# Output ***************"
-# mono "sme_example.exe"
-# cd '../..'
-# 
-# 
-# 
-# # *** Test_2 ***
-# cd "input_data"
-# echo "Generating test data..."
-# python "../tests/test_2.py"
-# echo "Test data generated! \n"
-# cd ".."
-# 
-# msbuild
-# cd "bin/Debug"
-# echo "************** C# Output ***************"
-# mono "sme_example.exe"
-# cd '../..'
+    msbuild -nologo -verbosity:q
+    cd "bin/Debug"
+    echo "************** Test_$i Start ***************" >> '../../tests/output.txt'
+    mono "sme_example.exe" >> '../../tests/output.txt'
+    echo "************** Test Finished ****************" >> '../../tests/output.txt'
+    cd '../..'
+done
+
+# Print results
+cd 'tests'
+python 'test_answers.py'

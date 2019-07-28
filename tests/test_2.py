@@ -3,19 +3,17 @@ import os
 from test_functions import ipv4_in, ipv4_out, tcp_in, white, black
 
 # Test description
-print 'Test_0:'
-print '''Tests the whitelist, by sending packages from both whitelisted and
-         non-whitelisted IPV4 sources only.
-         5 IPV4 packages are received, in which (0 indexed)
-         #1 and #2 are non-whitelisted, and should be blocked.'''
+print 'Test_2:'
+print '''Tests that an incoming non-whitelisted request is denied,
+         but a non-whitelisted request which matches a state connection is not.
+         2 IPV4 requests are sent, in which the first one should fail, and
+         the other should pass, as the state has been updated between the two requests,
+         due to an outgoing request having been sent just after the first incoming request.'''
 
 # IPV4 incoming (Src/Dest)
 ipv4_incoming = [
-                 ["11.0.0.0"     , "1.1.1.1"], # True
-                 ["22.22.22.22"  , "1.1.1.1"], # False
-                 ["9.255.255.255", "1.1.1.1"], # False
-                 ["10.0.0.0"     , "1.1.1.1"], # True
-                 ["20.0.0.0"     , "1.1.1.1"]  # True
+                 ["42.42.42.42", "1.1.1.1"], # False
+                 ["42.42.42.42", "1.1.1.1"] # True
                 ]
 
 # TCP incoming (Src/Dest/Port/syn_ack_flag)
@@ -24,6 +22,7 @@ tcp_incoming  = [
 
 # IPV4 outgoing (Src/Dest/port/syn_ack_flag)
 ipv4_outgoing = [
+                 ["1.1.1.1", "42.42.42.42", "42", "2"] # True
                 ]
 
 # SRC/DST ranges Whitelist
@@ -32,8 +31,7 @@ whitelist_src_dest = [
                      ]
 
 # DST ranges Blacklist
-blacklist = [
-            ]
+blacklist = ["66.66.66.65-66.66.66.67"]
 
 
 
