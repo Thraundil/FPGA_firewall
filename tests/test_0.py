@@ -4,10 +4,11 @@ from test_functions import ipv4_in, ipv4_out, tcp_in, white, black
 
 # Test description
 print 'Test_0:'
-print '''Tests the whitelist, by sending packages from both whitelisted and
-         non-whitelisted IPV4 sources only.
-         5 IPV4 packages are received, in which (0 indexed)
-         #1 and #2 are non-whitelisted, and should be blocked.'''
+print '''Whitelist testing. By sending packages from both whitelisted
+         and non-whitelisted IPV4 sources only, all packages from the
+        non-whitelisted IP should rightfully be blocked. \\
+        5 IPV4 packages are received in this test, in which \#0, \#3and \#4
+        are whitelisted, while \#1 and \#2 are not.'''
 
 # IPV4 incoming (Src/Dest)
 ipv4_incoming = [

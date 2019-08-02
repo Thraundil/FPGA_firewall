@@ -6,7 +6,7 @@ from test_functions import ipv4_in, ipv4_out, tcp_in, white, black
 print 'Test_2:'
 print '''Tests that an incoming non-whitelisted request is denied,
          but a non-whitelisted request which matches a state connection is not.
-         2 IPV4 requests are sent, in which the first one should fail, and
+         2 IPV4 requests are received, in which the first one should fail, and
          the other should pass, as the state has been updated between the two requests,
          due to an outgoing request having been sent just after the first incoming request.'''
 
