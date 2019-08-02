@@ -27,7 +27,6 @@ namespace simplePackageFilter
         private readonly uint my_id;
 
         private bool connection_in_use;
-        private int timeout_counter = 10000;
         public Connection_process_IPV4_incoming(byte[] ip_source_in, byte[] ip_dest_in, uint ids, IBus_IPv4_In ipv4)
         {
             Ip_source = ip_source_in;
@@ -70,10 +69,6 @@ namespace simplePackageFilter
 
             if (connection_in_use)
             {
-                if (timeout_counter == 0)
-                {
-                    connection_in_use = false;
-                }
 
                 if (ipv4_in.ClockCheck)
                 {
@@ -82,7 +77,6 @@ namespace simplePackageFilter
                         ruleVerdict.Accepted_ipv4 = true;
                     }
                 }
-                timeout_counter -= 1;
             }
         }
     }
@@ -173,7 +167,7 @@ namespace simplePackageFilter
                     Ip_dest[k] = update_tcp.DestIP[k];
                 }
                 Port_in = update_tcp.Port;
-                if (update_tcp.tcp)
+                if (update_tcp.is_tcp)
                 {
                     stage = 1;
                     our_turn_to_send = true; // they set the flag
@@ -348,7 +342,7 @@ namespace simplePackageFilter
         private readonly IBus_Update_State_out update_out = Scope.CreateOrLoadBus<IBus_Update_State_out>();
 
         [InputBus]
-        public IBus_TCP_to_outgoing fromt_tcp;
+        public IBus_TCP_to_outgoing from_tcp;
 
         [OutputBus]
         public IBus_outgoing_to_TCP to_TCP = Scope.CreateBus<IBus_outgoing_to_TCP>();
@@ -401,7 +395,7 @@ namespace simplePackageFilter
                     Ip_dest[k] = update_tcp.DestIP[k];
                 }
                 Port_in = update_tcp.Port;
-                if (update_tcp.tcp)
+                if (update_tcp.is_tcp)
                 {
                     stage = 1;
                     our_turn_to_send = true; // they set the flag
@@ -441,11 +435,20 @@ namespace simplePackageFilter
                 }
 
             }
-            //if (whatever_the_name_of_the_bus_is.flag)
-            //{
-            //    stage = bus_name.stage;
-            //    our_turn_to_send ^= true;  // Simply swap the boolean 
-            //}
+
+            if (from_tcp.valid)
+            {
+                if (from_tcp.end_con)
+                {
+                    connection_in_use = false;
+                    stage = 0;
+                }
+                else
+                {
+                    stage = from_tcp.stage; // maybe just add one?
+                    our_turn_to_send ^= true;  // Simply swap the boolean. Maybe just set to true.
+                }
+            }
 
             // If we get data
             if (dataOut.ReadyToWorkFlag)
@@ -462,7 +465,7 @@ namespace simplePackageFilter
                     if (connection_is_established)
                     {
                         // If it is a tcp connection and it has been established(through tcp handshake) then we are only looking for the fin flag
-                        if (dataOut.tcp)
+                        if (dataOut.is_tcp)
                         {
                             // If the fin flag has been set. Check for other flags or nah?
                             if (bits_bool[7])

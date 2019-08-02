@@ -81,7 +81,7 @@ namespace simplePackageFilter
                     var temp_out = new Connection_process_outgoing(new byte[4] { 0x00, 0x00, 0x00, 0x00 }, new byte[4] { 0x00, 0x00, 0x00, 0x00 }, 0, i,ipv4_out.ipv4);
 
                     temp_tcp.from_out = temp_out.to_TCP;
-                    temp_out.fromt_tcp = temp_tcp.to_out;
+                    temp_out.from_tcp = temp_tcp.to_out;
 
                     process_in_use[i] = temp_tcp.in_use;
                     tcp_connections[i] = temp_tcp.ruleVerdict;

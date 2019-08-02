@@ -27,6 +27,8 @@ namespace simplePackageFilter
             // updates the Toplevel Inputbus Bus_IPv4
 
             // reads every byte up until the source and destination IP's
+
+
             int length = (int)reader.BaseStream.Length;
             for (int j = 0; j < length / 10; j++)
             {

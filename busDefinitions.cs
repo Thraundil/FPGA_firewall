@@ -58,8 +58,8 @@ namespace simplePackageFilter
 
         uint Id { get; set; }
 
-        [InitialValue(false)]
-        bool tcp { get; set; }
+        [InitialValue(true)]
+        bool is_tcp { get; set; }
     }
 
     public interface IBus_Update_State_out : IBus
@@ -80,7 +80,7 @@ namespace simplePackageFilter
 
         uint Id { get; set; }
 
-        [InitialValue(false)]
+        [InitialValue(true)]
         bool Is_tcp { get; set; }
     }
 
@@ -98,7 +98,7 @@ namespace simplePackageFilter
 
         byte Flags { get; set; }
 
-        [InitialValue(false)]
+        [InitialValue(true)]
         bool is_tcp { get; set; }
 
         [InitialValue(false)]
@@ -202,8 +202,8 @@ namespace simplePackageFilter
 
         byte Flags { get; set; }
 
-        [InitialValue(false)]
-        bool tcp { get; set; }
+        [InitialValue(true)]
+        bool is_tcp { get; set; }
 
         [InitialValue(false)]
         bool ReadyToWorkFlag { get; set; }

@@ -94,10 +94,9 @@ namespace simplePackageFilter
                 }
                 else
                 {
-
                     // Convert byte to a bool array
                     // If the incoming packet is a tcp packet
-                    if (dataOut.tcp)
+                    if (dataOut.is_tcp)
                     {
                         var bits = new bool[8];
 
@@ -112,7 +111,7 @@ namespace simplePackageFilter
                             Console.WriteLine("Outgoing Package:  New TCP  (outgoing)");
                             // and so we must update the stack accordingly
                             // check if the packet is tcp or not
-                            update_out.Is_tcp = dataOut.tcp;
+                            update_out.Is_tcp = dataOut.is_tcp;
                             update_out.Flag = true;
                             update_out.SourceIP = dataOut.DestIP;
                             update_out.DestIP = dataOut.SourceIP;
@@ -152,7 +151,7 @@ namespace simplePackageFilter
                     else
                     {
                         Console.WriteLine("Outgoing Package: New UDP (outgoing)");
-                        update_out.Is_tcp = dataOut.tcp;
+                        update_out.Is_tcp = dataOut.is_tcp;
                         update_out.Flag = true;
                         update_out.SourceIP = dataOut.DestIP;
                         update_out.DestIP = dataOut.SourceIP;

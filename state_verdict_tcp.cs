@@ -116,7 +116,7 @@ namespace simplePackageFilter
                             Console.WriteLine("Incoming TCP:      Matches (whitelist)");
                             final_say_tcp_in.Accept_or_deny = true;
                             update_tcp.Flag = true;
-                            update_tcp.tcp = stateful_in.is_tcp;
+                            update_tcp.is_tcp = stateful_in.is_tcp;
                             update_tcp.set_in_use = true;
                             update_tcp.SourceIP = stateful_in.SourceIP;
                             update_tcp.DestIP = stateful_in.DestIP;
@@ -148,11 +148,12 @@ namespace simplePackageFilter
                     {
                         final_say_tcp_in.Accept_or_deny = true;
                         update_tcp.Flag = true;
-                        update_tcp.tcp = stateful_in.is_tcp;
+                        update_tcp.is_tcp = stateful_in.is_tcp;
                         update_tcp.set_in_use = true;
                         update_tcp.SourceIP = stateful_in.SourceIP;
                         update_tcp.DestIP = stateful_in.DestIP;
                         update_tcp.Port = stateful_in.Port;
+                        Console.WriteLine("Incoming UDP:      Matches(Whitelist)");
                         // Go through every process and see if they are available
                         // choose one from the available processes
                         // need another bus to take care of timeouts
@@ -169,6 +170,8 @@ namespace simplePackageFilter
                         update_tcp.Id = counter_id;
                     }
                 }
+                Console.WriteLine("Incoming TCP:      Blocked");
+                final_say_tcp_in.Accept_or_deny = false;
             }
         }
     }
