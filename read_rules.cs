@@ -15,12 +15,12 @@ namespace simplePackageFilter
         public string[] accepted_destinations = File.ReadAllLines("../../input_data/whitelist_dest.txt");
         public string[] blacklisted_destinations = File.ReadAllLines("../../input_data/blacklist.txt");
 
-//        public int[] Ip_str_to_int_array(string ip)
-//        {
-//            int[] ip_array = new int[4];
-//            ip_array = ip.Split('.').Select(Int32.Parse).ToArray();
-//            return ip_array;
-//        }
+        //public int[] Ip_str_to_int_array(string ip)
+        //{
+        //    int[] ip_array = new int[4];
+        //    ip_array = ip.Split('.').Select(Int32.Parse).ToArray();
+        //    return ip_array;
+        //}
 
         private (byte[], byte[]) Ip_str_to_byte_array(string ip)
         {

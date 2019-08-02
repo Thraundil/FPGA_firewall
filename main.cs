@@ -19,7 +19,7 @@ namespace simplePackageFilter
             // Number of rules, 
             int len_sources = rules.accepted_sources.Length;
             int len_blacklist = rules.blacklisted_destinations.Length;
-            int max_number_connections = 20;
+            int max_number_connections = 10;
             _ = rules.accepted_destinations.Length;
 
 
@@ -28,8 +28,7 @@ namespace simplePackageFilter
                 sim
                     .BuildCSVFile();
                 // CARL/KENNETH FIX PLZ
-//                    .BuildCSVFile()
-//                    .BuildVHDL();
+                //    .BuildVHDL();
 
                 // The input-simulators (for simulating actual intput/output for tests)
                 var ipv4_in  = new InputSimulator();
@@ -39,6 +38,7 @@ namespace simplePackageFilter
                 // The Whitelisted IP rules 
                 IBus_Rule_Verdict_IPV4[] Bus_array_IP_whitelist_ipv4 = new IBus_Rule_Verdict_IPV4[len_sources];
                 IBus_Rule_Verdict_TCP[] Bus_array_IP_whitelist_tcp = new IBus_Rule_Verdict_TCP[len_sources];
+                // The blacklisted IP's
                 IBus_blacklist_ruleVerdict_out[] Bus_array_IP_blacklist = new IBus_blacklist_ruleVerdict_out[len_blacklist];
 
 
@@ -70,15 +70,18 @@ namespace simplePackageFilter
                 IBus_Process_Verdict_TCP[] tcp_connections = new IBus_Process_Verdict_TCP[max_number_connections];
                 IBus_Process_Verdict_Outgoing[] outgoing_connections = new IBus_Process_Verdict_Outgoing[max_number_connections];
 
-
+                // Bus array for 
                 IBus_Connection_In_Use[] process_in_use = new IBus_Connection_In_Use[max_number_connections];
 
-                for (int i = 0; i < max_number_connections; i++)
+                for (uint i = 0; i < max_number_connections; i++)
                 {
                     // Inizialise every process to some default value that can never be matched
                     var temp_ipv4 = new Connection_process_IPV4_incoming(new byte[4] { 0x00, 0x00, 0x00, 0x00 }, new byte[4] { 0x00, 0x00, 0x00, 0x00 },i,ipv4_in.ipv4);
                     var temp_tcp = new Connection_process_TCP_incoming(new byte[4] { 0x00, 0x00, 0x00, 0x00 }, new byte[4] { 0x00, 0x00, 0x00, 0x00 }, 0, i, tcp_in.tcpBus);
                     var temp_out = new Connection_process_outgoing(new byte[4] { 0x00, 0x00, 0x00, 0x00 }, new byte[4] { 0x00, 0x00, 0x00, 0x00 }, 0, i,ipv4_out.ipv4);
+
+                    temp_tcp.from_out = temp_out.to_TCP;
+                    temp_out.fromt_tcp = temp_tcp.to_out;
 
                     process_in_use[i] = temp_tcp.in_use;
                     tcp_connections[i] = temp_tcp.ruleVerdict;
@@ -87,9 +90,9 @@ namespace simplePackageFilter
 
                 }
 
-                var final_verdict_tcP = new stateful_state_verdict(tcp_connections, Bus_array_IP_whitelist_tcp, tcp_in.tcpBus);
+                var final_verdict_tcP = new stateful_state_verdict(tcp_connections, Bus_array_IP_whitelist_tcp, tcp_in.tcpBus, process_in_use);
                 var Ipv4_state_verdict = new Ipv4_state_verdict(ipv4_connections, ipv4_in.ipv4, Bus_array_IP_whitelist_ipv4);
-                var final_verdict_outgoing = new out_state_verdict(Bus_array_IP_blacklist, outgoing_connections,ipv4_out.ipv4);
+                var final_verdict_outgoing = new out_state_verdict(Bus_array_IP_blacklist, outgoing_connections,ipv4_out.ipv4, process_in_use);
                 sim.Run();
             }
         }

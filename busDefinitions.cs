@@ -33,11 +33,11 @@ namespace simplePackageFilter
     [InputBus]
     public interface IBus_Connection_In_Use : IBus
     {
+        [InitialValue(false)]
         bool In_use { get; set; }
 
-        int Id { get; set; }
+        uint Id { get; set; }
 
-        bool timeout { get; set; }
     }
     [InputBus]
     public interface IBus_Update_State_tcp : IBus
@@ -48,7 +48,7 @@ namespace simplePackageFilter
         [FixedArrayLength(4)]
         IFixedArray<byte> DestIP { get; set; }
 
-        int Port { get; set; }
+        uint Port { get; set; }
 
         [InitialValue(false)]
         bool Flag { get; set; }
@@ -57,6 +57,9 @@ namespace simplePackageFilter
         bool set_in_use { get; set; }
 
         uint Id { get; set; }
+
+        [InitialValue(false)]
+        bool tcp { get; set; }
     }
 
     public interface IBus_Update_State_out : IBus
@@ -67,7 +70,7 @@ namespace simplePackageFilter
         [FixedArrayLength(4)]
         IFixedArray<byte> DestIP { get; set; }
 
-        int Port { get; set; }
+        uint Port { get; set; }
 
         [InitialValue(false)]
         bool Flag { get; set; }
@@ -76,7 +79,11 @@ namespace simplePackageFilter
         bool set_in_use { get; set; }
 
         uint Id { get; set; }
+
+        [InitialValue(false)]
+        bool Is_tcp { get; set; }
     }
+
 
     [TopLevelInputBus]
     public interface IBus_ITCP_In : IBus
@@ -87,9 +94,12 @@ namespace simplePackageFilter
         [FixedArrayLength(4)]
         IFixedArray<byte> DestIP { get; set; }
 
-        int Port { get; set; }
+        uint Port { get; set; }
 
         byte Flags { get; set; }
+
+        [InitialValue(false)]
+        bool is_tcp { get; set; }
 
         [InitialValue(false)]
         bool ThatOneVariableThatSaysIfWeAreDone { get; set; }
@@ -127,15 +137,6 @@ namespace simplePackageFilter
         bool IsSet_outgoing { get; set; }
     }
 
-    [TopLevelInputBus]
-    public interface IBus_State_Verdict : IBus
-    {
-        [InitialValue(false)]
-        bool Accepted { get; set; }
-
-        [InitialValue(false)]
-        bool Flag { get; set; }
-    }
 
     [TopLevelInputBus]
     public interface IBus_State_Verdict_IPv4 : IBus
@@ -197,9 +198,12 @@ namespace simplePackageFilter
         [FixedArrayLength(4)]
         IFixedArray<byte> DestIP { get; set; }
 
-        int SourcePort { get; set; }
+        uint SourcePort { get; set; }
 
         byte Flags { get; set; }
+
+        [InitialValue(false)]
+        bool tcp { get; set; }
 
         [InitialValue(false)]
         bool ReadyToWorkFlag { get; set; }
@@ -224,4 +228,27 @@ namespace simplePackageFilter
         bool Valid { get; set; }
     }
 
+    [InputBus]
+    public interface IBus_TCP_to_outgoing : IBus
+    {
+        [InitialValue(false)]
+        bool valid { get; set; }
+        uint stage { get; set; }
+
+        [InitialValue(false)]
+        bool end_con { get; set; }
+    }
+
+    [InputBus]
+    public interface IBus_outgoing_to_TCP : IBus
+    {
+        [InitialValue(false)]
+        bool valid { get; set; }
+        uint stage { get; set; }
+
+        [InitialValue(false)]
+        bool end_con { get; set; }
+    }
+
 }
+
