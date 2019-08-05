@@ -170,7 +170,7 @@ namespace simplePackageFilter
                 if (update_tcp.is_tcp)
                 {
                     stage = 1;
-                    our_turn_to_send = true; // they set the flag
+                    our_turn_to_send = false; // they set the flag
                     syn_flag_counter = 5;
                 }
 
@@ -198,7 +198,7 @@ namespace simplePackageFilter
                 if (update_out.Is_tcp)
                 {
                     stage = 1;
-                    our_turn_to_send = false;
+                    our_turn_to_send = true;
                     syn_flag_counter = 5;
                 }
 
@@ -221,12 +221,15 @@ namespace simplePackageFilter
                 else
                 {
                     stage = from_out.stage; // maybe just add one?
-                    our_turn_to_send ^= true;  // Simply swap the boolean. Maybe just set to true.
+                    our_turn_to_send = true;  // Simply swap the boolean. Maybe just set to true.
                 }
             }
 
             // If we get data
-            if (stateful_in.ThatOneVariableThatSaysIfWeAreDone)
+            // maybe add a check here that the type of connection. Could maybe reuse the stage variable here. 
+            // If the stage is none-zero it means it is a tcp connection.
+            // just need to make sure that stage get set back to 0 once a tcp connection dies.
+            if (stateful_in.ThatOneVariableThatSaysIfWeAreDone && ((stateful_in.is_tcp && stage != 0) || (!stateful_in.is_tcp && stage == 0)))
             {
                 // If the connection is both in use and the connecton matches the incoming "packet connection" ports, IPs ect.
                 if (connection_in_use && Shared_functions.DoesConnectExist(Ip_source, Ip_dest, Port_in, stateful_in.SourceIP, stateful_in.DestIP, stateful_in.Port))
@@ -254,7 +257,7 @@ namespace simplePackageFilter
                         if (stateful_in.is_tcp)
                         {
                             // If the fin flag has been set. Check for other flags or nah?
-                            if (bits_bool[7])
+                            if (bits_bool[0])
                             {
                                 connection_in_use = false;
                                 timeout_counter = default_timeout_counter;
@@ -272,16 +275,16 @@ namespace simplePackageFilter
                     {
                         // Meaning its our "turn" to receive
                         // Since this process handles inconing data we are only interested if we are "supposed" to receive data
-                        if (!our_turn_to_send)
+                        if (our_turn_to_send)
                         {
                             // Stage = 0 means nothing happened yet
                             // Stage = 1 means we have seen the syn packet
                             // Stage = 2 means we have seen the syn-ack packet
                             // Stage = 3 means we have seen the ack packet and thus the connection is considered established
-                            if (bits_bool[6] && bits_bool[3] && stage == 1) // syn-ack stage
+                            if (bits_bool[1] && bits_bool[3] && stage == 1) // syn-ack stage
                             {
                                 stage = 2;
-                                our_turn_to_send = true;
+                                our_turn_to_send = false;
                                 ruleVerdict.Accepted_state = true;
                                 timeout_counter = default_timeout_counter;
                                 to_out.valid = true;
@@ -291,7 +294,7 @@ namespace simplePackageFilter
                             {
                                 stage = 3;
                                 connection_is_established = true; // we have seen the syn -> syn-ack -> ack handshake
-                                our_turn_to_send = true;
+                                our_turn_to_send = false;
                                 ruleVerdict.Accepted_state = true;
                                 timeout_counter = default_timeout_counter;
                                 to_out.valid = true;
@@ -302,14 +305,14 @@ namespace simplePackageFilter
 
                         }
                         // This should mean:
-                        // We expect US the send the next packet, but we are receiving the same syn package again
+                        // We expect us the send the next packet, but we are receiving the same syn package again
                         // If they resent the same syn-package again for w/e reason
-                        else if (stateful_in.ThatOneVariableThatSaysIfWeAreDone && our_turn_to_send && bits_bool[6] && !bits_bool[3] && stage == 1 && syn_flag_counter > 0)
+                        else if (bits_bool[6] && !bits_bool[3] && stage == 1 && syn_flag_counter > 0)
                         {
                             syn_flag_counter -= 1;
                             ruleVerdict.Accepted_state = true;
                         }
-                        // Kill connection of syn counter = 0?
+                        // Kill connection if syn counter = 0?
                         if(syn_flag_counter == 0)
                         {
                             connection_in_use = false;
@@ -391,8 +394,11 @@ namespace simplePackageFilter
                 // Update the state process with incoming information
                 for (int k = 0; k < 4; k++)
                 {
-                    Ip_source[k] = update_tcp.SourceIP[k];
-                    Ip_dest[k] = update_tcp.DestIP[k];
+                    Ip_source[k] = update_out.DestIP[k];
+                    Ip_dest[k] = update_out.SourceIP[k];
+
+                    //Ip_source[k] = update_tcp.SourceIP[k];
+                    //Ip_dest[k] = update_tcp.DestIP[k];
                 }
                 Port_in = update_tcp.Port;
                 if (update_tcp.is_tcp)
@@ -417,8 +423,11 @@ namespace simplePackageFilter
                 // Update the state process with incoming information
                 for (int k = 0; k < 4; k++)
                 {
-                    Ip_source[k] = update_out.SourceIP[k];
-                    Ip_dest[k] = update_out.DestIP[k];
+                    Ip_source[k] = update_out.DestIP[k];
+                    Ip_dest[k] = update_out.SourceIP[k];
+
+                    //Ip_source[k] = update_out.SourceIP[k];
+                    //Ip_dest[k] = update_out.DestIP[k];
                 }
                 Port_in = update_out.Port;
                 if (update_out.Is_tcp)
@@ -446,7 +455,7 @@ namespace simplePackageFilter
                 else
                 {
                     stage = from_tcp.stage; // maybe just add one?
-                    our_turn_to_send ^= true;  // Simply swap the boolean. Maybe just set to true.
+                    our_turn_to_send = true;  // Simply swap the boolean. Maybe just set to true.
                 }
             }
 
@@ -484,7 +493,7 @@ namespace simplePackageFilter
                     {
                         // Meaning its our "turn" to receive
                         // Since this process handles inconing data we are only interested if we are "supposed" to receive data
-                        if (!our_turn_to_send)
+                        if (our_turn_to_send)
                         {
                             // Stage = 0 means nothing happened yet
                             // Stage = 1 means we have seen the syn packet
@@ -493,7 +502,7 @@ namespace simplePackageFilter
                             if (bits_bool[6] && bits_bool[3] && stage == 1) // syn-ack stage
                             {
                                 stage = 2;
-                                our_turn_to_send = true;
+                                our_turn_to_send = false; // ???
                                 ruleVerdict.Accepted_outgoing = true;
                                 to_TCP.valid = true;
                                 to_TCP.stage = 2;
@@ -502,7 +511,7 @@ namespace simplePackageFilter
                             {
                                 stage = 3;
                                 connection_is_established = true; // we have seen the syn -> syn-ack -> ack handshake
-                                our_turn_to_send = true;
+                                our_turn_to_send = false; // ???
                                 ruleVerdict.Accepted_outgoing = true;
                                 to_TCP.valid = true;
                                 to_TCP.stage = 3;
@@ -512,9 +521,9 @@ namespace simplePackageFilter
 
                         }
                         // This should mean:
-                        // We expect US the send the next packet, but we are receiving the same syn package again
-                        // If they resent the same syn-package again for w/e reason
-                        else if (dataOut.ReadyToWorkFlag && our_turn_to_send && bits_bool[6] && !bits_bool[3] && stage == 1)
+                        // We expect us the send the next packet, but we are receiving the same syn package again
+                        // If they resent the same syn-package again for w/e reason we accept it
+                        else if (bits_bool[6] && !bits_bool[3] && stage == 1)
                         {
                             ruleVerdict.Accepted_outgoing = true;
                         }
