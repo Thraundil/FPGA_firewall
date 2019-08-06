@@ -221,6 +221,10 @@ namespace simplePackageFilter
                 else
                 {
                     stage = from_out.stage; // maybe just add one?
+                    if (stage == 3)
+                    {
+                        connection_is_established = true;
+                    }
                     our_turn_to_send = true;  // Simply swap the boolean. Maybe just set to true.
                 }
             }
@@ -229,7 +233,7 @@ namespace simplePackageFilter
             // maybe add a check here that the type of connection. Could maybe reuse the stage variable here. 
             // If the stage is none-zero it means it is a tcp connection.
             // just need to make sure that stage get set back to 0 once a tcp connection dies.
-            if (stateful_in.ThatOneVariableThatSaysIfWeAreDone && ((stateful_in.is_tcp && stage != 0) || (!stateful_in.is_tcp && stage == 0)))
+            if (stateful_in.ThatOneVariableThatSaysIfWeAreDone)
             {
                 // If the connection is both in use and the connecton matches the incoming "packet connection" ports, IPs ect.
                 if (connection_in_use && Shared_functions.DoesConnectExist(Ip_source, Ip_dest, Port_in, stateful_in.SourceIP, stateful_in.DestIP, stateful_in.Port))
@@ -257,7 +261,7 @@ namespace simplePackageFilter
                         if (stateful_in.is_tcp)
                         {
                             // If the fin flag has been set. Check for other flags or nah?
-                            if (bits_bool[0])
+                            if (bits_bool[7])
                             {
                                 connection_in_use = false;
                                 timeout_counter = default_timeout_counter;
@@ -281,7 +285,7 @@ namespace simplePackageFilter
                             // Stage = 1 means we have seen the syn packet
                             // Stage = 2 means we have seen the syn-ack packet
                             // Stage = 3 means we have seen the ack packet and thus the connection is considered established
-                            if (bits_bool[1] && bits_bool[3] && stage == 1) // syn-ack stage
+                            if (bits_bool[6] && bits_bool[3] && stage == 1) // syn-ack stage
                             {
                                 stage = 2;
                                 our_turn_to_send = false;
@@ -394,8 +398,8 @@ namespace simplePackageFilter
                 // Update the state process with incoming information
                 for (int k = 0; k < 4; k++)
                 {
-                    Ip_source[k] = update_out.DestIP[k];
-                    Ip_dest[k] = update_out.SourceIP[k];
+                    Ip_source[k] = update_tcp.DestIP[k];
+                    Ip_dest[k] = update_tcp.SourceIP[k];
 
                     //Ip_source[k] = update_tcp.SourceIP[k];
                     //Ip_dest[k] = update_tcp.DestIP[k];
@@ -455,6 +459,10 @@ namespace simplePackageFilter
                 else
                 {
                     stage = from_tcp.stage; // maybe just add one?
+                    if (stage == 3)
+                    {
+                        connection_is_established = true;
+                    }                    
                     our_turn_to_send = true;  // Simply swap the boolean. Maybe just set to true.
                 }
             }

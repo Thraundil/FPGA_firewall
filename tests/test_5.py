@@ -11,19 +11,23 @@ print '''Tests if an incoming (whitelisted) IPV4/TCP
 # IPV4 incoming (Src/Dest)
 ipv4_incoming = [
                  ["42.42.42.42", "1.1.1.1"], # True
+                 ["42.42.42.42", "1.1.1.1"], # True
                  ["42.42.42.42", "1.1.1.1"] # True
                 ]
 
 # TCP incoming (Src/Dest/Port/syn_ack_flag)
 tcp_incoming  = [
                  ["42.42.42.42","1.1.1.1","42","2"], # False
-                 ["42.42.42.42","1.1.1.1","42","2"] # False
+                 ["42.42.42.42","1.1.1.1","42","16"], # False
+                 ["42.42.42.42","1.1.1.1","42","16"] # False
                 ]
 
 # IPV4 outgoing (Src/Dest/port/syn_ack_flag)
 ipv4_outgoing = [
                  ["0.0.0.0", "0.0.0.0", "0", "0"], # True
-                 ["1.1.1.1", "42.42.42.42", "42", "1"] # True
+                 ["1.1.1.1", "42.42.42.42", "42", "18"], # True
+                 ["1.1.1.1", "42.42.42.42", "42", "16"], # True
+                 ["1.1.1.1", "42.42.42.42", "42", "16"] # True
                 ]
 
 # SRC/DST ranges Whitelist

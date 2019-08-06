@@ -20,8 +20,8 @@ ipv4_incoming = [
 # TCP incoming (Src/Dest/Port/syn_ack_flag)
 tcp_incoming  = [
                  ["0.0.0.0","0.0.0.0","0","0"], # False
-                 ["42.42.42.42","1.1.1.1","80","1"], # False
-                 ["42.42.42.42","1.1.1.1","42","1"], # False
+                 ["42.42.42.42","1.1.1.1","80","18"], # False
+                 ["42.42.42.42","1.1.1.1","42","18"], # True
                 ]
 
 # IPV4 outgoing (Src/Dest/port/syn_ack_flag)

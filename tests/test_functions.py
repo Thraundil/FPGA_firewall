@@ -17,6 +17,11 @@ def ipv4_in(ipv4_incoming):
 def ipv4_out(ipv4_outgoing):
     output = ""
     for x in ipv4_outgoing:
+#        tcp_udp = str(hex(int(x[0])))
+#        if (tcp_udp == 3):
+#            output += ('0' + tcp_udp)
+#        else:
+#            output += tcp_udp
         split0 = x[0].split('.')
         split1 = x[1].split('.')
         for y in (split0+split1):
@@ -46,6 +51,11 @@ def ipv4_out(ipv4_outgoing):
 def tcp_in(tcp_incoming):
     output = ""
     for x in tcp_incoming:
+#        tcp_udp = str(hex(int(x[0])))
+#        if (tcp_udp == 3):
+#            output += ('0' + tcp_udp)
+#        else:
+#            output += tcp_udp
         split0 = x[0].split('.')
         split1 = x[1].split('.')
         for y in (split0+split1):

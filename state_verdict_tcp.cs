@@ -170,8 +170,10 @@ namespace simplePackageFilter
                         update_tcp.Id = counter_id;
                     }
                 }
-                Console.WriteLine("Incoming TCP:      Blocked");
-                final_say_tcp_in.Accept_or_deny = false;
+                else {
+                    Console.WriteLine("Incoming TCP:      Blocked");
+                    final_say_tcp_in.Accept_or_deny = false;
+                }
             }
         }
     }

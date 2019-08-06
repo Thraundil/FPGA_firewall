@@ -34,8 +34,8 @@ namespace simplePackageFilter
 
     // ****************************************************************************
 
-        public static bool DoesConnectExist(byte[] source, byte[] dest, int port,IFixedArray<byte> incoming_source,
-                                            IFixedArray<byte> incoming_dest, int incoming_port)
+        public static bool DoesConnectExist(byte[] source, byte[] dest, uint port,IFixedArray<byte> incoming_source,
+                                            IFixedArray<byte> incoming_dest, uint incoming_port)
         {
             bool doesItMatch = false;
 
