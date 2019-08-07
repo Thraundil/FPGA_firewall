@@ -1,0 +1,4 @@
+Outgoing Package:  New TCP  (outgoing)
+Outgoing Package: Does not have the syn flag only set so we dropped it
+Outgoing Package:  Exists  (state) 
+Outgoing Package:  Exists  (state) 

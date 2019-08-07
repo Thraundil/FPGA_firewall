@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
-# Change this to match the number of tests
-numberOfTests=5
+# Change this to match the number of tests (0-indexed)
+numberOfTests=7
 
 touch "tests/output.txt"
 echo "" > 'tests/output.txt'
