@@ -15,7 +15,6 @@ namespace simplePackageFilter
         // Used to read input from a .txt file
         byte[] sample;
 
-
         public async override System.Threading.Tasks.Task Run()
         {
             sample = File.ReadAllBytes("../../input_data/tcp_incoming_bytes");

@@ -52,8 +52,15 @@ namespace simplePackageFilter
             to_sim.ipv4_ready_flag = true;
 
             while (!ipv4_in.ClockCheck)
+            {
+                to_sim.ipv4_ready_flag = true;
+                final_say_ipv4.flag = false;
+                final_say_ipv4.Accepted = false;
                 await ClockAsync();
+            }
 
+            final_say_ipv4.flag = false;
+            final_say_ipv4.Accepted = false;
             to_sim.ipv4_ready_flag = false;
 
             // send signal to not send another packet
@@ -61,7 +68,13 @@ namespace simplePackageFilter
 
             // may need to fix this lol
             while (!connection_list[0].IsSet_ipv4 || !rule_list[0].ipv4_IsSet)
+            {
+                final_say_ipv4.flag = false;
+                final_say_ipv4.Accepted = false;
+                to_sim.ipv4_ready_flag = false;
                 await ClockAsync();
+            }
+            to_sim.ipv4_ready_flag = false;
 
             // They should all always be true :)
             //Console.WriteLine("{0} {1} {2} {3}", connection_list[0].IsSet_ipv4, connection_list[1].IsSet_ipv4, connection_list[2].IsSet_ipv4, connection_list[3].IsSet_ipv4);
@@ -69,9 +82,8 @@ namespace simplePackageFilter
             // we have recieved a msg from both the data(simulator process) and the state processes
             // so we are good to go
 
-                final_say_ipv4.flag = true;
-                // Checks if any rule process returns TRUE.
-                //my_bool = busList.Any(val => val.Accepted);
+            final_say_ipv4.flag = true;
+                // Checks if any rule process returns true
                 // Need to just OR them all 
                 for (int i = 0; i < connection_list.Length; i++)
                 {
@@ -98,6 +110,7 @@ namespace simplePackageFilter
                     else
                     {
                         Console.WriteLine("Incoming IPV4:     Blocked");
+                        final_say_ipv4.Accepted = false;
                         //final_say_ipv4.Accepted = false;
                         // no need to set the flag to false since it will already be false
                     }

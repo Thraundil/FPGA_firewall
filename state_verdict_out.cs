@@ -33,7 +33,9 @@ namespace simplePackageFilter
         bool black_bool_out = false;
 
         uint counter_id = 5;
-        bool found_out_id = false; 
+        bool found_out_id = false;
+
+        bool[] bits = new bool[8];
 
         public out_state_verdict(IBus_blacklist_ruleVerdict_out[] black_input, IBus_Process_Verdict_Outgoing[] con_input, IBus_Blacklist_out the_data, IBus_Connection_In_Use[] uses)
         {
@@ -57,6 +59,9 @@ namespace simplePackageFilter
             // For some reason we have to wait to get a signal from
             while(!dataOut.ReadyToWorkFlag)
             {
+                out_to_sim.out_ready_flag = true;
+                final_say_out.Accept_or_deny = false;
+                final_say_out.Valid = false;
                 await ClockAsync();
             }
 
@@ -68,8 +73,12 @@ namespace simplePackageFilter
             // They are not multicloked and hence will all "finish" at the same time/clock cycle
             while (!connection_list[0].IsSet_outgoing || !blacklist_input[0].IsSet)
             {
+                final_say_out.Accept_or_deny = false;
+                final_say_out.Valid = false;
+                out_to_sim.out_ready_flag = false;
                 await ClockAsync();
             }
+            out_to_sim.out_ready_flag = false;
             // when both of them are set we both have the data and the blacklist answser
 
             for (int i = 0; i < blacklist_input.Length; i++)
@@ -98,7 +107,6 @@ namespace simplePackageFilter
                     // If the incoming packet is a tcp packet
                     if (dataOut.is_tcp)
                     {
-                        var bits = new bool[8];
 
                         for (int i = 0; i < 8; i++)
                             bits[i] = (dataOut.Flags & (1 << i)) == 0 ? false : true;
@@ -119,11 +127,11 @@ namespace simplePackageFilter
 
                             // This one start high and go low while the other process starts low and go high
                             // Should mean they wont try to write to the same process unless it is the only one available 
-                            for (int l = 9; l >= 0; l--)
+                            for (uint l = 9; l > 0; l--)
                             {
                                 if (!in_use[l].In_use && !found_out_id)
                                 {
-                                    counter_id = (uint)l;
+                                    counter_id = l;
                                     found_out_id = true;
                                 }
                             }
@@ -179,6 +187,11 @@ namespace simplePackageFilter
                 final_say_out.Valid = true;
                 final_say_out.Accept_or_deny = false;
             }
+            //update_out.Is_tcp = update_out.Is_tcp;
+            //update_out.SourceIP = update_out.SourceIP;
+            //update_out.DestIP = update_out.DestIP;
+            //update_out.Port = update_out.Port;
+            //update_out.Id = update_out.Id;
         }
     }
 }

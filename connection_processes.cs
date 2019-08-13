@@ -13,10 +13,16 @@ namespace simplePackageFilter
 
         // Input bus to check if we need to update state
         [InputBus]
-        private readonly IBus_Update_State_tcp update_tcp = Scope.CreateOrLoadBus<IBus_Update_State_tcp>();
+        public IBus_Update_State_tcp update_tcp = Scope.CreateOrLoadBus<IBus_Update_State_tcp>();
 
         [InputBus]
-        private readonly IBus_Update_State_out update_out = Scope.CreateOrLoadBus<IBus_Update_State_out>();
+        public IBus_Update_State_out update_out = Scope.CreateOrLoadBus<IBus_Update_State_out>();
+
+        [InputBus]
+        public IBus_TCP_to_outgoing from_tcp;
+
+        [InputBus]
+        public IBus_outgoing_to_TCP from_out;
 
         [OutputBus]
         public IBus_Process_Verdict_IPV4 ruleVerdict = Scope.CreateBus<IBus_Process_Verdict_IPV4>();
@@ -62,10 +68,18 @@ namespace simplePackageFilter
                 // Update the state process with incoming information
                 for (int k = 0; k < 4; k++)
                 {
-                    Ip_source[k] = update_out.SourceIP[k];
-                    Ip_dest[k] = update_out.DestIP[k];
+                    // Swapped because of outgoing...
+                    Ip_source[k] = update_out.DestIP[k];
+
+                    Ip_dest[k] = update_out.SourceIP[k];
                 }
             }
+
+            if((from_tcp.valid && from_tcp.end_con) || (from_out.valid && from_out.end_con))
+            {
+                    connection_in_use = false;
+            }
+
 
             if (connection_in_use)
             {
@@ -130,6 +144,7 @@ namespace simplePackageFilter
         private bool connection_is_established = false;
         uint stage; // To represent the TCP handshake stage. 0 = nothing happened yet. 1 = means syn. 2 = syn-ack. 3 = ack and we are done.
         uint syn_flag_counter; // we will acecpt 5 attemps to recieve the same syn packet before we stop accepting them
+        bool[] bits_bool = new bool[8];
 
         public Connection_process_TCP_incoming(byte[] ip_source_in, byte[] ip_dest_in, uint port, uint ids, IBus_ITCP_In stateful)
         {
@@ -239,7 +254,6 @@ namespace simplePackageFilter
                 if (connection_in_use && Shared_functions.DoesConnectExist(Ip_source, Ip_dest, Port_in, stateful_in.SourceIP, stateful_in.DestIP, stateful_in.Port))
                 {
                     // Convert byte to a bool array
-                    var bits_bool = new bool[8];
                     for (int i = 0; i < 8; i++)
                         bits_bool[i] = (stateful_in.Flags & (1 << i)) == 0 ? false : true;
                     Array.Reverse(bits_bool);
@@ -362,6 +376,7 @@ namespace simplePackageFilter
         private uint Port_in { get; set; }
 
         private readonly uint my_id;
+        bool[] bits_bool = new bool[8];
 
         bool our_turn_to_send;
 
@@ -474,7 +489,6 @@ namespace simplePackageFilter
                 if (connection_in_use && Shared_functions.DoesConnectExist(Ip_source, Ip_dest, Port_in, dataOut.SourceIP, dataOut.DestIP, dataOut.SourcePort))
                 {
                     // Convert byte to a bool array
-                    var bits_bool = new bool[8];
                     for (int i = 0; i < 8; i++)
                         bits_bool[i] = (dataOut.Flags & (1 << i)) == 0 ? false : true;
                     Array.Reverse(bits_bool);

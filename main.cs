@@ -19,7 +19,7 @@ namespace simplePackageFilter
             // Number of rules, 
             int len_sources = rules.accepted_sources.Length;
             int len_blacklist = rules.blacklisted_destinations.Length;
-            int max_number_connections = 10;
+            int max_number_connections = 25;
             _ = rules.accepted_destinations.Length;
 
 
@@ -82,6 +82,8 @@ namespace simplePackageFilter
 
                     temp_tcp.from_out = temp_out.to_TCP;
                     temp_out.from_tcp = temp_tcp.to_out;
+                    temp_ipv4.from_tcp = temp_tcp.to_out;
+                    temp_ipv4.from_out = temp_out.to_TCP;
 
                     process_in_use[i] = temp_tcp.in_use;
                     tcp_connections[i] = temp_tcp.ruleVerdict;

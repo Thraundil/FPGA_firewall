@@ -53,8 +53,6 @@ namespace simplePackageFilter
         [InitialValue(false)]
         bool Flag { get; set; }
 
-        [InitialValue(false)]
-        bool set_in_use { get; set; }
 
         uint Id { get; set; }
 
@@ -70,14 +68,13 @@ namespace simplePackageFilter
         [FixedArrayLength(4)]
         IFixedArray<byte> DestIP { get; set; }
 
+        [InitialValue(0)]
         uint Port { get; set; }
 
         [InitialValue(false)]
         bool Flag { get; set; }
 
-        [InitialValue(false)]
-        bool set_in_use { get; set; }
-
+        [InitialValue(0)]
         uint Id { get; set; }
 
         [InitialValue(true)]

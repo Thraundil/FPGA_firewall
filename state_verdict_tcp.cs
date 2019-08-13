@@ -38,6 +38,8 @@ namespace simplePackageFilter
 
         bool found_id = false;
 
+        bool[] bits = new bool[8];
+
         public stateful_state_verdict(IBus_Process_Verdict_TCP[] con_process, IBus_Rule_Verdict_TCP[] rule_process, IBus_ITCP_In tcp_data, IBus_Connection_In_Use[] used)
         {
             connection_list = con_process;
@@ -64,18 +66,30 @@ namespace simplePackageFilter
 
             // We wait to get some actual data to inspect
             while (!stateful_in.ThatOneVariableThatSaysIfWeAreDone)
-                await ClockAsync();
-
-            // tell the simulator to wait
-            // until the rules and the connection processes have responded
-            to_sim.tcp_ready_flag = false;
-
-            while(!rule_list[0].tcp_IsSet || !connection_list[0].IsSet_state)
             {
+                to_sim.tcp_ready_flag = true; // Latches...
+                final_say_tcp_in.Valid = false; // To avoid latches...
+                final_say_tcp_in.Accept_or_deny = false; // see above
                 await ClockAsync();
             }
 
+            // tell the simulator to wait
+            // until the rules and the connection processes have responded
+            to_sim.tcp_ready_flag = false; // more latches
+            final_say_tcp_in.Valid = false; // yes yes yes
+            final_say_tcp_in.Accept_or_deny = false; // ... 
+
+            while (!rule_list[0].tcp_IsSet || !connection_list[0].IsSet_state)
+            {
+                to_sim.tcp_ready_flag = false; 
+                final_say_tcp_in.Valid = false; 
+                final_say_tcp_in.Accept_or_deny = false; 
+                await ClockAsync();
+            }
+            to_sim.tcp_ready_flag = false;
+
             // Check if the state processes found a match
+            // done by OR'ing them all together
             for (int i = 0; i < connection_list.Length; i++)
             {
                 connection_bool_tcp |= connection_list[i].Accepted_state;
@@ -90,6 +104,7 @@ namespace simplePackageFilter
                 // we do nothing if the connection already exist
             }
             // if the state processes did not find a match check the rules processes
+            // Again we OR them all together
             else
             {
                 for (int i = 0; i < rule_list.Length; i++)
@@ -103,7 +118,7 @@ namespace simplePackageFilter
                     if (stateful_in.is_tcp)
                     {
                         // Convert byte to a bool array
-                        var bits = new bool[8];
+                        
 
                         for (int i = 0; i < 8; i++)
                             bits[i] = (stateful_in.Flags & (1 << i)) == 0 ? false : true;
@@ -117,7 +132,6 @@ namespace simplePackageFilter
                             final_say_tcp_in.Accept_or_deny = true;
                             update_tcp.Flag = true;
                             update_tcp.is_tcp = stateful_in.is_tcp;
-                            update_tcp.set_in_use = true;
                             update_tcp.SourceIP = stateful_in.SourceIP;
                             update_tcp.DestIP = stateful_in.DestIP;
                             update_tcp.Port = stateful_in.Port;
@@ -149,7 +163,6 @@ namespace simplePackageFilter
                         final_say_tcp_in.Accept_or_deny = true;
                         update_tcp.Flag = true;
                         update_tcp.is_tcp = stateful_in.is_tcp;
-                        update_tcp.set_in_use = true;
                         update_tcp.SourceIP = stateful_in.SourceIP;
                         update_tcp.DestIP = stateful_in.DestIP;
                         update_tcp.Port = stateful_in.Port;
@@ -170,8 +183,9 @@ namespace simplePackageFilter
                         update_tcp.Id = counter_id;
                     }
                 }
-                else {
-                    Console.WriteLine("Incoming TCP:      Blocked");
+                else
+                {
+                    Console.WriteLine("Incoming {0}:      Blocked", stateful_in.is_tcp ? "TCP!!!" : "UDP");
                     final_say_tcp_in.Accept_or_deny = false;
                 }
             }
