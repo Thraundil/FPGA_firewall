@@ -185,7 +185,7 @@ namespace simplePackageFilter
                 }
                 else
                 {
-                    Console.WriteLine("Incoming {0}:      Blocked", stateful_in.is_tcp ? "TCP!!!" : "UDP");
+                    Console.WriteLine("Incoming {0}:      Blocked", stateful_in.is_tcp ? "TCP" : "UDP");
                     final_say_tcp_in.Accept_or_deny = false;
                 }
             }

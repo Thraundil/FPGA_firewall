@@ -69,9 +69,9 @@ namespace simplePackageFilter
                 for (int k = 0; k < 4; k++)
                 {
                     // Swapped because of outgoing...
-                    Ip_source[k] = update_out.DestIP[k];
+                    Ip_source[k] = update_out.SourceIP[k];
 
-                    Ip_dest[k] = update_out.SourceIP[k];
+                    Ip_dest[k] = update_out.DestIP[k];
                 }
             }
 
