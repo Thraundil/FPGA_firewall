@@ -7,10 +7,10 @@ namespace simplePackageFilter
     public class stateful_state_verdict : StateProcess
     {
         [InputBus]
-        public IBus_Process_Verdict_TCP[] connection_list;
+        public Loop_Con_TCP_To_Decider connection_list;
 
         [InputBus]
-        public IBus_Rule_Verdict_TCP[] rule_list;
+        public Loop_Whitelist_TCP_To_Decider rule_list;
 
         [InputBus]
         public IBus_ITCP_In stateful_in;
@@ -18,7 +18,7 @@ namespace simplePackageFilter
 
         // USE THIS
         [InputBus]
-        public IBus_Connection_In_Use[] in_use; 
+        public Loop_In_use_To_Decider in_use; 
 
         [OutputBus]
         public IBus_finalVerdict_tcp_In final_say_tcp_in = Scope.CreateBus<IBus_finalVerdict_tcp_In>();
@@ -34,13 +34,10 @@ namespace simplePackageFilter
 
         bool rule_bool = false;
 
-        uint counter_id = 1;
-
-        bool found_id = false;
 
         bool[] bits = new bool[8];
 
-        public stateful_state_verdict(IBus_Process_Verdict_TCP[] con_process, IBus_Rule_Verdict_TCP[] rule_process, IBus_ITCP_In tcp_data, IBus_Connection_In_Use[] used)
+        public stateful_state_verdict(Loop_Con_TCP_To_Decider con_process, Loop_Whitelist_TCP_To_Decider rule_process, IBus_ITCP_In tcp_data, Loop_In_use_To_Decider used)
         {
             connection_list = con_process;
             rule_list = rule_process;
@@ -79,7 +76,7 @@ namespace simplePackageFilter
             final_say_tcp_in.Valid = false; // yes yes yes
             final_say_tcp_in.Accept_or_deny = false; // ... 
 
-            while (!rule_list[0].tcp_IsSet || !connection_list[0].IsSet_state)
+            while (!connection_list.Valid || !rule_list.Valid)
             {
                 to_sim.tcp_ready_flag = false; 
                 final_say_tcp_in.Valid = false; 
@@ -90,10 +87,7 @@ namespace simplePackageFilter
 
             // Check if the state processes found a match
             // done by OR'ing them all together
-            for (int i = 0; i < connection_list.Length; i++)
-            {
-                connection_bool_tcp |= connection_list[i].Accepted_state;
-            }
+            connection_bool_tcp = connection_list.Value;
             final_say_tcp_in.Valid = true;
 
             // Accept the incoming package
@@ -107,10 +101,7 @@ namespace simplePackageFilter
             // Again we OR them all together
             else
             {
-                for (int i = 0; i < rule_list.Length; i++)
-                {
-                    rule_bool |= rule_list[i].tcp_Accepted;
-                }
+                rule_bool = rule_list.Value;
                 if (rule_bool)
                 {
 
@@ -118,8 +109,6 @@ namespace simplePackageFilter
                     if (stateful_in.is_tcp)
                     {
                         // Convert byte to a bool array
-                        
-
                         for (int i = 0; i < 8; i++)
                             bits[i] = (stateful_in.Flags & (1 << i)) == 0 ? false : true;
 
@@ -128,25 +117,22 @@ namespace simplePackageFilter
 
                         if (!bits[0] && !bits[1] && !bits[2] && !bits[3] && !bits[4] && !bits[5] && bits[6] && !bits[7]) // only the syn flag is set
                         {
-                            Console.WriteLine("Incoming TCP:      Matches (whitelist)");
-                            final_say_tcp_in.Accept_or_deny = true;
-                            update_tcp.Flag = true;
-                            update_tcp.is_tcp = stateful_in.is_tcp;
-                            update_tcp.SourceIP = stateful_in.SourceIP;
-                            update_tcp.DestIP = stateful_in.DestIP;
-                            update_tcp.Port = stateful_in.Port;
-                            // Go through every process and see if they are available
-                            // choose one the first available one
-                            for (uint l = 0; l < 10; l++)
+                            if (in_use.Valid_TCP)
                             {
-                                if (!in_use[l].In_use && !found_id)
-                                {
-                                    counter_id = l;
-                                    found_id = true;
-                                }
+                                Console.WriteLine("Incoming TCP:      Matches (whitelist)");
+                                final_say_tcp_in.Accept_or_deny = true;
+                                update_tcp.Flag = true;
+                                update_tcp.is_tcp = stateful_in.is_tcp;
+                                update_tcp.SourceIP = stateful_in.SourceIP;
+                                update_tcp.DestIP = stateful_in.DestIP;
+                                update_tcp.Port = stateful_in.Port;
+
+                                update_tcp.Id = in_use.Id_TCP;
                             }
-                            found_id = false;
-                            update_tcp.Id = counter_id; // Does it work now?
+                            else
+                            {
+                                Console.WriteLine("Incoming ´TCP:  No available Connection!");
+                            }
                         }
                         else
                         {
@@ -160,32 +146,26 @@ namespace simplePackageFilter
                     // UDP packet
                     else
                     {
-                        final_say_tcp_in.Accept_or_deny = true;
-                        update_tcp.Flag = true;
-                        update_tcp.is_tcp = stateful_in.is_tcp;
-                        update_tcp.SourceIP = stateful_in.SourceIP;
-                        update_tcp.DestIP = stateful_in.DestIP;
-                        update_tcp.Port = stateful_in.Port;
-                        Console.WriteLine("Incoming UDP:      Matches(Whitelist)");
-                        // Go through every process and see if they are available
-                        // choose one from the available processes
-                        // need another bus to take care of timeouts
-                        // since we can need to updat
-                        for (uint l = 0; l < 10; l++)
+                        if (in_use.Valid_TCP)
                         {
-                            if (!in_use[l].In_use && !found_id)
-                            {
-                                counter_id = l;
-                                found_id = true;
-                            }
+                            final_say_tcp_in.Accept_or_deny = true;
+                            update_tcp.Flag = true;
+                            update_tcp.is_tcp = stateful_in.is_tcp;
+                            update_tcp.SourceIP = stateful_in.SourceIP;
+                            update_tcp.DestIP = stateful_in.DestIP;
+                            update_tcp.Port = stateful_in.Port;
+                            Console.WriteLine("Incoming UDP:      Matches(Whitelist)");
+                            update_tcp.Id = in_use.Id_TCP;
                         }
-                        found_id = false;
-                        update_tcp.Id = counter_id;
+                        else
+                        {
+                            Console.WriteLine("Incoming UDP:  No available Connection!");
+                        }
                     }
                 }
                 else
                 {
-                    Console.WriteLine("Incoming {0}:      Blocked", stateful_in.is_tcp ? "TCP" : "UDP");
+                    Console.WriteLine("Incoming {0}:      Blocked", stateful_in.is_tcp ? "TCP!!!" : "UDP");
                     final_say_tcp_in.Accept_or_deny = false;
                 }
             }

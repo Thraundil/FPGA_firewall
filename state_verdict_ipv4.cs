@@ -12,14 +12,15 @@ namespace simplePackageFilter
 
         // stuff from the ipv4 connection processes
         [InputBus]
-        public IBus_Process_Verdict_IPV4[] connection_list;
+        public Loop_Whitelist_IPv4_To_Decider Whitelist_from_loop;
 
         [InputBus]
         public IBus_IPv4_In ipv4_in;
 
         // stuff from the ipv4 rule processes
+
         [InputBus]
-        public IBus_Rule_Verdict_IPV4[] rule_list;
+        public Loop_Con_IPv4_To_Decider Con_from_loop;
 
         // if we accept or deny the ipv4 header/packet
         [OutputBus]
@@ -33,11 +34,11 @@ namespace simplePackageFilter
 
         bool rule_bool = false;
 
-        public Ipv4_state_verdict(IBus_Process_Verdict_IPV4[] con_process, IBus_IPv4_In ipv4_data, IBus_Rule_Verdict_IPV4[] rule_process)
+        public Ipv4_state_verdict(Loop_Con_IPv4_To_Decider con_process, IBus_IPv4_In ipv4_data, Loop_Whitelist_IPv4_To_Decider rule_process)
         {
-            connection_list = con_process;
+            Con_from_loop = con_process;
             ipv4_in = ipv4_data;
-            rule_list = rule_process;
+            Whitelist_from_loop = rule_process;
         }
 
         protected override async Task OnTickAsync()
@@ -67,7 +68,7 @@ namespace simplePackageFilter
             // while we dont have the msg from the state
 
             // may need to fix this lol
-            while (!connection_list[0].IsSet_ipv4 || !rule_list[0].ipv4_IsSet)
+            while (!Con_from_loop.Valid || !Whitelist_from_loop.Valid)
             {
                 final_say_ipv4.flag = false;
                 final_say_ipv4.Accepted = false;
@@ -83,12 +84,10 @@ namespace simplePackageFilter
             // so we are good to go
 
             final_say_ipv4.flag = true;
-                // Checks if any rule process returns true
-                // Need to just OR them all 
-                for (int i = 0; i < connection_list.Length; i++)
-                {
-                    connection_bool |= connection_list[i].Accepted_ipv4;
-                }
+            // Checks if any rule process returns true
+            // Need to just OR them all 
+
+            connection_bool = Con_from_loop.Value;
 
                 // Accept the incoming package
                 if (connection_bool)
@@ -98,10 +97,9 @@ namespace simplePackageFilter
                 }
                 else
                 {
-                    for (int i = 0; i < rule_list.Length; i++)
-                    {
-                        rule_bool |= rule_list[i].ipv4_Accepted;
-                    }
+
+                rule_bool = Whitelist_from_loop.Value;
+
                     if (rule_bool)
                     {
                         Console.WriteLine("Incoming IPV4:     Matches (whitelist)");

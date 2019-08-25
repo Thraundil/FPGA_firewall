@@ -73,6 +73,7 @@ namespace simplePackageFilter
                 // Bus array for 
                 IBus_Connection_In_Use[] process_in_use = new IBus_Connection_In_Use[max_number_connections];
 
+
                 for (uint i = 0; i < max_number_connections; i++)
                 {
                     // Inizialise every process to some default value that can never be matched
@@ -92,9 +93,17 @@ namespace simplePackageFilter
 
                 }
 
-                var final_verdict_tcP = new stateful_state_verdict(tcp_connections, Bus_array_IP_whitelist_tcp, tcp_in.tcpBus, process_in_use);
-                var Ipv4_state_verdict = new Ipv4_state_verdict(ipv4_connections, ipv4_in.ipv4, Bus_array_IP_whitelist_ipv4);
-                var final_verdict_outgoing = new out_state_verdict(Bus_array_IP_blacklist, outgoing_connections,ipv4_out.ipv4, process_in_use);
+                var loop_Whitelist_IPv4 = new Loop_Whitelist_IPv4(Bus_array_IP_whitelist_ipv4);
+                var loop_Con_IPv4 = new Loop_Connection_IPv4(ipv4_connections);
+                var loop_Whitelist_TCP = new Loop_Whitelist_TCP(Bus_array_IP_whitelist_tcp);
+                var loop_Con_TCP = new Loop_Con_TCP(tcp_connections);
+                var loop_Blacklist = new Loop_Blacklist(Bus_array_IP_blacklist);
+                var loop_Con_Outgoing = new Loop_Con_Outgoing(outgoing_connections);
+                var loop_In_Use = new Loop_In_use(process_in_use);
+
+                var final_verdict_tcP = new stateful_state_verdict(loop_Con_TCP.to_decider, loop_Whitelist_TCP.to_decider, tcp_in.tcpBus, loop_In_Use.to_decider);
+                var Ipv4_state_verdict = new Ipv4_state_verdict(loop_Con_IPv4.to_decider, ipv4_in.ipv4, loop_Whitelist_IPv4.to_decider);
+                var final_verdict_outgoing = new out_state_verdict(loop_Blacklist.to_decider, loop_Con_Outgoing.to_decider, ipv4_out.ipv4, loop_In_Use.to_decider);
                 sim.Run();
             }
         }

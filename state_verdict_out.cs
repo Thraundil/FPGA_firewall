@@ -8,16 +8,16 @@ namespace simplePackageFilter
     {
 
         [InputBus]
-        public IBus_blacklist_ruleVerdict_out[] blacklist_input;
+        public Loop_Blacklist_To_Decider blacklist_input;
 
         [InputBus]
-        public IBus_Process_Verdict_Outgoing[] connection_list;
+        public Loop_Con_Outgoing_To_Decider connection_list;
 
         [InputBus]
         public IBus_Blacklist_out dataOut;
 
         [InputBus]
-        public IBus_Connection_In_Use[] in_use;
+        public Loop_In_use_To_Decider in_use;
 
         [OutputBus]
         public out_verdict_to_sim out_to_sim = Scope.CreateOrLoadBus<out_verdict_to_sim>();
@@ -32,12 +32,9 @@ namespace simplePackageFilter
 
         bool black_bool_out = false;
 
-        uint counter_id = 5;
-        bool found_out_id = false;
-
         bool[] bits = new bool[8];
 
-        public out_state_verdict(IBus_blacklist_ruleVerdict_out[] black_input, IBus_Process_Verdict_Outgoing[] con_input, IBus_Blacklist_out the_data, IBus_Connection_In_Use[] uses)
+        public out_state_verdict(Loop_Blacklist_To_Decider black_input, Loop_Con_Outgoing_To_Decider con_input, IBus_Blacklist_out the_data, Loop_In_use_To_Decider uses)
         {
             blacklist_input = black_input;
             connection_list = con_input;
@@ -71,7 +68,7 @@ namespace simplePackageFilter
             // Wait for the connection processes to reply back
             // It is fine to simply wait for 1 of each process to reply since
             // They are not multicloked and hence will all "finish" at the same time/clock cycle
-            while (!connection_list[0].IsSet_outgoing || !blacklist_input[0].IsSet)
+            while (!blacklist_input.Valid || !connection_list.Valid)
             {
                 final_say_out.Accept_or_deny = false;
                 final_say_out.Valid = false;
@@ -81,10 +78,7 @@ namespace simplePackageFilter
             out_to_sim.out_ready_flag = false;
             // when both of them are set we both have the data and the blacklist answser
 
-            for (int i = 0; i < blacklist_input.Length; i++)
-            {
-                black_bool_out |= blacklist_input[i].Accepted;
-            }
+            black_bool_out = blacklist_input.Value;
 
             // if this is true then the blacklist denied the packet
             // if it is false then the blacklist did not block the packet
@@ -92,10 +86,8 @@ namespace simplePackageFilter
             {
                 final_say_out.Accept_or_deny = true;
                 final_say_out.Valid = true;
-                for (int i = 0; i < connection_list.Length; i++)
-                {
-                    connection_bool_out |= connection_list[i].Accepted_outgoing;
-                }
+                connection_bool_out = connection_list.Value;
+
                 if (connection_bool_out)
                 {
                     Console.WriteLine("Outgoing Package:  Exists  (state) ");
@@ -116,30 +108,29 @@ namespace simplePackageFilter
                         // only the syn flag is set
                         if (!bits[0] && !bits[1] && !bits[2] && !bits[3] && !bits[4] && !bits[5] && bits[6] && !bits[7])
                         {
-                            Console.WriteLine("Outgoing Package:  New TCP  (outgoing)");
-                            // and so we must update the stack accordingly
-                            // check if the packet is tcp or not
-                            update_out.Is_tcp = dataOut.is_tcp;
-                            update_out.Flag = true;
-                            update_out.SourceIP = dataOut.DestIP;
-                            update_out.DestIP = dataOut.SourceIP;
-                            update_out.Port = dataOut.SourcePort;
-
-                            // This one start high and go low while the other process starts low and go high
-                            // Should mean they wont try to write to the same process unless it is the only one available 
-                            for (uint l = 9; l > 0; l--)
+                            if (in_use.Valid_Out)
                             {
-                                if (!in_use[l].In_use && !found_out_id)
-                                {
-                                    counter_id = l;
-                                    found_out_id = true;
-                                }
-                            }
-                            found_out_id = false;
+                                Console.WriteLine("Outgoing Package:  New TCP  (outgoing)");
+                                // and so we must update the stack accordingly
+                                // check if the packet is tcp or not
+                                update_out.Is_tcp = dataOut.is_tcp;
+                                update_out.Flag = true;
+                                update_out.SourceIP = dataOut.DestIP;
+                                update_out.DestIP = dataOut.SourceIP;
+                                update_out.Port = dataOut.SourcePort;
 
-                            update_out.Id = counter_id;
-                            final_say_out.Valid = true;
-                            final_say_out.Accept_or_deny = true;
+                                // This one start high and go low while the other process starts low and go high
+                                // Should mean they wont try to write to the same process unless it is the only one available 
+
+                                update_out.Id = in_use.Id_Out;
+
+                                final_say_out.Valid = true;
+                                final_say_out.Accept_or_deny = true;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Outgoing Package:  No available Connection!");
+                            }
 
                         }
                         else
@@ -158,25 +149,24 @@ namespace simplePackageFilter
                     // If the incoming packet is an UDP packet
                     else
                     {
-                        Console.WriteLine("Outgoing Package: New UDP (outgoing)");
-                        update_out.Is_tcp = dataOut.is_tcp;
-                        update_out.Flag = true;
-                        update_out.SourceIP = dataOut.DestIP;
-                        update_out.DestIP = dataOut.SourceIP;
-                        update_out.Port = dataOut.SourcePort;
-                        for (int l = 9; l >= 0; l--)
+                        if (in_use.Valid_Out)
                         {
-                            if (!in_use[l].In_use && !found_out_id)
-                            {
-                                counter_id = (uint)l;
-                                found_out_id = true;
-                            }
-                        }
-                        found_out_id = false;
+                            Console.WriteLine("Outgoing Package: New UDP (outgoing)");
+                            update_out.Is_tcp = dataOut.is_tcp;
+                            update_out.Flag = true;
+                            update_out.SourceIP = dataOut.DestIP;
+                            update_out.DestIP = dataOut.SourceIP;
+                            update_out.Port = dataOut.SourcePort;
 
-                        update_out.Id = counter_id;
-                        final_say_out.Valid = true;
-                        final_say_out.Accept_or_deny = true;
+                            update_out.Id = in_use.Id_Out;
+
+                            final_say_out.Valid = true;
+                            final_say_out.Accept_or_deny = true;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Outgoing Package:  No available Connection!");
+                        }
                     }
                 }
 
