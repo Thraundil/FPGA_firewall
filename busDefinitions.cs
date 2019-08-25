@@ -247,5 +247,87 @@ namespace simplePackageFilter
         bool end_con { get; set; }
     }
 
+
+    [InputBus]
+    public interface Loop_Con_IPv4_To_Decider : IBus
+    {
+        [InitialValue(false)]
+        bool Valid { get; set; }
+
+        [InitialValue(false)]
+        bool Value { get; set; } 
+    }
+
+    [InputBus]
+    public interface Loop_Whitelist_IPv4_To_Decider : IBus
+    {
+        [InitialValue(false)]
+        bool Valid { get; set; }
+
+        [InitialValue(false)]
+        bool Value { get; set; }
+    }
+
+    [InputBus]
+    public interface Loop_Whitelist_TCP_To_Decider : IBus
+    {
+        [InitialValue(false)]
+        bool Valid { get; set; }
+
+        [InitialValue(false)]
+        bool Value { get; set; }
+    }
+
+    [InputBus]
+    public interface Loop_Con_TCP_To_Decider : IBus
+    {
+        [InitialValue(false)]
+        bool Valid { get; set; }
+
+        [InitialValue(false)]
+        bool Value { get; set; }
+    }
+
+    [InputBus]
+    public interface Loop_Blacklist_To_Decider : IBus
+    {
+        [InitialValue(false)]
+        bool Valid { get; set; }
+
+        [InitialValue(false)]
+        bool Value { get; set; }
+    }
+
+    [InputBus]
+    public interface Loop_Con_Outgoing_To_Decider : IBus
+    {
+        [InitialValue(false)]
+        bool Valid { get; set; }
+
+        [InitialValue(false)]
+        bool Value { get; set; }
+    }
+
+    [InputBus]
+    public interface Loop_In_use_To_Decider : IBus
+    {
+        [InitialValue(0)]
+        uint Id_TCP { get; set; }
+
+        [InitialValue(false)]
+        bool Valid_TCP { get; set; }
+
+        [InitialValue(0)]
+        uint Id_Out { get; set; }
+
+        [InitialValue(false)]
+        bool Valid_Out { get; set; }
+
+    }
+
+
+
+
+
 }
 
