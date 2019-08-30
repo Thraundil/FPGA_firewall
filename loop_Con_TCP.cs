@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using SME;
 
 namespace simplePackageFilter
-{
+{  
     [ClockedProcess]
     public class Loop_Con_TCP : SimpleProcess
     {
@@ -32,7 +32,6 @@ namespace simplePackageFilter
 
             if (connection_list[0].IsSet_state)
             {
-
                 for (int i = 0; i < connection_list.Length; i++)
                 {
                     Connection_bool |= connection_list[i].Accepted_state;

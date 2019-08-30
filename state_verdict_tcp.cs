@@ -4,7 +4,7 @@ using SME;
 
 namespace simplePackageFilter
 {
-    public class stateful_state_verdict : StateProcess
+    public class stateful_state_verdict : SimpleProcess
     {
         [InputBus]
         public Loop_Con_TCP_To_Decider connection_list;
@@ -59,10 +59,9 @@ namespace simplePackageFilter
             rule_list = rule_process;
             stateful_in = tcp_data;
             in_use = used;
-        } 
+        }
 
-
-        protected override async Task OnTickAsync()
+        protected override void OnTick()
         {
 
             // reset the flags
@@ -75,11 +74,8 @@ namespace simplePackageFilter
             connection_bool_tcp = false;
             rule_bool = false;
 
-
             if (connection_list.Valid && rule_list.Valid)
             {
-
-
                 // Check if the state processes found a match
                 // done by OR'ing them all together
                 connection_bool_tcp = connection_list.Value;
@@ -181,6 +177,7 @@ namespace simplePackageFilter
             flags_data_1 = flags_data_2;
             is_tcp_data_1 = is_tcp_data_2;
 
+
             if (stateful_in.ThatOneVariableThatSaysIfWeAreDone)
             {
                 for (int i = 0; i < 4; i++)
@@ -193,7 +190,6 @@ namespace simplePackageFilter
                 port_data_2 = stateful_in.Port;
                 is_tcp_data_2 = stateful_in.is_tcp;
             }
-            await ClockAsync();
         }
     }
 }
