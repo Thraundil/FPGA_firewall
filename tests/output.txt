@@ -86,8 +86,8 @@ Outgoing Package: Does not have the syn flag only set so we dropped it
 Incoming TCP:      Matches (whitelist)
 Incoming IPV4:     Matches (connection)
 Outgoing Package:  New TCP  (outgoing)
-Incoming IPV4:     Matches (connection)
 Incoming TCP:      Matches (connection)
+Incoming IPV4:     Matches (connection)
 Incoming IPV4:     Matches (connection)
 Outgoing Package: Does not have the syn flag only set so we dropped it
 Incoming TCP:      Matches (connection)
@@ -102,10 +102,10 @@ Outgoing Package: Does not have the syn flag only set so we dropped it
 Incoming TCP:      Matches (connection)
 Incoming IPV4:     Matches (whitelist)
 Outgoing Package: Does not have the syn flag only set so we dropped it
-Incoming IPV4:     Matches (whitelist)
 Incoming TCP:      Matches (whitelist)
 Incoming IPV4:     Matches (connection)
 Outgoing Package: Does not have the syn flag only set so we dropped it
+Incoming IPV4:     Matches (connection)
 Incoming TCP:      Matches (connection)
 Incoming IPV4:     Matches (connection)
 Outgoing Package: Does not have the syn flag only set so we dropped it
@@ -116,8 +116,8 @@ Incoming TCP:      Matches (connection)
 Incoming IPV4:     Matches (connection)
 Incoming TCP:      Matches (connection)
 Incoming IPV4:     Matches (connection)
-Incoming IPV4:     Matches (connection)
 Incoming TCP:      Matches (connection)
+Incoming IPV4:     Matches (connection)
 Incoming TCP:      Blocked
 Incoming TCP:      Blocked
 Incoming TCP:      Blocked

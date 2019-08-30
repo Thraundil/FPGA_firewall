@@ -216,7 +216,6 @@ namespace simplePackageFilter
                     our_turn_to_send = true;
                     syn_flag_counter = 5;
                 }
-
                 // Meaning it is an UDP packet
                 // The connection is considered established when the first UDP packet is seen
                 else

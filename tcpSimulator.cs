@@ -55,6 +55,7 @@ namespace simplePackageFilter
 
                 tcpBus.ThatOneVariableThatSaysIfWeAreDone = false;
                 await ClockAsync();
+                await ClockAsync();
             }
         }
     }

@@ -52,6 +52,7 @@ namespace simplePackageFilter
 
                 ipv4.ClockCheck = false;
                 await ClockAsync();
+                await ClockAsync();
             }
         }
     }

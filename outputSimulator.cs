@@ -63,6 +63,8 @@ namespace simplePackageFilter
                 await ClockAsync();
                 ipv4.ReadyToWorkFlag = false;
                 await ClockAsync();
+                await ClockAsync();
+
             }
         }
     }

@@ -30,8 +30,7 @@ whitelist_src_dest = [
                      ]
 
 # DST ranges Blacklist
-blacklist = [
-            ]
+blacklist = ["99.99.99.99-99.99.99.99"]
 
 
 
