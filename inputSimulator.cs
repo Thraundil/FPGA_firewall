@@ -41,12 +41,6 @@ namespace simplePackageFilter
                     await ClockAsync();
                 }
 
-                // We have to wait for the ipv4 to be ready to recieve the next package
-                while(!can_we_send.ipv4_ready_flag)
-                {
-                    await ClockAsync();
-                }
-
                 ipv4.ClockCheck = true;
                 await ClockAsync();
 

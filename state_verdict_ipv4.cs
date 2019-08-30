@@ -7,7 +7,7 @@ using SME;
 
 namespace simplePackageFilter
 {
-    public class Ipv4_state_verdict : StateProcess
+    public class Ipv4_state_verdict : SimpleProcess
     {
 
         // stuff from the ipv4 connection processes
@@ -34,6 +34,7 @@ namespace simplePackageFilter
 
         bool rule_bool = false;
 
+
         public Ipv4_state_verdict(Loop_Con_IPv4_To_Decider con_process, IBus_IPv4_In ipv4_data, Loop_Whitelist_IPv4_To_Decider rule_process)
         {
             Con_from_loop = con_process;
@@ -41,7 +42,7 @@ namespace simplePackageFilter
             Whitelist_from_loop = rule_process;
         }
 
-        protected override async Task OnTickAsync()
+        protected override void OnTick()
         {
             // may need to fix this seems super sketchy
             final_say_ipv4.flag = false;
@@ -49,45 +50,15 @@ namespace simplePackageFilter
             connection_bool = false;
             rule_bool = false;
 
-            // whenver we get back here we should be ready to recieve the next package
-            to_sim.ipv4_ready_flag = true;
 
-            while (!ipv4_in.ClockCheck)
+            if (Con_from_loop.Valid && Whitelist_from_loop.Valid)
             {
-                to_sim.ipv4_ready_flag = true;
-                final_say_ipv4.flag = false;
-                final_say_ipv4.Accepted = false;
-                await ClockAsync();
-            }
 
-            final_say_ipv4.flag = false;
-            final_say_ipv4.Accepted = false;
-            to_sim.ipv4_ready_flag = false;
+                final_say_ipv4.flag = true;
+                // Checks if any rule process returns true
+                // Need to just OR them all 
 
-            // send signal to not send another packet
-            // while we dont have the msg from the state
-
-            // may need to fix this lol
-            while (!Con_from_loop.Valid || !Whitelist_from_loop.Valid)
-            {
-                final_say_ipv4.flag = false;
-                final_say_ipv4.Accepted = false;
-                to_sim.ipv4_ready_flag = false;
-                await ClockAsync();
-            }
-            to_sim.ipv4_ready_flag = false;
-
-            // They should all always be true :)
-            //Console.WriteLine("{0} {1} {2} {3}", connection_list[0].IsSet_ipv4, connection_list[1].IsSet_ipv4, connection_list[2].IsSet_ipv4, connection_list[3].IsSet_ipv4);
-
-            // we have recieved a msg from both the data(simulator process) and the state processes
-            // so we are good to go
-
-            final_say_ipv4.flag = true;
-            // Checks if any rule process returns true
-            // Need to just OR them all 
-
-            connection_bool = Con_from_loop.Value;
+                connection_bool = Con_from_loop.Value;
 
                 // Accept the incoming package
                 if (connection_bool)
@@ -98,7 +69,7 @@ namespace simplePackageFilter
                 else
                 {
 
-                rule_bool = Whitelist_from_loop.Value;
+                    rule_bool = Whitelist_from_loop.Value;
 
                     if (rule_bool)
                     {
@@ -113,6 +84,7 @@ namespace simplePackageFilter
                         // no need to set the flag to false since it will already be false
                     }
                 }
+            }
         }
     }
 }
