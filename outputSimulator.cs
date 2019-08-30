@@ -54,11 +54,6 @@ namespace simplePackageFilter
                 ipv4.Flags = reader.ReadByte();
                 await ClockAsync();
 
-                while (!from_out.out_ready_flag)
-                {
-                    await ClockAsync();
-                }
-
                 ipv4.ReadyToWorkFlag = true;
                 await ClockAsync();
                 ipv4.ReadyToWorkFlag = false;

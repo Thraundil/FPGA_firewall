@@ -48,12 +48,13 @@ namespace simplePackageFilter
         [FixedArrayLength(4)]
         IFixedArray<byte> DestIP { get; set; }
 
+        [InitialValue(0)]
         uint Port { get; set; }
 
         [InitialValue(false)]
         bool Flag { get; set; }
 
-
+        [InitialValue(0)]
         uint Id { get; set; }
 
         [InitialValue(true)]
@@ -314,20 +315,16 @@ namespace simplePackageFilter
         [InitialValue(0)]
         uint Id_TCP { get; set; }
 
-        [InitialValue(false)]
+        [InitialValue(true)]
         bool Valid_TCP { get; set; }
 
         [InitialValue(0)]
         uint Id_Out { get; set; }
 
-        [InitialValue(false)]
+        [InitialValue(true)]
         bool Valid_Out { get; set; }
 
     }
-
-
-
-
 
 }
 
