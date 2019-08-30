@@ -181,15 +181,18 @@ namespace simplePackageFilter
             flags_data_1 = flags_data_2;
             is_tcp_data_1 = is_tcp_data_2;
 
-            for (int i = 0; i < 4; i++)
+            if (stateful_in.ThatOneVariableThatSaysIfWeAreDone)
             {
-                Source_data_2[i] = stateful_in.SourceIP[i];
-                Dest_data_2[i] = stateful_in.DestIP[i];
+                for (int i = 0; i < 4; i++)
+                {
+                    Source_data_2[i] = stateful_in.SourceIP[i];
+                    Dest_data_2[i] = stateful_in.DestIP[i];
 
+                }
+                flags_data_2 = stateful_in.Flags;
+                port_data_2 = stateful_in.Port;
+                is_tcp_data_2 = stateful_in.is_tcp;
             }
-            flags_data_2 = stateful_in.Flags;
-            port_data_2 = stateful_in.Port;
-            is_tcp_data_2 = stateful_in.is_tcp;
             await ClockAsync();
         }
     }

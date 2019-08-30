@@ -45,11 +45,6 @@ namespace simplePackageFilter
                 tcpBus.Flags = reader.ReadByte();
                 await ClockAsync();
 
-                while (!ready.tcp_ready_flag)
-                {
-                    await ClockAsync();
-                }
-
                 tcpBus.ThatOneVariableThatSaysIfWeAreDone = true;
                 await ClockAsync();
 
