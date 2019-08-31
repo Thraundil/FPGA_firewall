@@ -28,27 +28,26 @@ namespace simplePackageFilter
 
             // We collect the entire packet, we wait until we can send and then we send it
             int length = (int)reader.BaseStream.Length;
-            await ClockAsync();
-            ipv4.ClockCheck = true;
             for (int j = 0; j < length / 8; j++)
             {
-
                 for (int i = 0; i < 4; i++)
                 {
                     ipv4.SourceIP[i] = reader.ReadByte();
+                    await ClockAsync();
                 }
                 for (int i = 0; i < 4; i++)
                 {
                     ipv4.DestIP[i] = reader.ReadByte();
+                    await ClockAsync();
                 }
+
+                ipv4.ClockCheck = true;
                 await ClockAsync();
 
+                ipv4.ClockCheck = false;
+                await ClockAsync();
+                await ClockAsync();
             }
-            await ClockAsync();
-            ipv4.ClockCheck = false;
-            await ClockAsync();
-            await ClockAsync();
-
         }
     }
 }

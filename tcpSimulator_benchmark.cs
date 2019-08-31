@@ -26,32 +26,26 @@ namespace simplePackageFilter
             int length = (int)reader.BaseStream.Length;
             for (int j = 0; j < length / 10; j++)
             {
+                tcpBus.ThatOneVariableThatSaysIfWeAreDone = true;
                 for (int i = 0; i < 4; i++)
                 {
                     tcpBus.SourceIP[i] = reader.ReadByte();
-                    await ClockAsync();
                 }
                 for (int i = 0; i < 4; i++)
                 {
                     tcpBus.DestIP[i] = reader.ReadByte();
-                    await ClockAsync();
                 }
 
                 // Port
                 tcpBus.Port = reader.ReadByte();
-                await ClockAsync();
 
                 // Tcp status (syn, ack, etc..)
                 tcpBus.Flags = reader.ReadByte();
                 await ClockAsync();
-
-                tcpBus.ThatOneVariableThatSaysIfWeAreDone = true;
-                await ClockAsync();
-                tcpBus.ThatOneVariableThatSaysIfWeAreDone = false;
-
-                await ClockAsync();
-                await ClockAsync();
             }
+            tcpBus.ThatOneVariableThatSaysIfWeAreDone = false;
+            await ClockAsync();
+            await ClockAsync();
         }
     }
 }
