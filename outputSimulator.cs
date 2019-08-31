@@ -27,8 +27,8 @@ namespace simplePackageFilter
             // updates the Toplevel Inputbus Bus_IPv4
 
             // reads every byte up until the source and destination IP's
-
-
+            await ClockAsync();
+            ipv4.ReadyToWorkFlag = true;
             int length = (int)reader.BaseStream.Length;
             for (int j = 0; j < length / 10; j++)
             {
@@ -36,31 +36,24 @@ namespace simplePackageFilter
                 for (int i = 0; i < 4; i++)
                 {
                     ipv4.SourceIP[i] = reader.ReadByte();
-                    await ClockAsync();
                 }
-
                 // TO IP
                 for (int i = 0; i < 4; i++)
                 {
                     ipv4.DestIP[i] = reader.ReadByte();
-                    await ClockAsync();
                 }
 
                 // Port
                 ipv4.SourcePort = reader.ReadByte();
-                await ClockAsync();
 
                 // Syn/Ack etc
                 ipv4.Flags = reader.ReadByte();
                 await ClockAsync();
 
-                ipv4.ReadyToWorkFlag = true;
-                await ClockAsync();
-                ipv4.ReadyToWorkFlag = false;
-                await ClockAsync();
-                await ClockAsync();
-
             }
+            ipv4.ReadyToWorkFlag = false;
+            await ClockAsync();
+            await ClockAsync();
         }
     }
 }
