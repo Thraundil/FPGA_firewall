@@ -104,10 +104,6 @@ namespace simplePackageFilter
                 var Ipv4_state_verdict = new Ipv4_state_verdict(loop_Con_IPv4.to_decider, ipv4_in.ipv4, loop_Whitelist_IPv4.to_decider);
                 var final_verdict_outgoing = new out_state_verdict(loop_Blacklist.to_decider, loop_Con_Outgoing.to_decider, ipv4_out.ipv4, loop_In_Use.to_decider);
 
-                var sink_IPv4 = new SinkP(Ipv4_state_verdict.final_say_ipv4);
-                var sink_TCP = new SinkTCP(final_verdict_tcP.final_say_tcp_in);
-                var sink_Out = new SinkOut(final_verdict_outgoing.final_say_out);
-
                 sim.Run();
             }
         }

@@ -26,7 +26,6 @@ namespace simplePackageFilter
             int length = (int)reader.BaseStream.Length;
             for (int j = 0; j < length / 10; j++)
             {
-                await ClockAsync();
                 tcpBus.ThatOneVariableThatSaysIfWeAreDone = true;
                 for (int i = 0; i < 4; i++)
                 {
